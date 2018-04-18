@@ -26,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\settings.hpp" />
+    <ClInclude Include="src\device_worker\DeviceManager.hpp" />
     <ClInclude Include="src\device_worker\devices\FileDevice.hpp" />
     <ClInclude Include="src\device_worker\devices\IDevice.hpp" />
     <ClInclude Include="src\device_worker\devices\MappedDevice.hpp" />
