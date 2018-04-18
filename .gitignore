@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+# Visual Studio files
+*.opendb
+*.suo
+*.user
+Dd]ebug/
+[Rr]elease/
+x64/
+[Bb]in/
+[Oo]bj/
+*.opendb
+*.vc.db
