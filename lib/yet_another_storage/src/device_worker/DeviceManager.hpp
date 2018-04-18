@@ -5,7 +5,7 @@
 
 namespace yas {
 
-template <typename OffsetType>
+template <typename Device, typename OffsetType>
 class DeviceManager {
  public:
   DeviceManager(fs::path file_path)
@@ -26,7 +26,7 @@ class DeviceManager {
   }
 
  private:
-  devices::IDevice device_;
+   Device device_;
 
   // read complex type
   template <typename ValueType>
