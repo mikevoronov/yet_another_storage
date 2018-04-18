@@ -19,15 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\device_worker\FileDevice.cpp" />
+    <ClCompile Include="src\device_worker\devices\FileDevice.cpp" />
+    <ClCompile Include="src\device_worker\devices\MappedDevice.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\storage\Storage.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\settings.hpp" />
-    <ClInclude Include="src\device_worker\FileDevice.hpp" />
-    <ClInclude Include="src\device_worker\IDevice.hpp" />
-    <ClInclude Include="src\external\expected.hpp" />
+    <ClInclude Include="src\device_worker\devices\FileDevice.hpp" />
+    <ClInclude Include="src\device_worker\devices\IDevice.hpp" />
+    <ClInclude Include="src\device_worker\devices\MappedDevice.hpp" />
+    <ClInclude Include="src\external\expected.h" />
     <ClInclude Include="src\external\filesystem.h" />
     <ClInclude Include="src\storage\storage_errors.hpp" />
   </ItemGroup>

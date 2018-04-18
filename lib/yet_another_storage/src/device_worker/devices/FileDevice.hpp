@@ -1,7 +1,8 @@
 #pragma once
 
 #include "IDevice.hpp"
-#include "../external/filesystem.h"
+#include "../../external/filesystem.h"
+#include "../../external/expected.h"
 
 #include <cstdint>
 #include <vector>
@@ -22,7 +23,6 @@ class FileDevice : public IDevice {
   virtual ~FileDevice() override;
   FileDevice(const FileDevice&);
 
-  // compiler shouldn't add these 3 but just in case
   FileDevice operator=(const FileDevice&) = delete;
   FileDevice operator=(FileDevice&&) = delete;
   FileDevice(FileDevice&&) = delete;
