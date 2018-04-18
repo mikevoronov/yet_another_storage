@@ -1,17 +1,42 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="src">
+      <UniqueIdentifier>{b8d996ae-0c67-4752-a1ef-9fc25f28feec}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    <Filter Include="src\common">
+      <UniqueIdentifier>{6a17a054-2c7c-42c5-9b62-84da7e23da58}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="src\device_worker">
+      <UniqueIdentifier>{054b3ffd-c69c-40e0-ac19-a92655e7ef1b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\exception">
+      <UniqueIdentifier>{a3ee9d7e-85f6-488f-b393-2a6f52c0ddf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\external">
+      <UniqueIdentifier>{550f2038-f247-49ba-80a7-4dca9dd951d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\physical_volume">
+      <UniqueIdentifier>{6f2e9ebb-1567-402a-b445-0569f2feb76f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\storage">
+      <UniqueIdentifier>{317c5df6-7782-49a9-9e9f-58278a7a7646}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\volume_group">
+      <UniqueIdentifier>{326e982b-3b99-49e2-930f-275a8f4fc88c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\storage\storage\IDevice.hpp">
+      <Filter>src\device_worker</Filter>
+    </ClInclude>
+    <ClInclude Include="src\external\expected.hpp">
+      <Filter>src\external</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
