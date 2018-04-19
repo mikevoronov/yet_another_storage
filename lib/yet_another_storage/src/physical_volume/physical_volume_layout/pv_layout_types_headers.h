@@ -61,5 +61,9 @@ struct ComplexTypeHeader {
   };
 });
 
+static_assert(sizeof(Simple4TypeHeader) == 12, "Simple4TypeHeader should be 12 bytes long - please check aligments and type size on your setup");
+static_assert(sizeof(Simple8TypeHeader) == 16, "Simple8TypeHeader should be 16 bytes long - please check aligments and type size on your setup");
+static_assert(sizeof(ComplexTypeHeader) == 16, "ComplexTypeHeader should be 16 bytes long - please check aligments and type size on your setup");
+
 } // namespace pv_layout_types_headers
 } // namespace yas

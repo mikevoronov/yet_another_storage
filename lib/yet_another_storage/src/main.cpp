@@ -1,4 +1,5 @@
 #include "storage/Storage.hpp"
+#include "physical_volume/physical_volume_layout/pv_layout_types_headers.h"
 #include <iostream>
 
 using namespace yas;
