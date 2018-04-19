@@ -12,7 +12,8 @@ namespace pv_layout_headers {
 STRUCT_PACK(
 struct PVHeader {
   uint8_t signature[] = { 'Y', 'A', 'S', '_', 'P', 'V' };                         //  + 6 bytes
-  pv_version version_;              // should move to class with operator <           + 2 bytes 
+  uint8_t major;
+  uint8_t minor;                                                                  // + 2 bytes 
   uint64_t pv_size_;                                                              //  + 8 bytes
   uint32_t cluster_size_;                                                         //  + 4 bytes
   uint32_t priority_;               // should be class (?)                            + 4 bytes
@@ -27,5 +28,6 @@ struct PVHeader {
 
 // TODO : add static assert to size of PVHeader
 
+constexpr uint32_t kVersionSize = sizeof(PVHeader::major) + sizeof(PVHeader::minor);
 } // namespace pv_layout_types_headers
 } // namespace yas
