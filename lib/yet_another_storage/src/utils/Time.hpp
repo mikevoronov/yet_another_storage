@@ -28,6 +28,11 @@ class Time {
   uint16_t expired_time_high() const { return expired_time_high_; }
   uint32_t expired_time_low() const { return expired_time_low_; }
 
+  Time(const Time&) = delete;
+  Time(Time &&) = delete;
+  Time& operator=(const Time&) = delete;
+  Time& operator=(Time&&) = delete;
+
  private:
   uint16_t expired_time_high_;
   uint32_t expired_time_low_;

@@ -15,9 +15,15 @@ class Version {
   Version(uint8_t major, uint8_t minor)
       : major_(major), minor_(minor)
   {}
+  ~Version() = default;
 
   uint16_t major() const { return major_; }
   uint32_t minor() const { return minor_; }
+
+  Version(const Version&) = delete;
+  Version(Version &&) = delete;
+  Version& operator=(const Version&) = delete;
+  Version& operator=(Version&&) = delete;
 
  private:
   uint8_t major_;
