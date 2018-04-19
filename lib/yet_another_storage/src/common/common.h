@@ -1,15 +1,11 @@
 #pragma once
+#include <cstdint>
+#include <vector>
 
 namespace yas {
-namespace macros {
+namespace common {
 
-#ifdef _MSC_VER
-#define STRUCT_PACK(...) \
-__pragma(pack(push, 1)) __VA_ARGS__ __pragma(pack(pop))
-#elif defined(__GNUC__)
-#define STRUCT_PACK(...) \
-__VA_ARGS__ __attribute__((packed))
-#endif 
+using ByteVector = std::vector<uint8_t>;
 
-} // namespace macros
+} // namespace common
 } // namespace yas

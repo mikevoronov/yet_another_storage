@@ -1,5 +1,5 @@
 #pragma once
-#include "../../common/common.h"
+#include "../../common/macros.h"
 #include "../../common/settings.hpp"
 #include <cstdint>
 

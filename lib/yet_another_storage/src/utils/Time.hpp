@@ -1,6 +1,6 @@
 #pragma once
 #include "../physical_volume/physical_volume_layout/pv_layout_types_headers.h"    // for sizeof expired time structure
-#include "../common/common.h"
+#include "../common/macros.h"
 #include <cstdint>
 #include <vector>
 
