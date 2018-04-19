@@ -1,7 +1,6 @@
 #pragma once
 #include "../../common/macros.h"
 #include "../../common/settings.hpp"
-#include "pv_version.h"
 #include <cstdint>
 
 using namespace yas::macros;
@@ -13,7 +12,7 @@ STRUCT_PACK(
 struct PVHeader {
   uint8_t signature[] = { 'Y', 'A', 'S', '_', 'P', 'V' };                         //  + 6 bytes
   uint8_t major;
-  uint8_t minor;                                                                  // + 2 bytes 
+  uint8_t minor;                                                                  //  + 2 bytes 
   uint64_t pv_size_;                                                              //  + 8 bytes
   uint32_t cluster_size_;                                                         //  + 4 bytes
   uint32_t priority_;               // should be class (?)                            + 4 bytes
