@@ -25,6 +25,7 @@
     <ClCompile Include="src\storage\Storage.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\common\common.h" />
     <ClInclude Include="src\common\settings.hpp" />
     <ClInclude Include="src\device_worker\DeviceManager.hpp" />
     <ClInclude Include="src\device_worker\devices\FileDevice.hpp" />
@@ -32,7 +33,11 @@
     <ClInclude Include="src\device_worker\devices\MappedDevice.hpp" />
     <ClInclude Include="src\external\expected.h" />
     <ClInclude Include="src\external\filesystem.h" />
+    <ClInclude Include="src\physical_volume\physical_volume_layout\pv_layout_headers.h" />
+    <ClInclude Include="src\physical_volume\physical_volume_layout\pv_layout_types_headers.h" />
+    <ClInclude Include="src\physical_volume\physical_volume_layout\pv_version.h" />
     <ClInclude Include="src\storage\storage_errors.hpp" />
+    <ClInclude Include="src\volume_group\VolumeGroup.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
