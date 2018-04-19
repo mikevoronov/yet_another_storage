@@ -40,6 +40,9 @@
     <Filter Include="src\physical_volume\physical_volume_layout\headers">
       <UniqueIdentifier>{d86c50eb-4b2b-45c9-8618-4c85682f517b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\utils">
+      <UniqueIdentifier>{d2145cd5-f1b4-4df9-8fbe-3dc28ff4f37a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -94,6 +97,9 @@
     </ClInclude>
     <ClInclude Include="src\common\common.h">
       <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\Time.hpp">
+      <Filter>src\utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
