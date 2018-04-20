@@ -11,7 +11,7 @@ template <typename CharType, typename LeafType>
 class InvertedIndexHelper {
   using StringViewType = std::basic_string_view<CharType>;
 public:
-  InvertedIndexHelper() 
+  InvertedIndexHelper()
       : non_exist_leaf_type_(LeafType::MakeNonExistType())
   {}
   ~InvertedIndexHelper() = default;
