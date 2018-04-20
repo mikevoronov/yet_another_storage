@@ -13,17 +13,17 @@ class AhoCorasickEngine {
 
  public:
   AhoCorasickEngine()
-      : root_(new CharNode()),
-        non_exist_type_(LeafType::MakeNonExistType())
+      : trie_(new CharNode()),
+        non_exist_leaf_type_(LeafType::MakeNonExistType())
   {}
   ~AhoCorasickEngine() = default;
   AhoCorasickEngine(AhoCorasickEngine &&other) noexcept 
       : root_(std::move(other.root_)),
-        non_exist_type_(LeafType::MakeNonExistType()) 
+        non_exist_leaf_type_(LeafType::MakeNonExistType())
   {}
 
   bool Insert(std::basic_string_view<CharType> key, LeafType &leaf) {
-    auto current = root_.get();
+    auto current = trie_.get();
 
     for (const auto &ch : key) {
       auto next = getNextNode(ch, current);
@@ -40,12 +40,12 @@ class AhoCorasickEngine {
 
   LeafType& Get(std::basic_string_view<CharType> key) noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ?  non_exist_type_ : node->leaf_;
+    return (nullptr == node) ? non_exist_leaf_type_ : node->leaf_;
   }
 
   const LeafType& Get(std::basic_string_view<CharType> key) const noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? non_exist_type_ : node->leaf_;
+    return (nullptr == node) ? non_exist_leaf_type_ : node->leaf_;
   }
 
   bool Delete(std::basic_string_view<CharType> key) {
@@ -54,13 +54,13 @@ class AhoCorasickEngine {
       return false;
     }
 
-    node->leaf_ = non_exist_type_;
+    node->leaf_ = non_exist_leaf_type_;
     return true;
   }
 
   bool HasKey(std::basic_string_view<CharType> key) const noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? false : non_exist_type_ != node->leaf_;
+    return (nullptr == node) ? false : non_exist_leaf_type_ != node->leaf_;
   }
 
   AhoCorasickEngine(const AhoCorasickEngine&) = delete;
@@ -75,8 +75,8 @@ private:
     LeafType leaf_;
   };
 
-  LeafType non_exist_type_;
-  std::unique_ptr<CharNode> root_;
+  LeafType non_exist_leaf_type_;
+  std::unique_ptr<CharNode> trie_;
 
   CharNode *getNextNode(CharType ch, CharNode *current) const noexcept {
     if (nullptr == current || !current->routes_.count(ch)) {
@@ -87,7 +87,7 @@ private:
   } 
 
   CharNode *getPathNode(std::basic_string_view<CharType> key) const noexcept {
-    auto current = root_.get();
+    auto current = trie_.get();
 
     for (const auto &ch : key) {
       current = getNextNode(ch, current);
@@ -97,7 +97,6 @@ private:
     }
     return current;
   }
-
 };
 
 } // namespace index_helper
