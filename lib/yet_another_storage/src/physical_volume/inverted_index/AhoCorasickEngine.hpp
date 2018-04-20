@@ -7,11 +7,14 @@ namespace index_helper {
 
 template <typename CharType, typename LeafType>
 class AhoCorasickEngine {
+  using StringViewType = std::basic_string_view<CharType>;
   template<typename CharType>
   struct Node;
   using CharNode = Node<CharType>;
 
  public:
+  static_assert(std::is_trivially_copyable_v<LeafType>, "LeafType should be POD");
+
   AhoCorasickEngine()
       : trie_(new CharNode()),
         non_exist_leaf_type_(LeafType::MakeNonExistType())
@@ -22,7 +25,7 @@ class AhoCorasickEngine {
         non_exist_leaf_type_(LeafType::MakeNonExistType())
   {}
 
-  bool Insert(std::basic_string_view<CharType> key, LeafType &leaf) {
+  bool Insert(StringViewType key, LeafType &leaf) {
     auto current = trie_.get();
 
     for (const auto &ch : key) {
@@ -38,17 +41,17 @@ class AhoCorasickEngine {
     return true;
   }
 
-  LeafType& Get(std::basic_string_view<CharType> key) noexcept {
+  LeafType& Get(StringViewType key) noexcept {
     const auto node = getPathNode(key);
     return (nullptr == node) ? non_exist_leaf_type_ : node->leaf_;
   }
 
-  const LeafType& Get(std::basic_string_view<CharType> key) const noexcept {
+  const LeafType& Get(StringViewType key) const noexcept {
     const auto node = getPathNode(key);
     return (nullptr == node) ? non_exist_leaf_type_ : node->leaf_;
   }
 
-  bool Delete(std::basic_string_view<CharType> key) {
+  bool Delete(StringViewType key) {
     const auto node = getPathNode(key);
     if (nullptr == node) {
       return false;
@@ -58,7 +61,7 @@ class AhoCorasickEngine {
     return true;
   }
 
-  bool HasKey(std::basic_string_view<CharType> key) const noexcept {
+  bool HasKey(StringViewType key) const noexcept {
     const auto node = getPathNode(key);
     return (nullptr == node) ? false : non_exist_leaf_type_ != node->leaf_;
   }
@@ -86,7 +89,7 @@ private:
     return current->routes_[ch].get();
   } 
 
-  CharNode *getPathNode(std::basic_string_view<CharType> key) const noexcept {
+  CharNode *getPathNode(StringViewType key) const noexcept {
     auto current = trie_.get();
 
     for (const auto &ch : key) {
