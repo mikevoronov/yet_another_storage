@@ -110,5 +110,8 @@
     <ClInclude Include="src\physical_volume\inverted_index\AhoCorasickEngine.hpp">
       <Filter>src\physical_volume\inverted_index</Filter>
     </ClInclude>
+    <ClInclude Include="src\physical_volume\inverted_index\InvertedIndexHelper.hpp">
+      <Filter>src\physical_volume\inverted_index</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
