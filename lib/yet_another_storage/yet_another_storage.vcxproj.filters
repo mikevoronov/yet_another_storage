@@ -43,6 +43,9 @@
     <Filter Include="src\utils">
       <UniqueIdentifier>{d2145cd5-f1b4-4df9-8fbe-3dc28ff4f37a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\physical_volume\inverted_index">
+      <UniqueIdentifier>{9ca1e68b-01a7-4f8e-b3cf-6dd4981c3e81}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -103,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="src\utils\Version.hpp">
       <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physical_volume\inverted_index\AhoCorasickEngine.hpp">
+      <Filter>src\physical_volume\inverted_index</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
