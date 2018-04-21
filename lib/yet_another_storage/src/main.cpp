@@ -1,6 +1,6 @@
 #include "storage/Storage.hpp"
 #include "physical_volume/physical_volume_layout/pv_layout_types_headers.h"
-#include "physical_volume/inverted_index/AhoCorasickEngine.hpp"
+#include "physical_volume/inverted_index_helper/AhoCorasickEngine.hpp"
 #include <iostream>
 
 using namespace yas;
