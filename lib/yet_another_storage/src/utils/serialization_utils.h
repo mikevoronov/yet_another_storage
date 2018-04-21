@@ -10,8 +10,10 @@ template<typename Iterator>
 struct range_t {
   Iterator begin_;
   Iterator end_;
-  Iterator begin() const noexcept { return begin_; }
-  Iterator end() const noexcept { return end_; }
+  Iterator begin() noexcept { return begin_; }
+  Iterator end() noexcept { return end_; }
+  const Iterator cbegin() const noexcept { return begin_; }
+  const Iterator cend() const noexcept { return end_; }
   decltype(auto) size() const  { return std::distance(begin_, end_); }
 };
 

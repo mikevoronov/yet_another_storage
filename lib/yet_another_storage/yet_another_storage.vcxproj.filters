@@ -116,5 +116,11 @@
     <ClInclude Include="src\physical_volume\inverted_index_helper\InvertedIndexHelper.hpp">
       <Filter>src\physical_volume\inverted_index_helper</Filter>
     </ClInclude>
+    <ClInclude Include="src\physical_volume\inverted_index_helper\AhoCorasickSerializationHelper.hpp">
+      <Filter>src\physical_volume\inverted_index_helper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\serialization_utils.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

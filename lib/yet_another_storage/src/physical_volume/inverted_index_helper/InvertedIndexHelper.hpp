@@ -42,7 +42,6 @@ public:
     return engine_.Get(key);
   }
 
-
   bool Delete(StringViewType key) {
     if (key.empty()) {
       return false;
