@@ -71,6 +71,7 @@ class AhoCorasickEngine {
   AhoCorasickEngine& operator=(AhoCorasickEngine&&) = delete;
 
 private:
+  template <typename T1, typename T2, typename T3> friend class AhoCorasickSerializationHelper;
   template<typename CharType>
   struct Node {
     Node() : leaf_(LeafType::MakeNonExistType()) {}
