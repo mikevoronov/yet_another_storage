@@ -89,7 +89,7 @@ class AhoCorasickSerializationHelper {
       // throw an exception (corrupt data - multiple roots)
     }
 
-    std::unique_ptr<CharNode> root(new CharNode());         // at firt completly construct the tree on function level
+    std::unique_ptr<CharNode> root(new CharNode());         // at first completly construct the tree on function level
                                                             // and only then modify engine to exception safety
     NodeDescriptorStorage prev_level_nodes;
     NodeDescriptorStorage current_level_nodes;
@@ -249,7 +249,7 @@ class AhoCorasickSerializationHelper {
           IdType right) {
         return left.node_id_ < right;
     });
-    if (std::end(leafs) == leaf || node_id != leaf->node_id_) {
+    if (std::cend(leafs) == leaf || node_id != leaf->node_id_) {
       return std::end(leafs); // TODO : throw an exception (corrupted data)
     }
     return leaf;
