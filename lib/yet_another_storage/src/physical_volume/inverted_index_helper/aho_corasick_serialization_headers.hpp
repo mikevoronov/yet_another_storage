@@ -2,6 +2,7 @@
 #include "../../utils/Version.hpp"
 #include "../../common/macros.h"
 #include <cstdint>
+#include <type_traits>    // for underlying_type_t
 
 using namespace yas::macros;
 
@@ -12,11 +13,11 @@ namespace aho_corasick_serialization_headers {
 STRUCT_PACK(
 template<typename IdType, typename CharType>
 struct NodeSerializationDescriptorT {
-  constexpr NodeSerializationDescriptorT(IdType node_id, 
-      IdType parent_node_id,
-      IdType depth_level,
-      IdType leaf_id,
-      CharType parent_node_ch)
+  constexpr NodeSerializationDescriptorT(IdType node_id = 0,
+      IdType parent_node_id = 0,
+      IdType depth_level = 0,
+      IdType leaf_id = 0,
+      CharType parent_node_ch = std::char_traits<CharType>::to_char_type('/'))
       : node_id_(node_id),
         parent_node_id_(parent_node_id),
         depth_level_(depth_level),
@@ -34,8 +35,8 @@ struct NodeSerializationDescriptorT {
 STRUCT_PACK(
 template<typename IdType, typename LeafType>
 struct LeafSerializationDescriptorT {
-  constexpr LeafSerializationDescriptorT(IdType node_id,
-      LeafType leaf)
+  constexpr LeafSerializationDescriptorT(IdType node_id = 0,
+      LeafType leaf = LeafType::MakeNonExistType())
       : node_id_(node_id),
         leaf_(leaf)
   {}
@@ -63,13 +64,20 @@ struct NodeDescriptorT {
   CharType parent_node_ch_;
 });
 
+enum IdTypeSize : uint8_t { k4Byte = 4, k8Byte = 8 };
+// from Effective and modern C++
+template <typename ValueType>
+constexpr auto to_underlying(ValueType value) noexcept {
+  return static_cast<std::underlying_type_t<ValueType>>(value);
+}
+
 STRUCT_PACK(
 template <typename IdType>
 struct SerializedDataHeaderT {
-  SerializedDataHeaderT(utils::Version version_,
-      IdType leafs_count_,
-      IdType nodes_count_,
-      IdTypeSize id_type_size_)
+  SerializedDataHeaderT(utils::Version version = {1,1},
+      IdType leafs_count = 0,
+      IdType nodes_count = 0,
+      IdTypeSize id_type_size = IdTypeSize::k4Byte)
       : version_(version),
         leafs_count_(leafs_count),
         nodes_count_(nodes_count),
@@ -80,11 +88,9 @@ struct SerializedDataHeaderT {
   IdType leafs_count_;
   IdType nodes_count_;
 
-  enum IdTypeSize : uint8_t { k4Byte = 4, k8Byte = 8 };
   IdTypeSize id_type_size_;          // also can determine by version but its better to explicitly check it
-
   static uint32_t ConvertIdType(IdTypeSize id_type_size) {
-    return id_type_size;
+    return to_underlying(id_type_size);
   }
   static IdTypeSize ConvertIdType(uint32_t size) {
     return static_cast<IdTypeSize>(size);

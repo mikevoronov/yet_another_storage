@@ -39,8 +39,8 @@ class AhoCorasickSerializationHelper {
     NodeDescriptorStorage next_level_nodes;
     
     // TODO : change type conversion after TODO_1
-    // TODO : emplace back
-    current_level_nodes.push_back({ 0, (CharNode *)engine.trie_.get(), 0, (CharType)'/' });
+    current_level_nodes.emplace_back(0, (CharNode *)engine.trie_.get(), 0, 
+        std::char_traits<CharType>::to_char_type('/'));
 
     IdType current_node_id = 0;
     IdType current_leaf_id = 0;
@@ -61,7 +61,7 @@ class AhoCorasickSerializationHelper {
         next_level_nodes.reserve(node_descriptor.node_->routes_.size());
         for(auto &route : node_descriptor.node_->routes_) {
           // TODO : emplace back
-          next_level_nodes.push_back({ current_node_id, route.second.get(), node_descriptor.node_id_, route.first });
+          next_level_nodes.emplace_back(current_node_id, route.second.get(), node_descriptor.node_id_, route.first);
           ++current_node_id;
         }
 
@@ -152,8 +152,12 @@ class AhoCorasickSerializationHelper {
       LeafSerializationDescriptorStorage &serialized_leafs) const {
     std::vector<uint8_t> result(sizeof(SerializedDataHeader) + serialized_nodes.size() + serialized_leafs.size());
 
-    SerializedDataHeader header = { version_, serialized_leafs.size(), serialized_nodes.size(),
-        SerializedDataHeader::ConvertIdType(sizeof(IdType))};
+    SerializedDataHeader header = { 
+        version_, 
+        static_cast<IdType>(serialized_leafs.size()), 
+        static_cast<IdType>(serialized_nodes.size()),
+        SerializedDataHeader::ConvertIdType(sizeof(IdType))
+    };
 
     // for VS checked iterator should be disabled
     auto current_cursor = serialization_utils::SaveAsBytes(std::begin(result), std::end(result), 
@@ -167,8 +171,7 @@ class AhoCorasickSerializationHelper {
   }
 
   void checkSerializedHeader(SerializedDataHeader &header) const {
-    if (header.version_.major > version_.major ||
-        (header.version_.major <= version_.major && header.version_.minor > version_.minor)) {
+    if (version_ < header.version_) {
       throw 1; // TODO : throw an exception
     }
 

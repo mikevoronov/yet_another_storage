@@ -9,6 +9,7 @@
 namespace yas {
 namespace index_helper {
 
+// TODO - add char_traits for LeafType to hide out MakeNonExistType
 template <typename CharType, typename LeafType>
 class InvertedIndexHelper {
   using StringViewType = std::basic_string_view<CharType>;
