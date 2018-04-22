@@ -1,10 +1,11 @@
 #pragma once
 
 #include "AhoCorasickEngine.hpp"
-#include "../../common/common.h"
+#include "aho_corasick_serialization_headers.hpp"
 #include "../../utils/serialization_utils.h"
 #include "../../utils/Version.hpp"
-#include "aho_corasick_serialization_headers.hpp"
+#include "../../common/common.h"
+#include "id_type_type_traits.hpp"
 #include <cstdint>
 #include <vector>
 #include <type_traits>
@@ -51,7 +52,7 @@ class AhoCorasickSerializationHelper {
     // breadth-first search
     while (!current_level_nodes.empty()) {
       for (const auto &node_descriptor : current_level_nodes) {
-        auto leaf_id = std::numeric_limits<IdType>::max();     // non exist leaf id
+        auto leaf_id = id_type_traits<IdType>::NonExistValue();
         if (node_descriptor.node_->leaf_ != leaf_traits<Leaf>::NonExistValue()) {
           leaf_id = current_leaf_id;
           serialized_leafs.push_back(serialize(node_descriptor.node_->leaf_, current_node_id));
@@ -105,7 +106,7 @@ class AhoCorasickSerializationHelper {
       const auto route = parent->node_->routes_[node_descriptor.parent_node_ch_].get();
       current_level_nodes.push_back(deserialize(node_descriptor, route));
 
-      if (node_descriptor.leaf_id_ != std::numeric_limits<IdType>::max()) {
+      if (node_descriptor.leaf_id_ != id_type_traits<IdType>::NonExistValue()) {
         route->leaf_ = getAppropriateLeaf(serialized_leafs, node_descriptor.leaf_id_)->leaf_;
       }
 
