@@ -20,22 +20,22 @@ class Version {
   uint16_t major() const { return major_; }
   uint32_t minor() const { return minor_; }
 
-  Version(const Version&) = delete;
-  Version(Version &&) = delete;
-  Version& operator=(const Version&) = delete;
-  Version& operator=(Version&&) = delete;
+  Version(const Version&) = default;
+  Version(Version &&) = default;
+  Version& operator=(const Version&) = default;
+  Version& operator=(Version&&) = default;
 
  private:
   uint8_t major_;
   uint8_t minor_;
 });
 
-bool operator<(const Version &lhs, const Version &rhs) {
+constexpr bool operator<(const Version &lhs, const Version &rhs) {
   return (lhs.major() < rhs.major()) ||
       (lhs.major() == rhs.major() && lhs.minor() < rhs.minor());
 }
 
-bool operator==(const Version &lhs, const Version &rhs) {
+constexpr bool operator==(const Version &lhs, const Version &rhs) {
   return !(lhs < rhs) && !(rhs < lhs);
 }
 

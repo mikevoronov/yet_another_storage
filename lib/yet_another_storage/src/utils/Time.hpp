@@ -28,17 +28,17 @@ class Time {
   uint16_t expired_time_high() const { return expired_time_high_; }
   uint32_t expired_time_low() const { return expired_time_low_; }
 
-  Time(const Time&) = delete;
-  Time(Time &&) = delete;
-  Time& operator=(const Time&) = delete;
-  Time& operator=(Time&&) = delete;
+  Time(const Time&) = default;
+  Time(Time &&) = default;
+  Time& operator=(const Time&) = default;
+  Time& operator=(Time&&) = default;
 
  private:
   uint16_t expired_time_high_;
   uint32_t expired_time_low_;
 });
 
-bool operator<(const Time &lhs, const Time &rhs) {
+constexpr bool operator<(const Time &lhs, const Time &rhs) {
   return (lhs.expired_time_high() < rhs.expired_time_high()) ||
       (lhs.expired_time_high() == rhs.expired_time_high() && lhs.expired_time_low() < rhs.expired_time_low());
 }
