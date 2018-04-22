@@ -62,7 +62,6 @@ class AhoCorasickSerializationHelper {
 
         next_level_nodes.reserve(node_descriptor.node_->routes_.size());
         for(auto &route : node_descriptor.node_->routes_) {
-          // TODO : emplace back
           next_level_nodes.emplace_back(current_node_id, route.second.get(), node_descriptor.node_id_, route.first);
           ++current_node_id;
         }
@@ -83,6 +82,7 @@ class AhoCorasickSerializationHelper {
 
     SerializedDataHeader header;
     auto current_cursor = serialization_utils::LoadFromBytes(std::begin(data), std::end(data), &header);
+    // TODO : exception if end
     checkSerializedHeader(header);
     const auto serialized_leafs = deserializeLeafDecriptors(header, data, current_cursor);
     NodeSerializationDescriptor node_descriptor;
@@ -91,7 +91,7 @@ class AhoCorasickSerializationHelper {
       // throw an exception (corrupt data - multiple roots)
     }
 
-    std::unique_ptr<CharNode> root(new CharNode());         // at first completly construct the tree on function level
+    std::unique_ptr<CharNode> root(new CharNode());         // at first completly construct the trie on function level
                                                             // and only then modify engine to exception safety
     NodeDescriptorStorage prev_level_nodes;
     NodeDescriptorStorage current_level_nodes;
@@ -111,6 +111,7 @@ class AhoCorasickSerializationHelper {
       }
 
       if (depth_level < node_descriptor.depth_level_) {
+        // TODO : move all if to explicit function to improve readability
         prev_level_nodes = std::move(current_level_nodes);
         std::sort(std::begin(prev_level_nodes), std::end(prev_level_nodes), [](
             const NodeDescriptorStorage::value_type &left,
@@ -125,6 +126,9 @@ class AhoCorasickSerializationHelper {
         ++depth_level;
       }
     }
+
+    // TODO : bad type conversion
+//    engine.trie_ = std::move(root);
   }
 
  private:
