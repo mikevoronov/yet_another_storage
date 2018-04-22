@@ -55,6 +55,22 @@ public:
     }
     return engine_.HasKey(key);
   }
+
+  template<typename IdType>
+  std::vector<uint8_t> Serialize() const {
+    AhoCorasickSerializationHelper<CharType, LeafType, IdType> serializer;
+    return serializer.Serialize(trie_);
+  }
+
+  template<typename IdType>
+  static InvertedIndexHelper Deserialize(std::vector<uint8_t> &data) {
+    AhoCorasickSerializationHelper<CharType, LeafType, IdType> serializer;
+    InvertedIndexHelper<CharType, LeafType> index_helper;
+    serializer.Deserialize(data, index_helper.trie_);
+
+    return index_helper;
+  }
+
   
   InvertedIndexHelper(const InvertedIndexHelper&) = delete;
   InvertedIndexHelper& operator=(const InvertedIndexHelper&) = delete;
