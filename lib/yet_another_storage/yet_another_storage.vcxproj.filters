@@ -122,5 +122,8 @@
     <ClInclude Include="src\utils\serialization_utils.h">
       <Filter>src\utils</Filter>
     </ClInclude>
+    <ClInclude Include="src\physical_volume\inverted_index_helper\aho_corasick_serialization_headers.hpp">
+      <Filter>src\physical_volume\inverted_index_helper</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
