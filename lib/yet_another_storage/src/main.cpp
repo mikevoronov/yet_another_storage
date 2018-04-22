@@ -1,4 +1,5 @@
 #include "physical_volume/inverted_index_helper/InvertedIndexHelper.hpp"
+#include "utils/Version.hpp"
 #include <string>
 #include <iostream>
 #include <cstdint>
@@ -54,8 +55,9 @@ int main() {
   auto t2 = helper_.Delete("/home/user1/file.txt");
   std::cout << helper_.Get("/home/user1/file.txt").value_ << std::endl;
 
-  auto data = helper_.Serialize<uint32_t>();
-  auto yy = yas::index_helper::InvertedIndexHelper<char, Leaf>::Deserialize<uint32_t>(data).Get("/home/user1/tmp").value_;
+  yas::utils::Version version{ 1,1 };
+  auto data = helper_.Serialize<uint32_t>(version);
+  auto yy = yas::index_helper::InvertedIndexHelper<char, Leaf>::Deserialize<uint32_t>(data, version).Get("/home/user1/tmp").value_;
 
 
   std::cout << helper_.Get("/home/user1/tmp").value_ << std::endl;

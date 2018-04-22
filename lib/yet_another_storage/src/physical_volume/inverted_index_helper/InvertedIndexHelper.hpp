@@ -1,6 +1,7 @@
 #pragma once
 #include "AhoCorasickEngine.hpp"
 #include "AhoCorasickSerializationHelper.hpp"
+#include "../../utils/Version.hpp"
 #include <memory>
 #include <string_view>
 #include <type_traits>
@@ -58,14 +59,14 @@ public:
   }
 
   template<typename IdType>
-  std::vector<uint8_t> Serialize() const {
-    AhoCorasickSerializationHelper<CharType, LeafType, IdType> serializer;
+  std::vector<uint8_t> Serialize(utils::Version version) const {
+    AhoCorasickSerializationHelper<CharType, LeafType, IdType> serializer(version);
     return serializer.Serialize(engine_);
   }
 
   template<typename IdType>
-  static InvertedIndexHelper Deserialize(std::vector<uint8_t> &data) {
-    AhoCorasickSerializationHelper<CharType, LeafType, IdType> serializer;
+  static InvertedIndexHelper Deserialize(std::vector<uint8_t> &data, utils::Version version) {
+    AhoCorasickSerializationHelper<CharType, LeafType, IdType> serializer(version);
     InvertedIndexHelper<CharType, LeafType> index_helper;
     serializer.Deserialize(data, index_helper.engine_);
 

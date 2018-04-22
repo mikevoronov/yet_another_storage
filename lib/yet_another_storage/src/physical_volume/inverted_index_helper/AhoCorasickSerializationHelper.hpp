@@ -2,6 +2,7 @@
 
 #include "AhoCorasickEngine.hpp"
 #include "../../utils/serialization_utils.h"
+#include "../../utils/Version.hpp"
 #include <cstdint>
 #include <vector>
 #include <type_traits>
@@ -24,12 +25,10 @@ class AhoCorasickSerializationHelper {
 
  public:
   static_assert(std::is_integral_v<IdType>, "IdType should be an integral type");
-  struct Version {
-    uint8_t major;
-    uint8_t minor;
-  };
 
-  AhoCorasickSerializationHelper() = default;
+  AhoCorasickSerializationHelper(utils::Version version) 
+      : version_(version)
+  {}
   ~AhoCorasickSerializationHelper() = default;
 
   std::vector<uint8_t> Serialize(const Engine &engine) const {
@@ -147,7 +146,7 @@ class AhoCorasickSerializationHelper {
   };
 
   struct SerializedDataHeader {
-    Version version_;
+    utils::Version version_;
     IdType leafs_count_;
     IdType nodes_count_;
 
@@ -164,7 +163,7 @@ class AhoCorasickSerializationHelper {
   using NodeSerializationDescriptorStorage = std::vector<NodeSerializationDescriptor>;
   using LeafSerializationDescriptorStorage = std::vector<LeafSerializationDescriptor>;
   using NodeDescriptorStorage = std::vector<NodeDescriptor>;
-  Version version_ = {1,1}; // TODO
+  utils::Version version_; // TODO
 
   NodeSerializationDescriptor serialize(const NodeDescriptor &node, IdType depth_level, IdType leaf_id) const noexcept {
     return { node.node_id_, node.parent_node_id_, depth_level, leaf_id, node.parent_node_ch_ };

@@ -10,7 +10,7 @@ namespace pv_layout_headers {
 
 STRUCT_PACK(
 struct PVHeader {
-  uint8_t signature[] = { 'Y', 'A', 'S', '_', 'P', 'V' };                         //  + 6 bytes
+  uint8_t signature[6] /*= { 'Y', 'A', 'S', '_', 'P', 'V' }*/;                         //  + 6 bytes
   uint8_t major;
   uint8_t minor;                                                                  //  + 2 bytes 
   uint64_t pv_size_;                                                              //  + 8 bytes
@@ -22,7 +22,6 @@ struct PVHeader {
   // some index
   //
   // data
-
 });
 
 // TODO : add static assert to size of PVHeader
