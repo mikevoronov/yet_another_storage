@@ -24,6 +24,11 @@ class AhoCorasickSerializationHelper {
 
  public:
   static_assert(std::is_integral_v<IdType>, "IdType should be an integral type");
+  struct Version {
+    uint8_t major;
+    uint8_t minor;
+  };
+
   AhoCorasickSerializationHelper() = default;
   ~AhoCorasickSerializationHelper() = default;
 
@@ -67,6 +72,57 @@ class AhoCorasickSerializationHelper {
     }
 
     return constructResultSerializedBuffer(serialized_nodes, serialized_leafs);
+  }
+
+  void Deserialize(std::vector<uint8_t> &data, Engine &engine) const {
+    if (data.size() < sizeof(SerializedDataHeader)) {
+      return; // TODO : throw an exception (invalid data)
+    }
+
+    SerializedDataHeader header;
+    auto current_cursor = serialization_utils::LoadFromBytes(std::begin(data), std::end(data), &header);
+    checkSerializedHeader(header);
+    const auto serialized_leafs = deserializeLeafDecriptors(header, data, current_cursor);
+    NodeSerializationDescriptor node_descriptor;
+    current_cursor = serialization_utils::LoadFromBytes(current_cursor, std::end(data), &node_descriptor);
+    if (node_descriptor.node_id_ != node_descriptor.parent_node_id_) {
+      // throw an exception (corrupt data - multiple roots)
+    }
+
+    std::unique_ptr<CharNode> root(new CharNode());         // at firt completly construct the tree on function level
+                                                            // and only then modify engine to exception safety
+    NodeDescriptorStorage prev_level_nodes;
+    NodeDescriptorStorage current_level_nodes;
+    prev_level_nodes.push_back(deserialize(node_descriptor, root.get()));
+
+    IdType depth_level = 1;                                     // root extracted -> depth_level should be 1
+    for (IdType node_id = 1; node_id < header.nodes_count_; ++node_id) {
+      current_cursor = serialization_utils::LoadFromBytes(current_cursor, std::end(data), &node_descriptor);
+      const auto parent = getAppropriateParentNode(prev_level_nodes, node_descriptor.parent_node_id_);
+      // TODO : add throw exception
+      parent->node_->routes_[node_descriptor.parent_node_ch_].reset(new CharNode());
+      const auto route = parent->node_->routes_[node_descriptor.parent_node_ch_].get();
+      current_level_nodes.push_back(deserialize(node_descriptor, route));
+
+      if (node_descriptor.leaf_id_ != std::numeric_limits<IdType>::max()) {
+        route->leaf_ = getAppropriateLeaf(serialized_leafs, node_descriptor.leaf_id_)->leaf_;
+      }
+
+      if (depth_level < node_descriptor.depth_level_) {
+        prev_level_nodes = std::move(current_level_nodes);
+        std::sort(std::begin(prev_level_nodes), std::end(prev_level_nodes), [](
+            const NodeDescriptorStorage::value_type &left,
+            const NodeDescriptorStorage::value_type &right) {
+          return left.node_id_ < right.node_id_;
+        });
+        {
+          // there was stl realization that doesn't decrease size after move :(
+          NodeDescriptorStorage tmp;
+          current_level_nodes.swap(tmp);
+        }
+        ++depth_level;
+      }
+    }
   }
 
  private:
@@ -140,6 +196,64 @@ class AhoCorasickSerializationHelper {
     return result;
   }
 
+  void checkSerializedHeader(SerializedDataHeader &header) const {
+    if (header.version_.major > version_.major ||
+        (header.version_.major <= version_.major && header.version_.minor > version_.minor)) {
+      throw 1; // TODO : throw an exception
+    }
+
+    if (header.id_type_size_ != sizeof(IdType)) {
+      throw 2; // TODO : throw an exception (corrupted header)
+    }
+  }
+
+  // this function return sorted leaf decriptors
+  template <typename Iterator>
+  LeafSerializationDescriptorStorage deserializeLeafDecriptors(SerializedDataHeader header, std::vector<uint8_t> &data,
+      Iterator current_cursor) const {
+    LeafSerializationDescriptorStorage serialized_leafs;
+    serialized_leafs.reserve(header.leafs_count_);
+
+    for (IdType leaf_id = 0; leaf_id <= header.leafs_count_; ++leaf_id) {
+      LeafSerializationDescriptor leaf_descriptor;
+      current_cursor = serialization_utils::LoadFromBytes(current_cursor, std::end(data), &leaf_descriptor);
+      if (std::end(data) == current_cursor) {
+        throw 1; // TODO : leafs count don't corresponds to header
+      }
+      serialized_leafs.push_back(std::move(leaf_descriptor));
+    }
+    std::sort(std::begin(serialized_leafs), std::end(serialized_leafs),
+        [](const LeafSerializationDescriptorStorage::value_type &left,
+        const LeafSerializationDescriptorStorage::value_type &right) {
+      return left.node_id_ < right.node_id_;
+    });
+
+    return serialized_leafs;
+  }
+
+  decltype(auto) getAppropriateParentNode(const NodeDescriptorStorage &nodes, IdType parent_node_id) const {
+    auto parent_node = std::lower_bound(std::begin(nodes), std::end(nodes), parent_node_id, [](
+        const NodeDescriptorStorage::value_type &left,
+        const IdType right){
+      return left.parent_node_id_ < right;
+    });
+    if (std::end(nodes) == parent_node || parent_node_id != parent_node->node_id_) {
+      return std::end(nodes); // TODO : throw an exception (corrupted data)
+    }
+    return parent_node;
+  }
+
+  decltype(auto) getAppropriateLeaf(const LeafSerializationDescriptorStorage &leafs, IdType node_id) const {
+    auto leaf = std::lower_bound(std::begin(leafs), std::end(leafs), node_id, [](
+          const LeafSerializationDescriptorStorage::value_type &left,
+          IdType right) {
+        return left.node_id_ < right;
+    });
+    if (std::end(leafs) == leaf || node_id != leaf->node_id_) {
+      return std::end(leafs); // TODO : throw an exception (corrupted data)
+    }
+    return leaf;
+  }
 };
 
 } // namespace index_helper
