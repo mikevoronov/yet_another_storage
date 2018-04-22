@@ -1,4 +1,5 @@
 #pragma once
+#include "leaf_type_traits.hpp"
 #include <unordered_map>
 #include <memory>
 
@@ -16,13 +17,11 @@ class AhoCorasickEngine {
   static_assert(std::is_trivially_copyable_v<LeafType>, "LeafType should be POD");
 
   AhoCorasickEngine()
-      : trie_(new CharNode()),
-        non_exist_leaf_type_(LeafType::MakeNonExistType())
+      : trie_(new CharNode())
   {}
   ~AhoCorasickEngine() = default;
   AhoCorasickEngine(AhoCorasickEngine &&other) noexcept 
-      : trie_(std::move(other.trie_)),
-        non_exist_leaf_type_(LeafType::MakeNonExistType())
+      : trie_(std::move(other.trie_))
   {}
 
   bool Insert(StringViewType key, LeafType &leaf) {
@@ -41,14 +40,14 @@ class AhoCorasickEngine {
     return true;
   }
 
-  LeafType& Get(StringViewType key) noexcept {
+  LeafType Get(StringViewType key) noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? non_exist_leaf_type_ : node->leaf_;
+    return (nullptr == node) ? leaf_traits<Leaf>::NonExistValue() : node->leaf_;
   }
 
-  const LeafType& Get(StringViewType key) const noexcept {
+  const LeafType Get(StringViewType key) const noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? non_exist_leaf_type_ : node->leaf_;
+    return (nullptr == node) ? leaf_traits<Leaf>::NonExistValue() : node->leaf_;
   }
 
   bool Delete(StringViewType key) {
@@ -57,13 +56,13 @@ class AhoCorasickEngine {
       return false;
     }
 
-    node->leaf_ = non_exist_leaf_type_;
+    node->leaf_ = leaf_traits<Leaf>::NonExistValue();
     return true;
   }
 
   bool HasKey(StringViewType key) const noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? false : non_exist_leaf_type_ != node->leaf_;
+    return (nullptr == node) ? false : leaf_traits<Leaf>::NonExistValue() != node->leaf_;
   }
 
   AhoCorasickEngine(const AhoCorasickEngine&) = delete;
@@ -74,12 +73,11 @@ private:
   template <typename T1, typename T2, typename T3> friend class AhoCorasickSerializationHelper;
   template<typename CharType>
   struct Node {
-    Node() : leaf_(LeafType::MakeNonExistType()) {}
+    Node() : leaf_(leaf_traits<Leaf>::NonExistValue()) {}
     std::unordered_map<CharType, std::unique_ptr<Node>> routes_;
     LeafType leaf_;
   };
 
-  LeafType non_exist_leaf_type_;
   std::unique_ptr<CharNode> trie_;
 
   CharNode *getNextNode(CharType ch, CharNode *current) const noexcept {

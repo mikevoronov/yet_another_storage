@@ -10,19 +10,15 @@
 namespace yas {
 namespace index_helper {
 
-// TODO - add char_traits for LeafType to hide out MakeNonExistType
 template <typename CharType, typename LeafType>
 class InvertedIndexHelper {
   using StringViewType = std::basic_string_view<CharType>;
 public:
-  InvertedIndexHelper()
-      : non_exist_leaf_type_(LeafType::MakeNonExistType())
-  {}
+  InvertedIndexHelper() = default;
   ~InvertedIndexHelper() = default;
 
   InvertedIndexHelper(InvertedIndexHelper &&other) noexcept
-      : engine_(std::move(other.engine_)),
-        non_exist_leaf_type_(LeafType::MakeNonExistType())
+      : engine_(std::move(other.engine_))
   {}
 
   bool Insert(StringViewType key, LeafType leaf) {
@@ -32,16 +28,16 @@ public:
     return engine_.Insert(key, leaf);
   }
 
-  LeafType& Get(StringViewType key) noexcept {
+  LeafType Get(StringViewType key) noexcept {
     if (key.empty()) {
-      return non_exist_leaf_type_;
+      return leaf_traits<Leaf>::NonExistValue();
     }
     return engine_.Get(key);
   }
 
-  const LeafType& Get(StringViewType key) const noexcept {
+  const LeafType Get(StringViewType key) const noexcept {
     if (key.empty()) {
-      return non_exist_leaf_type_;
+      return leaf_traits<Leaf>::NonExistValue();
     }
     return engine_.Get(key);
   }
@@ -81,7 +77,6 @@ public:
 private:
   // TODO: engine probably should be template or inner class (pimpl?) - need to decide later
   AhoCorasickEngine<CharType, LeafType> engine_;
-  LeafType non_exist_leaf_type_;
 };
 
 } // namespace index_helper

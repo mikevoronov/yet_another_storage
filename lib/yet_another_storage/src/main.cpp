@@ -8,11 +8,6 @@ struct Leaf {
   Leaf(uint64_t value = 0)
     : value_(value)
   {}
-
-  static Leaf& MakeNonExistType() noexcept {
-    static Leaf leaf{ 0 };
-    return leaf;
-  }
   uint64_t value_;
 };
 

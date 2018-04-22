@@ -1,6 +1,7 @@
 #pragma once
 #include "../../utils/Version.hpp"
 #include "../../common/macros.h"
+#include "leaf_type_traits.hpp"
 #include <cstdint>
 #include <type_traits>    // for underlying_type_t
 
@@ -36,7 +37,7 @@ STRUCT_PACK(
 template<typename IdType, typename LeafType>
 struct LeafSerializationDescriptorT {
   constexpr LeafSerializationDescriptorT(IdType node_id = 0,
-      LeafType leaf = LeafType::MakeNonExistType())
+      LeafType leaf = leaf_traits<LeafType>::NonExistValue())
       : node_id_(node_id),
         leaf_(leaf)
   {}

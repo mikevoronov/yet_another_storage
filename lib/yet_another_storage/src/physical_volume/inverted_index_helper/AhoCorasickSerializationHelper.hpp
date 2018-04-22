@@ -19,7 +19,7 @@ class AhoCorasickSerializationHelper {
   using Engine = AhoCorasickEngine<CharType, LeafType>;
   template<typename CharType>
   struct Node {
-    Node() : leaf_(LeafType::MakeNonExistType()) {}
+    Node() : leaf_(leaf_traits<Leaf>::NonExistValue()) {}
     std::unordered_map<CharType, std::unique_ptr<Node>> routes_;
     LeafType leaf_;
   };
@@ -51,8 +51,8 @@ class AhoCorasickSerializationHelper {
     // breadth-first search
     while (!current_level_nodes.empty()) {
       for (const auto &node_descriptor : current_level_nodes) {
-        auto leaf_id = std::numeric_limits<IdType>::max();     // non exist leaf
-        if (node_descriptor.node_->leaf_ != LeafType::MakeNonExistType()) {
+        auto leaf_id = std::numeric_limits<IdType>::max();     // non exist leaf id
+        if (node_descriptor.node_->leaf_ != leaf_traits<Leaf>::NonExistValue()) {
           leaf_id = current_leaf_id;
           serialized_leafs.push_back(serialize(node_descriptor.node_->leaf_, current_node_id));
           ++current_leaf_id;
