@@ -17,8 +17,8 @@ class Version {
   {}
   ~Version() = default;
 
-  uint16_t major() const { return major_; }
-  uint32_t minor() const { return minor_; }
+  constexpr uint16_t major() const { return major_; }
+  constexpr uint32_t minor() const { return minor_; }
 
   Version(const Version&) = default;
   Version(Version &&) = default;
