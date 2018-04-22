@@ -2,6 +2,7 @@
 #include "AhoCorasickEngine.hpp"
 #include "AhoCorasickSerializationHelper.hpp"
 #include "../../utils/Version.hpp"
+#include "../../common/common.h"
 #include <memory>
 #include <string_view>
 #include <type_traits>
@@ -60,13 +61,13 @@ public:
   }
 
   template<typename IdType>
-  std::vector<uint8_t> Serialize(utils::Version version) const {
+  ByteVector Serialize(utils::Version version) const {
     AhoCorasickSerializationHelper<CharType, LeafType, IdType> serializer(version);
     return serializer.Serialize(engine_);
   }
 
   template<typename IdType>
-  static InvertedIndexHelper Deserialize(std::vector<uint8_t> &data, utils::Version version) {
+  static InvertedIndexHelper Deserialize(ByteVector &data, utils::Version version) {
     AhoCorasickSerializationHelper<CharType, LeafType, IdType> serializer(version);
     InvertedIndexHelper<CharType, LeafType> index_helper;
     serializer.Deserialize(data, index_helper.engine_);

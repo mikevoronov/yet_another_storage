@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AhoCorasickEngine.hpp"
+#include "../../common/common.h"
 #include "../../utils/serialization_utils.h"
 #include "../../utils/Version.hpp"
 #include "aho_corasick_serialization_headers.hpp"
@@ -32,7 +33,7 @@ class AhoCorasickSerializationHelper {
   {}
   ~AhoCorasickSerializationHelper() = default;
 
-  std::vector<uint8_t> Serialize(const Engine &engine) const {
+  ByteVector Serialize(const Engine &engine) const {
     NodeSerializationDescriptorStorage serialized_nodes;
     LeafSerializationDescriptorStorage serialized_leafs;
     NodeDescriptorStorage current_level_nodes;
@@ -74,7 +75,7 @@ class AhoCorasickSerializationHelper {
     return constructResultSerializedBuffer(serialized_nodes, serialized_leafs);
   }
 
-  void Deserialize(std::vector<uint8_t> &data, Engine &engine) const {
+  void Deserialize(ByteVector &data, Engine &engine) const {
     if (data.size() < sizeof(SerializedDataHeader)) {
       return; // TODO : throw an exception (invalid data)
     }
@@ -148,9 +149,9 @@ class AhoCorasickSerializationHelper {
     return { node_descriptor.node_id_, node, node_descriptor.parent_node_id_, node_descriptor.parent_node_ch_ };
   }
 
-  std::vector<uint8_t> constructResultSerializedBuffer(NodeSerializationDescriptorStorage &serialized_nodes, 
+  ByteVector constructResultSerializedBuffer(NodeSerializationDescriptorStorage &serialized_nodes,
       LeafSerializationDescriptorStorage &serialized_leafs) const {
-    std::vector<uint8_t> result(sizeof(SerializedDataHeader) + serialized_nodes.size() + serialized_leafs.size());
+    ByteVector result(sizeof(SerializedDataHeader) + serialized_nodes.size() + serialized_leafs.size());
 
     SerializedDataHeader header = { 
         version_, 
@@ -182,7 +183,7 @@ class AhoCorasickSerializationHelper {
 
   // this function return sorted leaf decriptors
   template <typename Iterator>
-  LeafSerializationDescriptorStorage deserializeLeafDecriptors(SerializedDataHeader header, std::vector<uint8_t> &data,
+  LeafSerializationDescriptorStorage deserializeLeafDecriptors(SerializedDataHeader header, ByteVector &data,
       Iterator current_cursor) const {
     LeafSerializationDescriptorStorage serialized_leafs;
     serialized_leafs.reserve(header.leafs_count_);
