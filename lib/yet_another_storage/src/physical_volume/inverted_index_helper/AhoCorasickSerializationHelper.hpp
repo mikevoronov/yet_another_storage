@@ -40,7 +40,7 @@ class AhoCorasickSerializationHelper {
     
     // TODO : change type conversion after TODO_1
     // TODO : emplace back
-    current_level_nodes.push_back({ 0, (CharNode *)engine.root_.get(), 0, (CharType)'/' });
+    current_level_nodes.push_back({ 0, (CharNode *)engine.trie_.get(), 0, (CharType)'/' });
 
     IdType current_node_id = 0;
     IdType current_leaf_id = 0;

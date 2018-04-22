@@ -21,7 +21,7 @@ class AhoCorasickEngine {
   {}
   ~AhoCorasickEngine() = default;
   AhoCorasickEngine(AhoCorasickEngine &&other) noexcept 
-      : root_(std::move(other.root_)),
+      : trie_(std::move(other.trie_)),
         non_exist_leaf_type_(LeafType::MakeNonExistType())
   {}
 
