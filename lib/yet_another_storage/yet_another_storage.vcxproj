@@ -34,6 +34,8 @@
     <ClInclude Include="src\device_worker\devices\MappedDevice.hpp" />
     <ClInclude Include="src\external\expected.h" />
     <ClInclude Include="src\external\filesystem.h" />
+    <ClInclude Include="src\physical_volume\freelist_helper\FreelistHelper.hpp" />
+    <ClInclude Include="src\physical_volume\freelist_helper\FreelistStrategy.hpp" />
     <ClInclude Include="src\physical_volume\inverted_index_helper\AhoCorasickEngine.hpp" />
     <ClInclude Include="src\physical_volume\inverted_index_helper\AhoCorasickSerializationHelper.hpp" />
     <ClInclude Include="src\physical_volume\inverted_index_helper\aho_corasick_serialization_headers.hpp" />

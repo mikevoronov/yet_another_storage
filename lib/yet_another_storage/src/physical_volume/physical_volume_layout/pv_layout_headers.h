@@ -8,24 +8,31 @@ using namespace yas::macros;
 namespace yas {
 namespace pv_layout_headers {
 
+// PV layout contains of
+// PVHeader
+// Freelists
+// Inverted index
+// Data
+
 STRUCT_PACK(
 struct PVHeader {
-  uint8_t signature[6] /*= { 'Y', 'A', 'S', '_', 'P', 'V' }*/;                         //  + 6 bytes
+  uint8_t signature[6] /*= { 'Y', 'A', 'S', '_', 'P', 'V' }*/;                    //  + 6 bytes
   uint8_t major;
   uint8_t minor;                                                                  //  + 2 bytes 
   uint64_t pv_size_;                                                              //  + 8 bytes
   uint32_t cluster_size_;                                                         //  + 4 bytes
-  uint32_t priority_;               // should be class (?)                            + 4 bytes
-  OffsetType root_entry_offset_;                                                  //  + 8 bytes
-  // freelists
-  //
-  // some index
-  //
-  // data
+  uint32_t priority_;                                                             //  + 4 bytes
+  uint64_t inverted_index_size_;                                                  //  + 8 bytes
 });
 
-// TODO : add static assert to size of PVHeader
+STRUCT_PACK(
+  template<typename OffsetType>
+  struct FreelistHeader {
+    OffsetType free_bins_[11];
+});
 
+
+static_assert(32 == sizeof(PVHeader), "PVHeader should be 12 bytes long - please check aligments and type size on your setup");
 constexpr uint32_t kVersionSize = sizeof(PVHeader::major) + sizeof(PVHeader::minor);
 } // namespace pv_layout_types_headers
 } // namespace yas

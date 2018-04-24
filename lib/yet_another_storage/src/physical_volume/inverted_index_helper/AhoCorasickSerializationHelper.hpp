@@ -127,8 +127,8 @@ class AhoCorasickSerializationHelper {
       }
     }
 
-    // TODO : bad type conversion
-//    engine.trie_ = std::move(root);
+    // TODO (!!) : bad type conversion (need to investigate how VS can view inner struct from friends class)
+    engine.trie_.swap(*(std::unique_ptr<AhoCorasickEngine<CharType, LeafType>::CharNode>*)(&root));
   }
 
  private:

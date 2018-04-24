@@ -131,5 +131,11 @@
     <ClInclude Include="src\physical_volume\inverted_index_helper\id_type_type_traits.hpp">
       <Filter>src\physical_volume\inverted_index_helper</Filter>
     </ClInclude>
+    <ClInclude Include="src\physical_volume\freelist_helper\FreelistHelper.hpp">
+      <Filter>src\physical_volume\freelist_helper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physical_volume\freelist_helper\FreelistStrategy.hpp">
+      <Filter>src\physical_volume\freelist_helper</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
