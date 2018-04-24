@@ -12,11 +12,15 @@ This storage supports all common operations with keys. It based on physical volu
   Freelists exploits concept of fastbin in (dl)ptmalloc. In this version of library cluster size is fixed and equals 3840 bytes (to guaranteed fit at page size on x86/amd64) so there are following freelist buckets: | 4 | 8 | <16| <32| <64| <128| <256| <512 | <1024| <2048| <3840|. Freelists are also located in RAM but it requires only 4*bucket_count bytes.
  
 ### Data
-  Similar with FAT filesystem: all data divided to clusters with fized size. There are 3 types of data entry: simple type with 4 bytes, simple type with 8 bytes and complex type with non-fized size. The first two have a simple header with minimum size. It assummed that they cann't occupy several clusters. The third one can occupy several clusters and has a special link to next chunk with it's data.
+  Similar to FAT filesystem: PV is divided to clusters with fixed size(3840). There are three types of data entry: 
+  1. simple type with 4 bytes
+  2. simple type with 8 bytes
+  3. complex type with non-fized size
+  The first two have a simple header with minimum size (12 bytes for 4 bytes type and 16 for 8). It assummed that they cann't occupy several clusters. 
+  The third one can occupy several clusters and to support it has a special link to next chunk with it's data.
 
 
 ## Dependences 
 
 1. nonstd::expected (https://github.com/martinmoene/expected-lite) - header-only
-2. boost::interprocess::mapped_file
-3. boost::test
+2. boost::test
