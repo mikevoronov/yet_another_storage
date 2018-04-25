@@ -6,6 +6,10 @@ namespace storage {
 
 enum StorageError : uint32_t {
   kSuccess = 0,
+  kDeviceGeneralError = 1,
+  kDeviceReadError = 2,
+  kDeviceWriteError = 3,
+
   kFileNotFound = 1,
   kKeyNotFound = 2,
 
