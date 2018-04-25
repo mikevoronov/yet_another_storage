@@ -1,4 +1,7 @@
 #include "FileDevice.hpp"
+#include "../../exceptions/YASException.h"
+
+using namespace yas::storage;
 
 namespace yas {
 namespace devices {
@@ -8,42 +11,42 @@ FileDevice::FileDevice(fs::path path)
   Open();
 }
 
-nonstd::expected<std::vector<uint8_t>, IDevice::DeviceErrorCode> FileDevice::Read(uint64_t position, 
+ByteVector FileDevice::Read(uint64_t position,
     uint64_t data_size) {
   if (!IsOpen()) {
-    return nonstd::make_unexpected(IDevice::DeviceErrorCode::DeviceOpenError);
+    throw(exception::YASException("The device hasn't been opened during read", StorageError::kDeviceReadError));
   }
 
   device_.seekg(position);
   if (device_.eof()) {
-    return nonstd::make_unexpected(IDevice::DeviceErrorCode::DevicePositionMismatch);
+    throw(exception::YASException("The device's get cursor position mismath", StorageError::kDeviceReadError));
   }
 
   std::vector<uint8_t> data(data_size);
   device_.read((char *)data.data(), data_size);
   if (device_.eof()) {
-    return nonstd::make_unexpected(IDevice::DeviceErrorCode::DeviceLengthMismatch);
+    throw(exception::YASException("Read after file end", StorageError::kDeviceReadError));
   }
 
   return data;
 }
 
-nonstd::expected<uint64_t, IDevice::DeviceErrorCode> FileDevice::Write(uint64_t position, std::vector<uint8_t> &data) {
+uint64_t FileDevice::Write(uint64_t position, std::vector<uint8_t> &data) {
   if (!IsOpen()) {
-    return nonstd::make_unexpected(IDevice::DeviceErrorCode::DeviceOpenError);
+    throw(exception::YASException("The device hasn't been opened during write", StorageError::kDeviceWriteError));
   }
 
   device_.seekp(position);
   if (device_.eof()) {
-    return nonstd::make_unexpected(IDevice::DeviceErrorCode::DeviceWriteError);
+    throw(exception::YASException("The device's put cursor position mismath", StorageError::kDeviceWriteError));
   }
 
   device_.write((char *)data.data(), data.size());
   if (!device_.good()) {
-    return nonstd::make_unexpected(IDevice::DeviceErrorCode::DeviceWriteError);
+    throw(exception::YASException("Smth happened during device write", StorageError::kDeviceWriteError));
   }
 
-  return true;
+  return data.size();
 }
 
 bool FileDevice::IsOpen() const {
@@ -55,7 +58,7 @@ FileDevice::~FileDevice() {
 }
 
 void FileDevice::Open() {
-  device_.rdbuf()->pubsetbuf(0, 0);     // in Windows case its also desirable to disable NTFS write cache
+  device_.rdbuf()->pubsetbuf(0, 0);     // in Windows it is also desirable to disable NTFS write cache
   device_.open(path_, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
 }
 
