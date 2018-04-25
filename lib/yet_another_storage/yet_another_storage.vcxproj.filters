@@ -137,5 +137,8 @@
     <ClInclude Include="src\physical_volume\freelist_helper\FreelistStrategy.hpp">
       <Filter>src\physical_volume\freelist_helper</Filter>
     </ClInclude>
+    <ClInclude Include="src\exceptions\YASException.h">
+      <Filter>src\exception</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

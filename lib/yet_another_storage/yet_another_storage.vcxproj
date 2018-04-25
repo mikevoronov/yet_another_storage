@@ -32,6 +32,7 @@
     <ClInclude Include="src\device_worker\devices\FileDevice.hpp" />
     <ClInclude Include="src\device_worker\devices\IDevice.hpp" />
     <ClInclude Include="src\device_worker\devices\MappedDevice.hpp" />
+    <ClInclude Include="src\exceptions\YASException.h" />
     <ClInclude Include="src\external\expected.h" />
     <ClInclude Include="src\external\filesystem.h" />
     <ClInclude Include="src\physical_volume\freelist_helper\FreelistHelper.hpp" />
