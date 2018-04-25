@@ -4,7 +4,7 @@
 namespace yas {
 namespace storage {
 
-enum StorageErrors : uint32_t {
+enum StorageError : uint32_t {
   kSuccess = 0,
   kFileNotFound = 1,
   kKeyNotFound = 2
@@ -12,7 +12,11 @@ enum StorageErrors : uint32_t {
 };
 
 struct StorageErrorDescriptor {
-  StorageErrors error_code_;
+  StorageErrorDescriptor(std::string message, StorageError error_code)
+      : error_code_(error_code),
+        message_(std::move(message))
+  {}
+  StorageError error_code_;
   std::string message_;           // can be empty
 };
 

@@ -8,22 +8,18 @@ namespace exception {
 
 class YASException : public std::exception {
  public:
-  YASException(std::string &&message, storage::StorageErrors error_code) 
-      : message_(std::forward<std::string>(message)),
+  YASException(std::string message, storage::StorageError error_code) 
+      : message_(std::move(message)),
         error_code_(error_code)
   {}
 
-  storage::StorageErrors GetErrorCode() const noexcept {
-    return error_code_;
-  }
-
-  std::string GetMessage() const {
-    return message_;
+  storage::StorageErrorDescriptor getError() const {
+    return { message_, error_code_ };
   }
 
  private:
   std::string message_;
-  storage::StorageErrors error_code_;
+  storage::StorageError error_code_;
 };
 
 } // namespace exception
