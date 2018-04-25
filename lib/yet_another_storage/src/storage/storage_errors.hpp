@@ -7,7 +7,9 @@ namespace storage {
 enum StorageError : uint32_t {
   kSuccess = 0,
   kFileNotFound = 1,
-  kKeyNotFound = 2
+  kKeyNotFound = 2,
+
+  kUnknownExceptionType
   // TODO : add list
 };
 
