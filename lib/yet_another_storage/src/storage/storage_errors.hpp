@@ -9,6 +9,10 @@ enum StorageError : uint32_t {
   kDeviceGeneralError = 1,
   kDeviceReadError = 2,
   kDeviceWriteError = 3,
+  kInvertedIndexDesirializationError = 4,
+  kInvertedIndexDesirializationVersionUnsopportedError = 5,   // explicit type from kInvertedIndexDesirializationError
+                                                              // because of it could be recover from it with different
+                                                              // version header
 
   kFileNotFound = 1,
   kKeyNotFound = 2,
