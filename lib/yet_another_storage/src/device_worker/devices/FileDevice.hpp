@@ -2,7 +2,6 @@
 #include "../../external/filesystem.h"
 #include "../../external/expected.h"
 #include "../../common/common.h"
-
 #include <cstdint>
 #include <fstream>
 #include <filesystem>

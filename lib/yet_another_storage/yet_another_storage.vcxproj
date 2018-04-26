@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\device_worker\devices\FileDevice.cpp" />
-    <ClCompile Include="src\device_worker\devices\MappedDevice.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\storage\Storage.hpp" />
   </ItemGroup>
@@ -30,7 +29,6 @@
     <ClInclude Include="src\common\settings.hpp" />
     <ClInclude Include="src\device_worker\DeviceManager.hpp" />
     <ClInclude Include="src\device_worker\devices\FileDevice.hpp" />
-    <ClInclude Include="src\device_worker\devices\MappedDevice.hpp" />
     <ClInclude Include="src\exceptions\YASException.h" />
     <ClInclude Include="src\exceptions\YASExceptionHandler.h" />
     <ClInclude Include="src\external\expected.h" />

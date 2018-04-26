@@ -31,9 +31,6 @@
     <Filter Include="src\device_worker\devices\file_device">
       <UniqueIdentifier>{e33a04b6-d6d8-4d7c-b068-eacd0831ea95}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\device_worker\devices\mapped_device">
-      <UniqueIdentifier>{39a3026a-ff27-4aba-8baf-680cc96de02f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\physical_volume\physical_volume_layout">
       <UniqueIdentifier>{de3da419-66b0-43fa-9d4d-7045562661ae}</UniqueIdentifier>
     </Filter>
@@ -60,9 +57,6 @@
     <ClCompile Include="src\device_worker\devices\FileDevice.cpp">
       <Filter>src\device_worker\devices\file_device</Filter>
     </ClCompile>
-    <ClCompile Include="src\device_worker\devices\MappedDevice.cpp">
-      <Filter>src\device_worker\devices\mapped_device</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\settings.hpp">
@@ -79,9 +73,6 @@
     </ClInclude>
     <ClInclude Include="src\device_worker\devices\FileDevice.hpp">
       <Filter>src\device_worker\devices\file_device</Filter>
-    </ClInclude>
-    <ClInclude Include="src\device_worker\devices\MappedDevice.hpp">
-      <Filter>src\device_worker\devices\mapped_device</Filter>
     </ClInclude>
     <ClInclude Include="src\device_worker\DeviceManager.hpp">
       <Filter>src\device_worker</Filter>

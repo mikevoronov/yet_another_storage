@@ -1,16 +1,18 @@
 #pragma once
-
 #include "AhoCorasickEngine.hpp"
 #include "aho_corasick_serialization_headers.hpp"
 #include "../../utils/serialization_utils.h"
 #include "../../utils/Version.hpp"
 #include "../../common/common.h"
 #include "id_type_type_traits.hpp"
+#include "../../exceptions/YASException.h"
 #include <cstdint>
 #include <vector>
 #include <type_traits>
 #include <numeric>
 #include <algorithm>
+
+using namespace yas::storage;
 
 namespace yas {
 namespace index_helper {

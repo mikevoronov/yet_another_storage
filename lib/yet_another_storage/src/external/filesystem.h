@@ -1,5 +1,4 @@
 #pragma once
-
 #include <experimental/filesystem>
 
 namespace yas {
