@@ -1,7 +1,5 @@
 #pragma once
-
 #include "../external/filesystem.h"
-#include "devices/IDevice.hpp"
 
 namespace yas {
 
