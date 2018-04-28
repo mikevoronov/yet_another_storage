@@ -9,43 +9,57 @@ class DeviceManager {
   DeviceManager(fs::path file_path)
     : device_(file_path) {
     if (!device_.IsOpen()) {
-      throw 1;
+      throw(exception::YASException("The device hasn't been opened during read", StorageError::kDeviceGeneralError));
     }
   }
 
   template <typename ValueType>
   ValueType Read(OffsetType offset) {
-    return Read<ValueType>(std::is_integral<ValueType>, offset);
+    if constexpr (4 >= sizeof(ValueType)) {
+      return Read4BytesType(offset);
+    }
+    if constexpr (8 >= sizeof(ValueType)) {
+      return Read8BytesType(offset);
+    }
+    return ReadComplexType(offset);
   }
 
   template <typename ValueType>
-  void Write(OffsetType offset, ValueType &&type) {
-    Write<ValueType>(std::is_integral<ValueType>, offset, std::forward(type));
-  }
+  void Write(OffsetType offset, const ValueType &type) {
+      if constexpr (4 >= sizeof(ValueType)) {
+        return Write4BytesType(offset, type);
+      }
+      if constexpr (8 >= sizeof(ValueType)) {
+        return Write8BytesType(offset, type);
+      }
+      return WriteComplexType(offset, type);
+    }
 
  private:
    Device device_;
 
-  // read complex type
   template <typename ValueType>
-  ValueType Read(std::true_type, OffsetType offset) {
+  ValueType Read4BytesType(OffsetType offset) {
   }
 
-  // read trivially type
   template <typename ValueType>
-  ValueType Read(std::false_type, OffsetType offset) {
+  ValueType Read8BytesType(OffsetType offset) {
   }
 
-  // write complex type
   template <typename ValueType>
-  void Write(std::true_type, OffsetType offset, ValueType &&type) {
-
+  ValueType ReadComplexType(OffsetType offset) {
   }
 
-  // write trivially type
   template <typename ValueType>
-  void Write(std::false_type, OffsetType offset, ValueType &&type) {
+  void Write4BytesType(OffsetType offset, const ValueType &type) {
+  }
 
+  template <typename ValueType>
+  void Write8BytesType(OffsetType offset, const ValueType &type) {
+  }
+
+  template <typename ValueType>
+  void WriteComplexType(OffsetType offset, const ValueType &type) {
   }
 
   uint64_t read(OffsetType offset, char* buf, size_t buf_size);
