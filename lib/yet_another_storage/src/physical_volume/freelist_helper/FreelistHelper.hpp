@@ -13,7 +13,7 @@ class FreelistHelper {
   FreelistHelper() = default;
   ~FreelistHelper() = default;
 
-  OffsetType GetFreeEntry(const uint32_t entry_size, DeviceManager &device_manager) {
+  OffsetType GetFreeEntry(const uint32_t entry_size, device_worker::DeviceManager &device_manager) {
   }
 
   FreelistHelper(FreelistHelper&) = delete;
