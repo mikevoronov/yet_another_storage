@@ -9,7 +9,7 @@ class DeviceManager {
   DeviceManager(fs::path file_path)
     : device_(file_path) {
     if (!device_.IsOpen()) {
-      throw(exception::YASException("The device hasn't been opened during read", StorageError::kDeviceGeneralError));
+      throw(exception::YASException("The device hasn't been opened", StorageError::kDeviceGeneralError));
     }
   }
 
