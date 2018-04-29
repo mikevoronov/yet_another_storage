@@ -1,5 +1,5 @@
 #pragma once
-#include "../../device_worker/DeviceManager.hpp"
+#include "../../device_worker/PVDeviceWorker.hpp"
 #include "FreelistStrategy.hpp"
 #include <array>
 
@@ -13,7 +13,7 @@ class FreelistHelper {
   FreelistHelper() = default;
   ~FreelistHelper() = default;
 
-  OffsetType GetFreeEntry(const uint32_t entry_size, device_worker::DeviceManager &device_manager) {
+  OffsetType GetFreeEntry(const uint32_t entry_size, device_worker::PVDeviceWorker &device_worker) {
   }
 
   FreelistHelper(FreelistHelper&) = delete;

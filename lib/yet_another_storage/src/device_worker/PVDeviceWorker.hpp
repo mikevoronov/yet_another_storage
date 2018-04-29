@@ -1,7 +1,7 @@
 #pragma once
+#include "../external/filesystem.h"
 #include "../physical_volume/physical_volume_layout/pv_layout_headers.h"
 #include "../physical_volume/physical_volume_layout/pv_layout_types_headers.h"
-#include "../external/filesystem.h"
 
 using namespace yas::pv_layout_headers;
 using namespace yas::pv_layout_types_headers;
@@ -10,9 +10,9 @@ namespace yas {
 namespace device_worker {
 
 template <typename Device, typename OffsetType>
-class DeviceWorker {
+class PVDeviceWorker {
  public:
-   DeviceWorker(fs::path file_path)
+   PVDeviceWorker(fs::path file_path)
       : device_(file_path) {
     if (!device_.IsOpen()) {
       throw(exception::YASException("The device hasn't been opened", StorageError::kDeviceGeneralError));
@@ -30,8 +30,13 @@ class DeviceWorker {
     return ReadComplexType(offset);
   }
 
-  template <>
+  template<>
   PVHeader Read(OffsetType offset) {
+
+  }
+  
+  template<>
+  Simple4TypeHeader Read(OffsetType offset) {
 
   }
 
@@ -46,15 +51,15 @@ class DeviceWorker {
       return WriteComplexType(offset, type);
     }
 
-  template <>
-  void Write<PVHeaderT>(OffsetType offset, const PVHeaderT &type) {
+  //template <>
+  //void Write(OffsetType offset, const PVHeader &type) {
 
-  }
+  //}
 
-  DeviceWorker(const DeviceWorker&) = delete;
-  DeviceWorker(DeviceWorker&&) = delete;
-  DeviceWorker& operator=(const DeviceWorker&) = delete;
-  DeviceWorker& operator=(DeviceWorker&&) = delete;
+  PVDeviceWorker(const PVDeviceWorker&) = delete;
+  PVDeviceWorker(PVDeviceWorker&&) = delete;
+  PVDeviceWorker& operator=(const PVDeviceWorker&) = delete;
+  PVDeviceWorker& operator=(PVDeviceWorker&&) = delete;
 
  private:
    Device device_;
