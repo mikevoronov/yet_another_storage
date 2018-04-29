@@ -1,10 +1,12 @@
 #pragma once
-#include "../../device_worker/PVDeviceWorker.hpp"
 #include "FreelistStrategy.hpp"
 #include <array>
 
 namespace yas {
 namespace freelist_helper {
+
+template <typename Device, typename OffsetType>
+class PVDeviceWorker;
 
 template <typename Strategy, typename OffsetType>
 class FreelistHelper {
@@ -13,7 +15,7 @@ class FreelistHelper {
   FreelistHelper() = default;
   ~FreelistHelper() = default;
 
-  OffsetType GetFreeEntry(const uint32_t entry_size, device_worker::PVDeviceWorker &device_worker) {
+  OffsetType GetFreeEntry(const uint32_t entry_size, PVDeviceWorker &device_worker) {
   }
 
   FreelistHelper(FreelistHelper&) = delete;

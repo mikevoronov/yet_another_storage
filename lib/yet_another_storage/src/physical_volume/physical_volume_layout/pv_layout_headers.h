@@ -34,5 +34,6 @@ STRUCT_PACK(
 
 static_assert(32 == sizeof(PVHeader), "PVHeader should be 12 bytes long - please check aligments and type size on your setup");
 constexpr uint32_t kVersionSize = sizeof(PVHeader::major) + sizeof(PVHeader::minor);
-} // namespace pv_layout_types_headers
+
+} // namespace pv_layout_headers
 } // namespace yas
