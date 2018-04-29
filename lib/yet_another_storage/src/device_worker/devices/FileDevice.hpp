@@ -9,14 +9,15 @@
 namespace yas {
 namespace devices {
 
+template <typename OffsetType>
 class FileDevice {
  public:
   FileDevice(fs::path path);
   ~FileDevice();
   FileDevice(const FileDevice&);
    
-  ByteVector Read(uint64_t position, uint64_t data_size);
-  uint64_t Write(uint64_t position, std::vector<uint8_t> &data);
+  ByteVector Read(OffsetType position, uint64_t data_size);
+  uint64_t Write(OffsetType position, std::vector<uint8_t> &data);
   bool IsOpen() const;
   bool Close();
 

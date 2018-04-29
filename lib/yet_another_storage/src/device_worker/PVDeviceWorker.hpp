@@ -32,7 +32,7 @@ class PVDeviceWorker {
 
   template<>
   PVHeader Read(OffsetType offset) {
-
+    device_.
   }
   
   template<>
@@ -40,21 +40,56 @@ class PVDeviceWorker {
 
   }
 
+  template<>
+  Simple8TypeHeader Read(OffsetType offset) {
+
+  }
+
+  template<>
+  CommonTypeHeader Read(OffsetType offset) {
+
+  }
+
+  template<>
+  FreelistHeader<OffsetType> Read(OffsetType offset) {
+
+  }
+
   template <typename ValueType>
   void Write(OffsetType offset, const ValueType &type) {
-      if constexpr (4 >= sizeof(ValueType)) {
-        return Write4BytesType(offset, type);
-      }
-      if constexpr (8 >= sizeof(ValueType)) {
-        return Write8BytesType(offset, type);
-      }
-      return WriteComplexType(offset, type);
+    if constexpr (4 >= sizeof(ValueType)) {
+      return Write4BytesType(offset, type);
     }
+    if constexpr (8 >= sizeof(ValueType)) {
+      return Write8BytesType(offset, type);
+    }
+    return WriteComplexType(offset, type);
+  }
 
-  //template <>
-  //void Write(OffsetType offset, const PVHeader &type) {
+  template <>
+  void Write(OffsetType offset, const PVHeader &type) {
 
-  //}
+  }
+
+  template <>
+  void Write(OffsetType offset, const Simple4TypeHeader &type) {
+
+  }
+
+  template <>
+  void Write(OffsetType offset, const Simple8TypeHeader &type) {
+
+  }
+
+  template <>
+  void Write(OffsetType offset, const ComplexTypeHeader &type) {
+
+  }
+
+  template <>
+  void Write(OffsetType offset, const FreelistHeader<OffsetType> &type) {
+
+  }
 
   PVDeviceWorker(const PVDeviceWorker&) = delete;
   PVDeviceWorker(PVDeviceWorker&&) = delete;
