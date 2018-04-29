@@ -71,6 +71,9 @@ class AhoCorasickEngine {
 
 private:
   template <typename T1, typename T2, typename T3> friend class AhoCorasickSerializationHelper;
+
+  // TODO : for better perfomance and cache-friendly nodes should placed next to each other
+  // in this case traversal would almost free (could used the same allocator as in std::deque)
   template<typename CharType>
   struct Node {
     Node() : leaf_(leaf_traits<Leaf>::NonExistValue()) {}

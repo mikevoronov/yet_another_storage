@@ -9,6 +9,7 @@ using namespace yas::pv_layout_types_headers;
 namespace yas {
 namespace device_worker {
 
+// TODO : need to refactoring - too many similar functions
 template <typename Device, typename OffsetType>
 class PVDeviceWorker {
  public:
@@ -32,7 +33,7 @@ class PVDeviceWorker {
 
   template<>
   PVHeader Read(OffsetType offset) {
-    device_.
+    device_.Read
   }
   
   template<>
