@@ -29,6 +29,8 @@
     <ClInclude Include="src\common\settings.hpp" />
     <ClInclude Include="src\device_worker\PVDeviceWorker.hpp" />
     <ClInclude Include="src\device_worker\devices\FileDevice.hpp" />
+    <ClInclude Include="src\device_worker\PVMountPointManager.hpp" />
+    <ClInclude Include="src\device_worker\PVManagerFactory.hpp" />
     <ClInclude Include="src\exceptions\YASException.h" />
     <ClInclude Include="src\exceptions\YASExceptionHandler.h" />
     <ClInclude Include="src\external\expected.h" />
