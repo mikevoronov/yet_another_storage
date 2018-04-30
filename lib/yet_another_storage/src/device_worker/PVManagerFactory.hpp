@@ -16,12 +16,12 @@ public:
   using Manager = std::shared_ptr<PVMountPointManager<char>>;
 
   // TODO - add 
-  static std::shared_ptr<Manager> Create(utils::Version version, std::string mount_point) {
+  static Manager Create(utils::Version version, std::string mount_point) {
     // can be spin lock on atomics
     std::lock_guard<std::mutex> lock(factory_mutex_);
 
     if (!managers_.count(mount_point)) {
-      managers_[mount_point].reset(new PVMountPointManager());
+      managers_[mount_point].reset(new PVMountPointManager<char>());
     }
 
     return managers_[mount_point];
