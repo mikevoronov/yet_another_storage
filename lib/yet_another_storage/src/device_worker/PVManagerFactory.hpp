@@ -1,21 +1,30 @@
 #pragma once
-
-#include "PVManager.hpp"
+#include "PVMountPointManager.hpp"
+#include "../utils/Version.hpp"
 #include "../external/filesystem.h"
 #include <mutex>
 #include <memory>
+#include <string>
+#include <unordered_map>
 
-namespace yas_fs {
+namespace yas {
+namespace pv_manager {
 
-// factory 
+  // factory 
 class PhysicalVolumeWorkerFactory {
- public:
-   static std::unique_ptr<IPhysicalVolumeWorker> Create(physical_volume_version version) {
-     switch(version.major)
-     {
-     case 1:
-       return std::make_unique<PhysicalVolumeWorkerVersion_1_1>();
-     }
+public:
+  using Manager = std::shared_ptr<PVMountPointManager<char>>;
+
+  // TODO - add 
+  static std::shared_ptr<Manager> Create(utils::Version version, std::string mount_point) {
+    // can be spin lock on atomics
+    std::lock_guard<std::mutex> lock(factory_mutex_);
+
+    if (!managers_.count(mount_point)) {
+      managers_[mount_point].reset(new PVMountPointManager());
+    }
+
+    return managers_[mount_point];
   }
 
   PhysicalVolumeWorkerFactory() = delete;
@@ -23,6 +32,11 @@ class PhysicalVolumeWorkerFactory {
   PhysicalVolumeWorkerFactory(const PhysicalVolumeWorkerFactory&) = delete;
   PhysicalVolumeWorkerFactory(PhysicalVolumeWorkerFactory&&) = delete;
   PhysicalVolumeWorkerFactory operator=(const PhysicalVolumeWorkerFactory&) = delete;
+
+private:
+  static std::unordered_map<std::string, Manager> managers_;
+  static std::mutex factory_mutex_;
 };
 
-} // namespace yas_fs
+} // namespace pv_manager
+} // namespace yas
