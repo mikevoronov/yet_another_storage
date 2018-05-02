@@ -54,9 +54,6 @@
     <ClCompile Include="src\storage\Storage.hpp">
       <Filter>src\storage</Filter>
     </ClCompile>
-    <ClCompile Include="src\device_worker\devices\FileDevice.cpp">
-      <Filter>src\device_worker\devices\file_device</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\settings.hpp">
@@ -131,11 +128,14 @@
     <ClInclude Include="src\device_worker\PVDeviceWorker.hpp">
       <Filter>src\device_worker</Filter>
     </ClInclude>
-    <ClInclude Include="src\device_worker\PVManagerFactory.hpp">
-      <Filter>src\device_worker</Filter>
+    <ClInclude Include="src\storage\PVManagerFactory.hpp">
+      <Filter>src\storage</Filter>
     </ClInclude>
-    <ClInclude Include="src\device_worker\PVMountPointManager.hpp">
-      <Filter>src\device_worker</Filter>
+    <ClInclude Include="src\storage\PVMountPointManagerAdapter.hpp">
+      <Filter>src\storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\storage\PVMountPointManager.hpp">
+      <Filter>src\storage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

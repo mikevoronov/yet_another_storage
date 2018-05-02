@@ -1,12 +1,12 @@
 #pragma once
 #include <cstdint>
 
+// TODO : should specified in the build script
 namespace yas {
 
-constexpr uint32_t kMaxPath = 1024;
-constexpr uint32_t kKeyNameMax = 128;
-
-// this would be using as pointer type in storage
+// pointer type to navigate through PV
 using OffsetType = uint64_t;      
+// type of 
+using CharType = char;
 
 } // namespace yas
