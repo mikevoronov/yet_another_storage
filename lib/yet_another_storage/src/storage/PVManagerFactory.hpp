@@ -11,7 +11,7 @@ namespace yas {
 namespace storage {
 
   // factory 
-class PhysicalVolumeWorkerFactory {
+class PVManagerFactory {
   using Manager = PVMountPointManagerAdapter<CharType>;
 
  public:
@@ -26,11 +26,11 @@ class PhysicalVolumeWorkerFactory {
     return managers_[mount_point];
   }
 
-  PhysicalVolumeWorkerFactory() = delete;
-  ~PhysicalVolumeWorkerFactory() = delete;
-  PhysicalVolumeWorkerFactory(const PhysicalVolumeWorkerFactory&) = delete;
-  PhysicalVolumeWorkerFactory(PhysicalVolumeWorkerFactory&&) = delete;
-  PhysicalVolumeWorkerFactory operator=(const PhysicalVolumeWorkerFactory&) = delete;
+  PVManagerFactory() = delete;
+  ~PVManagerFactory() = delete;
+  PVManagerFactory(const PVManagerFactory&) = delete;
+  PVManagerFactory(PVManagerFactory&&) = delete;
+  PVManagerFactory operator=(const PVManagerFactory&) = delete;
 
  private:
   static std::unordered_map<std::string, std::shared_ptr<Manager>> managers_;
