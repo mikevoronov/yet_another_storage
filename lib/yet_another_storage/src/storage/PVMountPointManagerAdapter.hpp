@@ -47,5 +47,5 @@ class PVMountPointManagerAdapter {
   std::mutex manager_guard_;
 };
 
-}
+} // namespace storage
 } // namespace fs

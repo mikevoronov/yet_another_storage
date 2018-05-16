@@ -19,5 +19,5 @@ private:
   device_worker::PVDeviceWorker<devices::FileDevice<OffsetType>, OffsetType> device_worker_;
 };
 
-} // namespace pv_manager
+} // namespace storage
 } // namespace yas

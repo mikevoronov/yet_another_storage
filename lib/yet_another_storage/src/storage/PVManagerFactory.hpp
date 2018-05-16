@@ -10,7 +10,7 @@
 namespace yas {
 namespace storage {
 
-  // factory 
+// factory 
 class PVManagerFactory {
   using Manager = PVMountPointManagerAdapter<CharType>;
 
@@ -37,5 +37,5 @@ class PVManagerFactory {
   static std::mutex factory_mutex_;
 };
 
-} // namespace pv_manager
+} // namespace storage
 } // namespace yas
