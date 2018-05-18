@@ -15,7 +15,6 @@ class PVDeviceWorker;
 template <typename Strategy, typename OffsetType>
 class FreelistHelper {
  public:
-  static constexpr uint32_t kBinCount = 11;
   ~FreelistHelper() = default;
 
   static FreelistHelper Load(const FreelistHeader &header) {

@@ -1,7 +1,6 @@
 #pragma once
 #include "../../common/macros.h"
 #include "../../common/settings.hpp"
-#include "../freelist_helper/FreelistHelper.hpp"
 #include <cstdint>
 
 using namespace yas::macros;
@@ -9,6 +8,8 @@ using namespace yas::macros;
 // TODO : merge 2 layout headers to the one
 namespace yas {
 namespace pv_layout_headers {
+
+constexpr uint32_t kBinCount = 11;
 
 // PV layout contains of
 // PVHeader
@@ -30,7 +31,7 @@ struct PVHeader {
 STRUCT_PACK(
   template<typename OffsetType>
   struct FreelistHeader {
-    OffsetType free_bins_[freelist_helper::FreelistHelper::kBinCount];
+    OffsetType free_bins_[kBinCount];
 });
 
 static_assert(32 == sizeof(PVHeader), "PVHeader should be 12 bytes long - please check aligments and type size on your setup");
