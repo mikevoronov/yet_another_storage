@@ -1,7 +1,7 @@
 #pragma once
 
 namespace yas {
-namespace index_helper {
+namespace freelist_helper {
 
 class FreelistStrategy {
  public:
