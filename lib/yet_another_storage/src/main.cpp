@@ -28,6 +28,7 @@ public:
   yas::index_helper::InvertedIndexHelper<char, Leaf> helper_;
 };
 
+// TODO : move to unit test
 int main() {
   A a;
   a.foo();

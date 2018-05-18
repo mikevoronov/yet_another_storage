@@ -26,6 +26,13 @@ enum ValueType : uint16_t {
                           // because of expired_time_high - 2 bytes aligment)
 };
 
+// I assume that the most common types would be types with 4 and 8 bytes size. So there
+// are specially size - optimized header for them.Each header could be in 2 states: allocated and freed.
+// Allocated headers contain expired_time and data.Freed headers contain link instead of data. 
+// This link points to the next freed header with the same size. This freelists then would used for
+// allocating new entry in file (to decrease fragmentation and expensive extension of the physical volume on hdd).
+// The idea stolen from (dl)ptmalloc fastbin realization.
+
 STRUCT_PACK(
 template <typename T>
 struct CommonTypeHeader {
