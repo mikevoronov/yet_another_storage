@@ -8,8 +8,6 @@
 #include "../../exceptions/YASException.h"
 #include <cstdint>
 #include <vector>
-#include <type_traits>
-#include <numeric>
 #include <algorithm>
 
 using namespace yas::storage;
@@ -86,9 +84,14 @@ class AhoCorasickSerializationHelper {
 
     SerializedDataHeader header;
     auto current_cursor = serialization_utils::LoadFromBytes(begin, end, &header);
-    // TODO : exception if end
     checkSerializedHeader(header);
     const auto serialized_leafs = deserializeLeafDescriptors(current_cursor, end, header.leafs_count_);
+    std::sort(std::begin(serialized_leafs), std::end(serialized_leafs),
+      [](const LeafSerializationDescriptorStorage::value_type &left,
+        const LeafSerializationDescriptorStorage::value_type &right) {
+      return left.node_id_ < right.node_id_;
+    });
+
     NodeSerializationDescriptor node_descriptor;
     current_cursor = serialization_utils::LoadFromBytes(current_cursor, end, &node_descriptor);
     if (node_descriptor.node_id_ != node_descriptor.parent_node_id_) {
@@ -96,18 +99,20 @@ class AhoCorasickSerializationHelper {
           kInvertedIndexDesirializationError));
     }
 
-    std::unique_ptr<CharNode> root(new CharNode());         // at first completly construct the trie on function level
-                                                            // and only then modify engine to exception safety
-    NodeDescriptorStorage prev_level_nodes;
+    // at first completly construct the trie on function level
+    // and only then modify engine to exception safety
+    std::unique_ptr<CharNode> root(new CharNode());         
+                                                            
+    NodeDescriptorStorage previous_level_nodes;
     NodeDescriptorStorage current_level_nodes;
-    prev_level_nodes.push_back(deserialize(node_descriptor, root.get()));
+    previous_level_nodes.push_back(deserialize(node_descriptor, root.get()));
 
     IdType depth_level = 1;                                     // root extracted -> depth_level should be 1
     for (IdType node_id = 1; node_id < header.nodes_count_; ++node_id) {
       current_cursor = serialization_utils::LoadFromBytes(current_cursor, end, &node_descriptor);
-      const auto parent = findNodeByParentNodeId(std::cbegin(prev_level_nodes), std::cend(prev_level_nodes), 
+      const auto parent = findNodeByParentNodeId(std::cbegin(previous_level_nodes), std::cend(previous_level_nodes),
           node_descriptor.parent_node_id_);
-      if (std::cend(prev_level_nodes) == parent) {
+      if (std::cend(previous_level_nodes) == parent) {
         throw (exception::YASException("Corrupt data: parent node can't be found",
             kInvertedIndexDesirializationError));
       }
@@ -126,18 +131,7 @@ class AhoCorasickSerializationHelper {
       }
 
       if (depth_level < node_descriptor.depth_level_) {
-        // TODO : move all if to explicit function to improve readability
-        prev_level_nodes = std::move(current_level_nodes);
-        std::sort(std::begin(prev_level_nodes), std::end(prev_level_nodes), [](
-            const NodeDescriptorStorage::value_type &left,
-            const NodeDescriptorStorage::value_type &right) {
-          return left.node_id_ < right.node_id_;
-        });
-        {
-          // there was stl realization that doesn't decrease size after move :(
-          NodeDescriptorStorage tmp;
-          current_level_nodes.swap(tmp);
-        }
+        prepareForNextDeserializationDepth(previous_level_nodes, current_level_nodes);
         ++depth_level;
       }
     }
@@ -203,7 +197,6 @@ class AhoCorasickSerializationHelper {
     }
   }
 
-  // TODO : note that this function also sorted leaf decriptors so it should be devided into 2 functions or renamed
   template <typename Iterator>
   LeafSerializationDescriptorStorage deserializeLeafDescriptors(const Iterator begin, Iterator end, 
       IdType leafs_count) const {
@@ -220,11 +213,6 @@ class AhoCorasickSerializationHelper {
       }
       serialized_leafs.push_back(std::move(leaf_descriptor));
     }
-    std::sort(std::begin(serialized_leafs), std::end(serialized_leafs),
-        [](const LeafSerializationDescriptorStorage::value_type &left,
-           const LeafSerializationDescriptorStorage::value_type &right) {
-      return left.node_id_ < right.node_id_;
-    });
 
     return serialized_leafs;
   }
@@ -253,6 +241,19 @@ class AhoCorasickSerializationHelper {
       return end;
     }
     return found_leaf;
+  }
+
+  void prepareForNextDeserializationDepth(NodeDescriptorStorage &prev_level_nodes, 
+      NodeDescriptorStorage &current_level_nodes) const {
+    prev_level_nodes = std::move(current_level_nodes);
+    std::sort(std::begin(prev_level_nodes), std::end(prev_level_nodes), [](
+      const NodeDescriptorStorage::value_type &left,
+      const NodeDescriptorStorage::value_type &right) {
+      return left.node_id_ < right.node_id_;
+    });
+    // there was stl realization that doesn't decrease size after move :(
+    NodeDescriptorStorage tmp;
+    current_level_nodes.swap(tmp);
   }
 };
 
