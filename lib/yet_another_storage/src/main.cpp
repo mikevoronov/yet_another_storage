@@ -53,7 +53,8 @@ int main() {
 
   yas::utils::Version version{ 1,1 };
   auto data = helper_.Serialize<uint32_t>(version);
-  auto yy = yas::index_helper::InvertedIndexHelper<char, Leaf>::Deserialize<uint32_t>(data, version).Get("/home/user1/tmp").value_;
+  auto yy = yas::index_helper::InvertedIndexHelper<char, Leaf>:: \
+      Deserialize<uint32_t>(std::begin(data), std::end(data), version).Get("/home/user1/tmp").value_;
 
 
   std::cout << helper_.Get("/home/user1/tmp").value_ << std::endl;

@@ -36,7 +36,7 @@ range_t<const uint8_t*> AsBytes(const Type *type) {
 
 // checks correspondes between sizes
 template<typename InsertIterator, typename Type>
-InsertIterator SaveAsBytes(InsertIterator begin, InsertIterator end, const Type *data) {
+InsertIterator SaveAsBytes(const InsertIterator begin, const InsertIterator end, const Type *data) {
   auto bytes = AsBytes(data);
   if (std::distance(begin, end) < bytes.size()) {
     return end;

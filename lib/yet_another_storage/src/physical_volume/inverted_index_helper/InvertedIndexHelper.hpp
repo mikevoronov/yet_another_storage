@@ -62,12 +62,11 @@ public:
     return serializer.Serialize(engine_);
   }
 
-  // TODO : move to [begin ,end) params
-  template<typename IdType>
-  static InvertedIndexHelper Deserialize(ByteVector &data, utils::Version version) {
+  template<typename IdType, typename Iterator>
+  static InvertedIndexHelper Deserialize(Iterator begin, Iterator end, utils::Version version) {
     AhoCorasickSerializationHelper<CharType, LeafType, IdType> serializer(version);
     InvertedIndexHelper<CharType, LeafType> index_helper;
-    serializer.Deserialize(data, index_helper.engine_);
+    serializer.Deserialize(begin, end, index_helper.engine_);
 
     return index_helper;
   }
