@@ -77,19 +77,20 @@ class AhoCorasickSerializationHelper {
     return constructResultSerializedBuffer(serialized_nodes, serialized_leafs);
   }
 
-  void Deserialize(ByteVector &data, Engine &engine) const {
-    if (data.size() < sizeof(SerializedDataHeader)) {
+  template <typename Iterator>
+  void Deserialize(const Iterator begin, const Iterator end, Engine &engine) const {
+    if (std::distance(begin, end) < sizeof(SerializedDataHeader)) {
       throw (exception::YASException("Invalid data size: < sizeof(SerializedDataHeader)", 
           kInvertedIndexDesirializationError));
     }
 
     SerializedDataHeader header;
-    auto current_cursor = serialization_utils::LoadFromBytes(std::begin(data), std::end(data), &header);
+    auto current_cursor = serialization_utils::LoadFromBytes(begin, end, &header);
     // TODO : exception if end
     checkSerializedHeader(header);
-    const auto serialized_leafs = deserializeLeafDecriptors(header, data, current_cursor);
+    const auto serialized_leafs = deserializeLeafDescriptors(current_cursor, end, header.leafs_count_);
     NodeSerializationDescriptor node_descriptor;
-    current_cursor = serialization_utils::LoadFromBytes(current_cursor, std::end(data), &node_descriptor);
+    current_cursor = serialization_utils::LoadFromBytes(current_cursor, end, &node_descriptor);
     if (node_descriptor.node_id_ != node_descriptor.parent_node_id_) {
       throw (exception::YASException("Corrupt data: multiple roots found",
           kInvertedIndexDesirializationError));
@@ -103,8 +104,9 @@ class AhoCorasickSerializationHelper {
 
     IdType depth_level = 1;                                     // root extracted -> depth_level should be 1
     for (IdType node_id = 1; node_id < header.nodes_count_; ++node_id) {
-      current_cursor = serialization_utils::LoadFromBytes(current_cursor, std::end(data), &node_descriptor);
-      const auto parent = getAppropriateParentNode(prev_level_nodes, node_descriptor.parent_node_id_);
+      current_cursor = serialization_utils::LoadFromBytes(current_cursor, end, &node_descriptor);
+      const auto parent = findNodeByParentNodeId(std::cbegin(prev_level_nodes), std::cend(prev_level_nodes), 
+          node_descriptor.parent_node_id_);
       if (std::cend(prev_level_nodes) == parent) {
         throw (exception::YASException("Corrupt data: parent node can't be found",
             kInvertedIndexDesirializationError));
@@ -114,7 +116,8 @@ class AhoCorasickSerializationHelper {
       current_level_nodes.push_back(deserialize(node_descriptor, route));
 
       if (node_descriptor.leaf_id_ != id_type_traits<IdType>::NonExistValue()) {
-        const auto found_leaf_iterator = getAppropriateLeaf(serialized_leafs, node_descriptor.leaf_id_);
+        const auto found_leaf_iterator = findLeafByNodeId(std::cbegin(serialized_leafs), std::cend(serialized_leafs), 
+            node_descriptor.leaf_id_);
         if (std::cend(serialized_leafs) == found_leaf_iterator) {
           throw (exception::YASException("Corrupt data: node's leaf can't be found",
               kInvertedIndexDesirializationError));
@@ -154,15 +157,15 @@ class AhoCorasickSerializationHelper {
 
   utils::Version version_; 
 
-  NodeSerializationDescriptor serialize(const NodeDescriptor &node, IdType depth_level, IdType leaf_id) const noexcept {
+  constexpr NodeSerializationDescriptor serialize(const NodeDescriptor &node, IdType depth_level, IdType leaf_id) const noexcept {
     return { node.node_id_, node.parent_node_id_, depth_level, leaf_id, node.parent_node_ch_ };
   }
 
-  LeafSerializationDescriptor serialize(LeafType leaf, IdType node_id) const noexcept {
+  constexpr LeafSerializationDescriptor serialize(LeafType leaf, IdType node_id) const noexcept {
     return { node_id, std::move(leaf) };
   }
 
-  NodeDescriptor deserialize(const NodeSerializationDescriptor &node_descriptor, CharNode *node) const noexcept {
+  constexpr NodeDescriptor deserialize(const NodeSerializationDescriptor &node_descriptor, CharNode *node) const noexcept {
     return { node_descriptor.node_id_, node, node_descriptor.parent_node_id_, node_descriptor.parent_node_ch_ };
   }
 
@@ -177,7 +180,7 @@ class AhoCorasickSerializationHelper {
         SerializedDataHeader::ConvertIdType(sizeof(IdType))
     };
 
-    // for VS checked iterator should be disabled
+    // in VS checked iterator should be disabled to prevent unnecessary checks 
     auto current_cursor = serialization_utils::SaveAsBytes(std::begin(result), std::end(result), 
         reinterpret_cast<uint8_t *>(&header));
     current_cursor = std::copy(reinterpret_cast<uint8_t*>(serialized_leafs.data()),
@@ -194,23 +197,24 @@ class AhoCorasickSerializationHelper {
           kInvertedIndexDesirializationVersionUnsopportedError));
     }
 
-    if (header.id_type_size_ != sizeof(IdType)) {
+    if (sizeof(IdType) != header.id_type_size_) {
       throw (exception::YASException("Corrupted header: size of IdType mismath",
           kInvertedIndexDesirializationError));
     }
   }
 
-  // this function return sorted leaf decriptors
+  // TODO : note that this function also sorted leaf decriptors so it should be devided into 2 functions or renamed
   template <typename Iterator>
-  LeafSerializationDescriptorStorage deserializeLeafDecriptors(SerializedDataHeader header, ByteVector &data,
-      Iterator current_cursor) const {
+  LeafSerializationDescriptorStorage deserializeLeafDescriptors(const Iterator begin, Iterator end, 
+      IdType leafs_count) const {
     LeafSerializationDescriptorStorage serialized_leafs;
-    serialized_leafs.reserve(header.leafs_count_);
+    serialized_leafs.reserve(leafs_count);
 
-    for (IdType leaf_id = 0; leaf_id <= header.leafs_count_; ++leaf_id) {
+    auto current_cursor = begin;
+    for (IdType leaf_id = 0; leaf_id < leafs_count; ++leaf_id) {
       LeafSerializationDescriptor leaf_descriptor;
-      current_cursor = serialization_utils::LoadFromBytes(current_cursor, std::end(data), &leaf_descriptor);
-      if (std::end(data) == current_cursor) {
+      current_cursor = serialization_utils::LoadFromBytes(current_cursor, end, &leaf_descriptor);
+      if (end == current_cursor) {
         throw (exception::YASException("leafs count don't corresponds to header",
             kInvertedIndexDesirializationError));
       }
@@ -218,35 +222,37 @@ class AhoCorasickSerializationHelper {
     }
     std::sort(std::begin(serialized_leafs), std::end(serialized_leafs),
         [](const LeafSerializationDescriptorStorage::value_type &left,
-        const LeafSerializationDescriptorStorage::value_type &right) {
+           const LeafSerializationDescriptorStorage::value_type &right) {
       return left.node_id_ < right.node_id_;
     });
 
     return serialized_leafs;
   }
 
-  decltype(auto) getAppropriateParentNode(const NodeDescriptorStorage &nodes, IdType parent_node_id) const {
-    auto parent_node = std::lower_bound(std::begin(nodes), std::end(nodes), parent_node_id, [](
+  template<typename Iterator>
+  Iterator findNodeByParentNodeId(const Iterator begin, const Iterator end, IdType parent_node_id) const {
+    auto found_parent_node = std::lower_bound(begin, end, parent_node_id, [](
         const NodeDescriptorStorage::value_type &left,
         const IdType right){
       return left.parent_node_id_ < right;
     });
-    if (std::end(nodes) == parent_node || parent_node_id != parent_node->node_id_) {
-      return std::end(nodes);
+    if (end == found_parent_node || parent_node_id != found_parent_node->node_id_) {
+      return end;
     }
-    return parent_node;
+    return found_parent_node;
   }
 
-  decltype(auto) getAppropriateLeaf(const LeafSerializationDescriptorStorage &leafs, IdType node_id) const {
-    auto leaf = std::lower_bound(std::begin(leafs), std::end(leafs), node_id, [](
+  template<typename Iterator>
+  Iterator findLeafByNodeId(const Iterator begin, const Iterator end, IdType node_id) const {
+    auto found_leaf = std::lower_bound(begin, end, node_id, [](
           const LeafSerializationDescriptorStorage::value_type &left,
           IdType right) {
         return left.node_id_ < right;
     });
-    if (std::cend(leafs) == leaf || node_id != leaf->node_id_) {
-      return std::end(leafs);
+    if (end == found_leaf || node_id != found_leaf->node_id_) {
+      return end;
     }
-    return leaf;
+    return found_leaf;
   }
 };
 
