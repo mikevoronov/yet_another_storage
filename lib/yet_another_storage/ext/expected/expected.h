@@ -1,5 +1,4 @@
 ﻿#pragma once
-// https://github.com/martinmoene/expected-lite
 
 // Copyright (C) 2016-2018 Martin Moene.
 //

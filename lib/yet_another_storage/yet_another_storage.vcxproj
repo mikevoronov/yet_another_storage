@@ -23,6 +23,8 @@
     <ClCompile Include="src\storage\Storage.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ext\expected\expected.h" />
+    <ClInclude Include="src\common\filesystem.h" />
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\common\common.h" />
     <ClInclude Include="src\common\settings.hpp" />
@@ -30,8 +32,6 @@
     <ClInclude Include="src\device_worker\devices\FileDevice.hpp" />
     <ClInclude Include="src\exceptions\YASException.h" />
     <ClInclude Include="src\exceptions\YASExceptionHandler.h" />
-    <ClInclude Include="src\external\expected.h" />
-    <ClInclude Include="src\external\filesystem.h" />
     <ClInclude Include="src\physical_volume\freelist_helper\FreelistHelper.hpp" />
     <ClInclude Include="src\physical_volume\freelist_helper\FreelistStrategy.hpp" />
     <ClInclude Include="src\physical_volume\inverted_index_helper\AhoCorasickEngine.hpp" />

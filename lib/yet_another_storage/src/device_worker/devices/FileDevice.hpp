@@ -1,6 +1,6 @@
 #pragma once
-#include "../../external/filesystem.h"
-#include "../../external/expected.h"
+#include "../../common/filesystem.h"
+#include "../../../ext/expected/expected.h"
 #include "../../common/common.h"
 #include <cstdint>
 #include <fstream>
