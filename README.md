@@ -15,10 +15,10 @@ This storage supports all common operations with keys. It is based on physical v
  
 ### Data
   Similar to common filesystems: PV is divided on clusters with fixed size (3840). And there are three types of data entry: 
-  1. simple type with 4 bytes
-  2. simple type with 8 bytes
-  3. complex type with non-fized size
-  The first two have a simple header with minimum size (12 bytes for 4 bytes type and 16 for 8). It assummed that they can't occupy several clusters. 
+  1. "simple" 4 bytes type,
+  2. "simple" 8 bytes type,
+  3. "complex" type with non-fized size.
+  The first two have a simple header with minimum size (12 bytes for 4 bytes type and 16 for 8). It is assummed that they can't occupy several clusters. 
   The third one can occupy several clusters and to support it has a special link to next chunk with it's data.
 
 ## Dependences 
