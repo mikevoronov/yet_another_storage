@@ -1,5 +1,4 @@
 #pragma once
-#include "../physical_volume/physical_volume_layout/pv_layout_headers.h"    // for sizeof of version in header
 #include "../common/macros.h"
 #include <cstdint>
 #include <vector>
@@ -39,7 +38,5 @@ constexpr bool operator==(const Version &lhs, const Version &rhs) {
   return !(lhs < rhs) && !(rhs < lhs);
 }
 
-// this class then would used to unpack raw bytes
-static_assert(pv_layout_headers::kVersionSize == sizeof(Version), "size of Time should be the same as the size in physical_volume_layout");
 } // namespace utils
 } // namespace yas

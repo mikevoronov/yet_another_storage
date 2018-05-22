@@ -1,8 +1,7 @@
 #pragma once
 
 // TODO : too many headers...
-#include "../physical_volume/physical_volume_layout/pv_layout_headers.h"
-#include "../physical_volume/physical_volume_layout/pv_layout_types_headers.h"
+#include "../physical_volume/pv_layout_headers.h"
 #include "../physical_volume/inverted_index_helper/InvertedIndexHelper.hpp"
 #include "../physical_volume/freelist_helper/FreelistHelper.hpp"
 #include "../physical_volume/freelist_helper/FreelistStrategy.hpp"
@@ -13,7 +12,6 @@
 #include <string_view>
 
 using namespace yas::pv_layout_headers;
-using namespace yas::pv_layout_types_headers;
 
 namespace yas {
 namespace storage {
@@ -56,7 +54,7 @@ class PVMountPointManager {
   PVMountPointManager(PVMountPointManager&&) = default;
   PVMountPointManager operator=(PVMountPointManager&&) = default;
 
-  bool checkPVHeader(pv_layout_headers::PVHeader &header) const {
+  bool checkPVHeader(PVHeader &header) const {
     // TODO : check signature, size and version
   }
 };

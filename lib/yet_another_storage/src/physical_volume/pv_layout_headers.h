@@ -1,12 +1,38 @@
 #pragma once
-#include "../../common/macros.h"
-#include "../../common/settings.hpp"
+#include "../common/macros.h"
+#include "../common/settings.hpp"
+#include "../utils/Version.hpp"
 #include <cstdint>
 
 using namespace yas::macros;
 
 namespace yas {
-namespace pv_layout_types_headers {
+namespace pv_layout_headers {
+
+constexpr uint32_t kBinCount = 11;
+
+// PV layout contains of
+// PVHeader
+// Freelists
+// Inverted index
+// Data
+
+STRUCT_PACK(
+struct PVHeader {
+  uint8_t signature[6] = { 'Y', 'A', 'S', '_', 'P', 'V' };                        //  + 6 bytes
+  utils::Version version;                                                         //  + 2 bytes
+  uint64_t pv_size_;                                                              //  + 8 bytes
+  uint32_t cluster_size_;                                                         //  + 4 bytes
+  uint32_t priority_;                                                             //  + 4 bytes
+  uint32_t freelist_bins_count_;                                                  //  + 4 bytes
+  uint32_t priority_;                                                             //  + 4 bytes
+});
+
+STRUCT_PACK(
+template<typename OffsetType>
+struct FreelistHeader {
+  OffsetType free_bins_[kBinCount];
+});
 
 enum ValueType : uint16_t {
   kInt8 = 0,
@@ -48,12 +74,12 @@ struct CommonTypeHeader {
 });
 
 STRUCT_PACK(
-struct Simple4TypeHeader {           // 12 bytes (follow the requirements of the lowest physical volume size)
+struct Simple4TypeHeader {
   CommonTypeHeader<uint32_t> body_;
 });
 
 STRUCT_PACK(
-struct Simple8TypeHeader {           // 16 bytes (follow the requirements of the lowest physical volume size)
+struct Simple8TypeHeader {
   CommonTypeHeader<uint64_t> body_;
 });
 
@@ -69,9 +95,11 @@ struct ComplexTypeHeader {
 });
 
 constexpr uint32_t kTimeSize = sizeof(ComplexTypeHeader::expired_time_high) + sizeof(ComplexTypeHeader::expired_time_low);
+
+static_assert(32 == sizeof(PVHeader), "PVHeader should be 12 bytes long - please check aligments and type size on your setup");
 static_assert(12 == sizeof(Simple4TypeHeader), "Simple4TypeHeader should be 12 bytes long - please check aligments and type size on your setup");
 static_assert(16 == sizeof(Simple8TypeHeader), "Simple8TypeHeader should be 16 bytes long - please check aligments and type size on your setup");
 static_assert(16 == sizeof(ComplexTypeHeader), "ComplexTypeHeader should be 16 bytes long - please check aligments and type size on your setup");
 
-} // namespace pv_layout_types_headers
+} // namespace pv_layout_headers
 } // namespace yas

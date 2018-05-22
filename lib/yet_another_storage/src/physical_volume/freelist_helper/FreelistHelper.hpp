@@ -1,5 +1,5 @@
 #pragma once
-#include "../physical_volume_layout/pv_layout_headers.h"
+#include "../pv_layout_headers.h"
 #include "../utils/serialization_utils.h"
 #include "FreelistStrategy.hpp"
 #include <array>

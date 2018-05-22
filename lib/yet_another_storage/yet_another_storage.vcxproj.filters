@@ -31,12 +31,6 @@
     <Filter Include="src\device_worker\devices\file_device">
       <UniqueIdentifier>{e33a04b6-d6d8-4d7c-b068-eacd0831ea95}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\physical_volume\physical_volume_layout">
-      <UniqueIdentifier>{de3da419-66b0-43fa-9d4d-7045562661ae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\physical_volume\physical_volume_layout\headers">
-      <UniqueIdentifier>{d86c50eb-4b2b-45c9-8618-4c85682f517b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\utils">
       <UniqueIdentifier>{d2145cd5-f1b4-4df9-8fbe-3dc28ff4f37a}</UniqueIdentifier>
     </Filter>
@@ -73,12 +67,6 @@
     </ClInclude>
     <ClInclude Include="src\volume_group\VolumeGroup.hpp">
       <Filter>src\volume_group</Filter>
-    </ClInclude>
-    <ClInclude Include="src\physical_volume\physical_volume_layout\pv_layout_headers.h">
-      <Filter>src\physical_volume\physical_volume_layout\headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\physical_volume\physical_volume_layout\pv_layout_types_headers.h">
-      <Filter>src\physical_volume\physical_volume_layout\headers</Filter>
     </ClInclude>
     <ClInclude Include="src\utils\Time.hpp">
       <Filter>src\utils</Filter>
@@ -136,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="src\storage\PVMountPointManager.hpp">
       <Filter>src\storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physical_volume\pv_layout_headers.h">
+      <Filter>src\physical_volume</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

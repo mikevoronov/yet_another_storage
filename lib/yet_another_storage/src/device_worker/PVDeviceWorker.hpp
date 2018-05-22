@@ -1,10 +1,8 @@
 #pragma once
 #include "../external/filesystem.h"
-#include "../physical_volume/physical_volume_layout/pv_layout_headers.h"
-#include "../physical_volume/physical_volume_layout/pv_layout_types_headers.h"
+#include "../physical_volume/pv_layout_headers.h"
 
 using namespace yas::pv_layout_headers;
-using namespace yas::pv_layout_types_headers;
 
 namespace yas {
 namespace device_worker {
