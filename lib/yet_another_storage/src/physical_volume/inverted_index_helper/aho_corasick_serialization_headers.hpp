@@ -72,6 +72,13 @@ constexpr auto to_underlying(ValueType value) noexcept {
   return static_cast<std::underlying_type_t<ValueType>>(value);
 }
 
+constexpr auto ConvertIdType(IdTypeSize id_type_size) {
+  return to_underlying(id_type_size);
+}
+constexpr auto ConvertIdType(uint32_t size) {
+  return static_cast<IdTypeSize>(size);
+}
+
 STRUCT_PACK(
 template <typename IdType>
 struct SerializedDataHeaderT {
@@ -88,14 +95,7 @@ struct SerializedDataHeaderT {
   utils::Version version_;
   IdType leafs_count_;
   IdType nodes_count_;
-
   IdTypeSize id_type_size_;          // also can determine by version but its better to explicitly check it
-  static uint32_t ConvertIdType(IdTypeSize id_type_size) {
-    return to_underlying(id_type_size);
-  }
-  static IdTypeSize ConvertIdType(uint32_t size) {
-    return static_cast<IdTypeSize>(size);
-  }
 });
 
 } // namespace aho_corasick_serialization_headers

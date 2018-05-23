@@ -39,7 +39,7 @@ class AhoCorasickSerializationHelper {
     LeafSerializationDescriptorStorage serialized_leafs;
     NodeDescriptorStorage current_level_nodes;
     NodeDescriptorStorage next_level_nodes;
-    
+
     // TODO (!!) : bad type conversion (need to investigate how VS can view inner struct from friends class)
     current_level_nodes.emplace_back(0, reinterpret_cast<CharNode*>(engine.trie_.get()), 0,
         std::char_traits<CharType>::to_char_type('/'));
@@ -48,12 +48,12 @@ class AhoCorasickSerializationHelper {
     IdType current_leaf_id = 0;
     IdType parent_node_id = 0;
     IdType depth_level = 0;
-    
+
     // breadth-first search
     while (!current_level_nodes.empty()) {
       for (const auto &node_descriptor : current_level_nodes) {
         auto leaf_id = id_type_traits<IdType>::NonExistValue();
-        if (node_descriptor.node_->leaf_ != leaf_traits<Leaf>::NonExistValue()) {
+        if (leaf_traits<Leaf>::NonExistValue() != node_descriptor.node_->leaf_) {
           leaf_id = current_leaf_id;
           serialized_leafs.push_back(serialize(node_descriptor.node_->leaf_, current_node_id));
           ++current_leaf_id;
@@ -69,7 +69,6 @@ class AhoCorasickSerializationHelper {
       }
       ++depth_level;
       current_level_nodes = std::move(next_level_nodes);
-      next_level_nodes.clear();
     }
 
     return constructResultSerializedBuffer(serialized_nodes, serialized_leafs);
@@ -77,53 +76,55 @@ class AhoCorasickSerializationHelper {
 
   template <typename Iterator>
   void Deserialize(const Iterator begin, const Iterator end, Engine &engine) const {
-    if (std::distance(begin, end) < sizeof(SerializedDataHeader)) {
-      throw (exception::YASException("Invalid data size: < sizeof(SerializedDataHeader)", 
-          kInvertedIndexDesirializationError));
+    SerializedDataHeader header;
+    auto current_cursor = deserializeDataHeader(begin, end, header);
+    if (!header.nodes_count_) {
+      return;
     }
 
-    SerializedDataHeader header;
-    auto current_cursor = serialization_utils::LoadFromBytes(begin, end, &header);
-    checkSerializedHeader(header);
-    const auto serialized_leafs = deserializeLeafDescriptors(current_cursor, end, header.leafs_count_);
-    std::sort(std::begin(serialized_leafs), std::end(serialized_leafs),
-      [](const LeafSerializationDescriptorStorage::value_type &left,
-        const LeafSerializationDescriptorStorage::value_type &right) {
+    LeafSerializationDescriptorStorage leaf_descriptors;
+    current_cursor = deserializeLeafDescriptors(current_cursor, end, header.leafs_count_, leaf_descriptors);
+    std::sort(std::begin(leaf_descriptors), std::end(leaf_descriptors),
+        [](const LeafSerializationDescriptorStorage::value_type &left,
+           const LeafSerializationDescriptorStorage::value_type &right) {
       return left.node_id_ < right.node_id_;
     });
 
+    // extract root entry
     NodeSerializationDescriptor node_descriptor;
-    current_cursor = serialization_utils::LoadFromBytes(current_cursor, end, &node_descriptor);
+    current_cursor = deserializeNodeDescriptor(current_cursor, end, node_descriptor);
     if (node_descriptor.node_id_ != node_descriptor.parent_node_id_) {
-      throw (exception::YASException("Corrupt data: multiple roots found",
+      throw (exception::YASException("Corrupt data: root must be the first node in the serialized descriptors list",
           kInvertedIndexDesirializationError));
     }
 
-    // at first completly construct the trie on function level
-    // and only then modify engine to exception safety
+    // at first completely construct the trie on function level
+    // and only then modify engine for exception safety
     std::unique_ptr<CharNode> root(new CharNode());         
-                                                            
+
     NodeDescriptorStorage previous_level_nodes;
     NodeDescriptorStorage current_level_nodes;
     previous_level_nodes.push_back(deserialize(node_descriptor, root.get()));
 
     IdType depth_level = 1;                                     // root extracted -> depth_level should be 1
     for (IdType node_id = 1; node_id < header.nodes_count_; ++node_id) {
-      current_cursor = serialization_utils::LoadFromBytes(current_cursor, end, &node_descriptor);
+      current_cursor = deserializeNodeDescriptor(current_cursor, end, node_descriptor);
+
       const auto parent = findNodeByParentNodeId(std::cbegin(previous_level_nodes), std::cend(previous_level_nodes),
           node_descriptor.parent_node_id_);
       if (std::cend(previous_level_nodes) == parent) {
         throw (exception::YASException("Corrupt data: parent node can't be found",
             kInvertedIndexDesirializationError));
       }
+
       parent->node_->routes_[node_descriptor.parent_node_ch_].reset(new CharNode());
       const auto route = parent->node_->routes_[node_descriptor.parent_node_ch_].get();
       current_level_nodes.push_back(deserialize(node_descriptor, route));
 
       if (node_descriptor.leaf_id_ != id_type_traits<IdType>::NonExistValue()) {
-        const auto found_leaf_iterator = findLeafByNodeId(std::cbegin(serialized_leafs), std::cend(serialized_leafs), 
+        const auto found_leaf_iterator = findLeafByNodeId(std::cbegin(leaf_descriptors), std::cend(leaf_descriptors),
             node_descriptor.leaf_id_);
-        if (std::cend(serialized_leafs) == found_leaf_iterator) {
+        if (std::cend(leaf_descriptors) == found_leaf_iterator) {
           throw (exception::YASException("Corrupt data: node's leaf can't be found",
               kInvertedIndexDesirializationError));
         }
@@ -143,11 +144,11 @@ class AhoCorasickSerializationHelper {
  private:
   using NodeSerializationDescriptor = aho_corasick_serialization_headers::NodeSerializationDescriptorT<IdType, CharType>;
   using LeafSerializationDescriptor = aho_corasick_serialization_headers::LeafSerializationDescriptorT<IdType, LeafType>;
-  using NodeDescriptor = aho_corasick_serialization_headers::NodeDescriptorT<IdType, CharType, CharNode, CharType>;
-  using SerializedDataHeader = aho_corasick_serialization_headers::SerializedDataHeaderT<IdType>;
+  using NodeDescriptor              = aho_corasick_serialization_headers::NodeDescriptorT<IdType, CharType, CharNode, CharType>;
+  using SerializedDataHeader        = aho_corasick_serialization_headers::SerializedDataHeaderT<IdType>;
   using NodeSerializationDescriptorStorage = std::vector<NodeSerializationDescriptor>;
   using LeafSerializationDescriptorStorage = std::vector<LeafSerializationDescriptor>;
-  using NodeDescriptorStorage = std::vector<NodeDescriptor>;
+  using NodeDescriptorStorage              = std::vector<NodeDescriptor>;
 
   utils::Version version_; 
 
@@ -171,7 +172,7 @@ class AhoCorasickSerializationHelper {
         version_, 
         static_cast<IdType>(serialized_leafs.size()), 
         static_cast<IdType>(serialized_nodes.size()),
-        SerializedDataHeader::ConvertIdType(sizeof(IdType))
+        aho_corasick_serialization_headers::ConvertIdType(sizeof(IdType))
     };
 
     // in VS checked iterator should be disabled to prevent unnecessary checks 
@@ -185,7 +186,14 @@ class AhoCorasickSerializationHelper {
     return result;
   }
 
-  void checkSerializedHeader(SerializedDataHeader &header) const {
+  template <typename Iterator>
+  Iterator deserializeDataHeader(const Iterator begin, Iterator end, SerializedDataHeader &header) const {
+    auto current_cursor = serialization_utils::LoadFromBytes(begin, end, &header);
+    if (end == current_cursor) {
+      throw (exception::YASException("Invalid data size: data size less than size of SerializedDataHeader",
+          kInvertedIndexDesirializationError));
+    }
+
     if (version_ < header.version_) {
       throw (exception::YASException("Corrupted header: header version unsupported",
           kInvertedIndexDesirializationVersionUnsopportedError));
@@ -195,13 +203,14 @@ class AhoCorasickSerializationHelper {
       throw (exception::YASException("Corrupted header: size of IdType mismath",
           kInvertedIndexDesirializationError));
     }
+
+    return current_cursor;
   }
 
   template <typename Iterator>
-  LeafSerializationDescriptorStorage deserializeLeafDescriptors(const Iterator begin, Iterator end, 
-      IdType leafs_count) const {
-    LeafSerializationDescriptorStorage serialized_leafs;
-    serialized_leafs.reserve(leafs_count);
+  Iterator deserializeLeafDescriptors(const Iterator begin, Iterator end,
+      IdType leafs_count, LeafSerializationDescriptorStorage &deserialized_leaf_descriptors) const {
+    deserialized_leaf_descriptors.reserve(leafs_count);
 
     auto current_cursor = begin;
     for (IdType leaf_id = 0; leaf_id < leafs_count; ++leaf_id) {
@@ -211,16 +220,28 @@ class AhoCorasickSerializationHelper {
         throw (exception::YASException("leafs count don't corresponds to header",
             kInvertedIndexDesirializationError));
       }
-      serialized_leafs.push_back(std::move(leaf_descriptor));
+      deserialized_leaf_descriptors.push_back(std::move(leaf_descriptor));
     }
 
-    return serialized_leafs;
+    return current_cursor;
+  }
+
+  template <typename Iterator>
+  Iterator deserializeNodeDescriptor(const Iterator begin, Iterator end,
+      NodeSerializationDescriptor &node_descriptor) const {
+    auto current_cursor = serialization_utils::LoadFromBytes(begin, end, &node_descriptor);
+    if (end == current_cursor) {
+      throw (exception::YASException("Invalid data size: there is a mismatch with size of data and descriptors count",
+        kInvertedIndexDesirializationError));
+    }
+
+    return current_cursor;
   }
 
   template<typename Iterator>
   Iterator findNodeByParentNodeId(const Iterator begin, const Iterator end, IdType parent_node_id) const {
     auto found_parent_node = std::lower_bound(begin, end, parent_node_id, [](
-        const NodeDescriptorStorage::value_type &left,
+        const typename std::iterator_traits<Iterator>::value_type &left,
         const IdType right){
       return left.parent_node_id_ < right;
     });
@@ -233,8 +254,8 @@ class AhoCorasickSerializationHelper {
   template<typename Iterator>
   Iterator findLeafByNodeId(const Iterator begin, const Iterator end, IdType node_id) const {
     auto found_leaf = std::lower_bound(begin, end, node_id, [](
-          const LeafSerializationDescriptorStorage::value_type &left,
-          IdType right) {
+          const typename std::iterator_traits<Iterator>::value_type &left,
+          const IdType right) {
         return left.node_id_ < right;
     });
     if (end == found_leaf || node_id != found_leaf->node_id_) {
@@ -243,17 +264,14 @@ class AhoCorasickSerializationHelper {
     return found_leaf;
   }
 
-  void prepareForNextDeserializationDepth(NodeDescriptorStorage &prev_level_nodes, 
+  void prepareForNextDeserializationDepth(NodeDescriptorStorage &previous_level_nodes, 
       NodeDescriptorStorage &current_level_nodes) const {
-    prev_level_nodes = std::move(current_level_nodes);
-    std::sort(std::begin(prev_level_nodes), std::end(prev_level_nodes), [](
-      const NodeDescriptorStorage::value_type &left,
-      const NodeDescriptorStorage::value_type &right) {
+    previous_level_nodes = std::move(current_level_nodes);
+    std::sort(std::begin(previous_level_nodes), std::end(previous_level_nodes), [](
+        const NodeDescriptorStorage::value_type &left,
+        const NodeDescriptorStorage::value_type &right) {
       return left.node_id_ < right.node_id_;
     });
-    // there was stl realization that doesn't decrease size after move :(
-    NodeDescriptorStorage tmp;
-    current_level_nodes.swap(tmp);
   }
 };
 
