@@ -1,10 +1,10 @@
+#pragma once
 #include "gtest/gtest.h"
 #include "physical_volume/inverted_index_helper/AhoCorasickEngine.hpp"
 #include "physical_volume/inverted_index_helper/leaf_type_traits.hpp"
 #include <string_view>
 
 namespace {
-
 TEST(AhoCorasickEngine, BasicInsertTest) {
   using Engine = yas::index_helper::AhoCorasickEngine<char, uint64_t>;
   Engine engine;
@@ -146,4 +146,5 @@ TEST(AhoCorasickEngine, DeleteRootTest) {
   EXPECT_EQ(false, engine.HasKey("/home/user1/"));
   EXPECT_EQ(false, engine.HasKey("/home/"));
 }
+
 }

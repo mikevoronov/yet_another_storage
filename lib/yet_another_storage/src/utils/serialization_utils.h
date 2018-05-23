@@ -34,7 +34,7 @@ range_t<const uint8_t*> AsBytes(const Type *type) {
   return range(ptr, ptr + sizeof(Type));
 }
 
-// checks correspondes between sizes
+// universal link isn't sutable in this case
 template<typename InsertIterator, typename Type>
 InsertIterator SaveAsBytes(const InsertIterator begin, const InsertIterator end, const Type *data) {
   auto bytes = AsBytes(data);
@@ -44,16 +44,18 @@ InsertIterator SaveAsBytes(const InsertIterator begin, const InsertIterator end,
   return std::copy(std::begin(bytes), std::end(bytes), begin);
 }
 
-// checks correspondes between sizes
 template<typename ReadIterator, typename Type>
-ReadIterator LoadFromBytes(ReadIterator begin, ReadIterator end, Type* data) {
+ReadIterator LoadFromBytes(ReadIterator begin, ReadIterator end, Type *data) {
   auto bytes = AsBytes(data);
-  if (std::distance(begin, end) > bytes.size()) {
-    return end;
+  if (std::distance(begin, end) < bytes.size()) {
+    // nithing has been readed
+    return begin;
   }
 
-  std::copy(begin, begin + bytes.size(), std::begin(bytes));
-  return begin + bytes.size();
+  auto new_end = begin;
+  std::advance(new_end, bytes.size());
+  std::copy(begin, new_end, std::begin(bytes));
+  return new_end;
 }
 
 } // namespace utils

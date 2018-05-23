@@ -12,8 +12,11 @@ namespace index_helper {
 
 template <typename CharType, typename LeafType>
 class InvertedIndexHelper {
-  using StringViewType = std::basic_string_view<CharType>;
 public:
+  using char_type = CharType;
+  using leaf_type = LeafType;
+  using key_type = std::basic_string_view<CharType>;
+
   InvertedIndexHelper() = default;
   ~InvertedIndexHelper() = default;
 
@@ -21,35 +24,35 @@ public:
       : engine_(std::move(other.engine_))
   {}
 
-  bool Insert(StringViewType key, LeafType leaf) {
+  bool Insert(key_type key, LeafType leaf) {
     if (key.empty()) {
       return false;
     }
     return engine_.Insert(key, leaf);
   }
 
-  LeafType Get(StringViewType key) noexcept {
+  LeafType Get(key_type key) noexcept {
     if (key.empty()) {
-      return leaf_traits<Leaf>::NonExistValue();
+      return leaf_traits<LeafType>::NonExistValue();
     }
     return engine_.Get(key);
   }
 
-  const LeafType Get(StringViewType key) const noexcept {
+  const LeafType Get(key_type key) const noexcept {
     if (key.empty()) {
-      return leaf_traits<Leaf>::NonExistValue();
+      return leaf_traits<LeafType>::NonExistValue();
     }
     return engine_.Get(key);
   }
 
-  bool Delete(StringViewType key) {
+  bool Delete(key_type key) {
     if (key.empty()) {
       return false;
     }
     return engine_.Delete(key);
   }
 
-  bool HasKey(StringViewType key) const noexcept {
+  bool HasKey(key_type key) const noexcept {
     if (key.empty()) {
       return false;
     }
