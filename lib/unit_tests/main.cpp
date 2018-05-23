@@ -1,5 +1,6 @@
 #include "aho_corasick_tests.h"
 #include "inverted_index_tests.h"
+#include "test_device_tests.h"
 
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);
