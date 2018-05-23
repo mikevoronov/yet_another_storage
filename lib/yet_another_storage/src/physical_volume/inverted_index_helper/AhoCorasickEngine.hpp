@@ -27,7 +27,7 @@ class AhoCorasickEngine {
       : trie_(std::move(other.trie_))
   {}
 
-  bool Insert(key_type key, LeafType leaf) {
+  bool Insert(key_type key, LeafType &leaf) {
     auto current = trie_.get();
 
     for (const auto &ch : key) {
@@ -39,7 +39,7 @@ class AhoCorasickEngine {
       }
       current = next;
     }
-    current->leaf_= std::move(leaf);
+    current->leaf_= leaf;
     return true;
   }
 

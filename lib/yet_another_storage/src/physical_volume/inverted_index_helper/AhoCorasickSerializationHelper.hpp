@@ -106,6 +106,7 @@ class AhoCorasickSerializationHelper {
     NodeDescriptorStorage current_level_nodes;
     previous_level_nodes.push_back(deserialize(node_descriptor, root.get()));
 
+    // root extracted -> depth_level should be 1
     IdType depth_level = 1;
     for (IdType node_id = 1; node_id < header.nodes_count_; ++node_id) {
       current_cursor = deserializeNodeDescriptor(current_cursor, end, node_descriptor);
