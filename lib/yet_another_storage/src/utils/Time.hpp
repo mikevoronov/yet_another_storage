@@ -1,5 +1,5 @@
 #pragma once
-#include "../physical_volume/physical_volume_layout/pv_layout_types_headers.h"    // for sizeof expired time structure
+#include "../physical_volume/pv_layout_headers.h"    // for sizeof expired time structure
 #include "../common/macros.h"
 #include <cstdint>
 #include <vector>
@@ -12,7 +12,7 @@ namespace utils {
 STRUCT_PACK(
 class Time {
  public:
-  constexpr Time(uint32_t expired_time_low, uint16_t expired_time_high = 0)
+  constexpr explicit Time(uint32_t expired_time_low, uint16_t expired_time_high = 0)
       : expired_time_high_(expired_time_high), expired_time_low(expired_time_low_)
   {}
 
@@ -44,6 +44,6 @@ constexpr bool operator<(const Time &lhs, const Time &rhs) {
 }
 
 // this class then would used to unpack raw bytes
-static_assert(pv_layout_types_headers::kTimeSize == sizeof(Time), "size of Time should be the same as the size in physical_volume_layout");
+static_assert(pv_layout_headers::kTimeSize == sizeof(Time), "size of Time should be the same as the size in physical_volume_layout");
 } // namespace utils
 } // namespace yas

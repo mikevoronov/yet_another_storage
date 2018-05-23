@@ -29,7 +29,7 @@ class AhoCorasickSerializationHelper {
  public:
   static_assert(std::is_integral_v<IdType>, "IdType should be an integral type");
 
-  AhoCorasickSerializationHelper(utils::Version version) 
+  explicit AhoCorasickSerializationHelper(utils::Version version)
       : version_(version)
   {}
   ~AhoCorasickSerializationHelper() = default;

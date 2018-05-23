@@ -1,10 +1,8 @@
 #pragma once
 #include "../../common/filesystem.h"
-#include "../../../ext/expected/expected.h"
 #include "../../common/common.h"
-#include <cstdint>
+#include "../../exceptions/YASException.h"
 #include <fstream>
-#include <filesystem>
 
 namespace yas {
 namespace devices {
@@ -12,7 +10,7 @@ namespace devices {
 template <typename OffsetType>
 class FileDevice {
  public:
-  FileDevice(fs::path path)
+   explicit FileDevice(fs::path path)
      : path_(path) 
   {}
 
@@ -25,8 +23,7 @@ class FileDevice {
     Open();
   }
 
-  ByteVector Read(uint64_t position,
-    uint64_t data_size) {
+  ByteVector Read(uint64_t position, uint64_t data_size) {
     if (!IsOpen()) {
       throw(exception::YASException("The device hasn't been opened during read", StorageError::kDeviceReadError));
     }
@@ -57,7 +54,7 @@ class FileDevice {
 
     device_.write((char *)data.data(), data.size());
     if (!device_.good()) {
-      throw(exception::YASException("Smth happened during device write", StorageError::kDeviceWriteError));
+      throw(exception::YASException("Smth bad happened during device write", StorageError::kDeviceWriteError));
     }
 
     return data.size();
