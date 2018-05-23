@@ -8,13 +8,16 @@ namespace index_helper {
 
 template <typename CharType, typename LeafType>
 class AhoCorasickEngine {
-  using StringViewType = std::basic_string_view<CharType>;
   template<typename CharType>
   struct Node;
   using CharNode = Node<CharType>;
 
  public:
   static_assert(std::is_trivially_copyable_v<LeafType>, "LeafType should be POD");
+
+  using char_type = CharType;
+  using leaf_type = LeafType;
+  using key_type = std::basic_string_view<CharType>;
 
   AhoCorasickEngine()
       : trie_(new CharNode())
@@ -24,7 +27,7 @@ class AhoCorasickEngine {
       : trie_(std::move(other.trie_))
   {}
 
-  bool Insert(StringViewType key, LeafType &leaf) {
+  bool Insert(key_type key, LeafType leaf) {
     auto current = trie_.get();
 
     for (const auto &ch : key) {
@@ -40,29 +43,30 @@ class AhoCorasickEngine {
     return true;
   }
 
-  LeafType Get(StringViewType key) noexcept {
+  LeafType Get(key_type key) noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? leaf_traits<Leaf>::NonExistValue() : node->leaf_;
+    return (nullptr == node) ? leaf_traits<LeafType>::NonExistValue() : node->leaf_;
   }
 
-  const LeafType Get(StringViewType key) const noexcept {
+  const LeafType Get(key_type key) const noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? leaf_traits<Leaf>::NonExistValue() : node->leaf_;
+    return (nullptr == node) ? leaf_traits<LeafType>::NonExistValue() : node->leaf_;
   }
 
-  bool Delete(StringViewType key) {
+  bool Delete(key_type key) {
+    // TODO : delete node path
     const auto node = getPathNode(key);
     if (nullptr == node) {
       return false;
     }
 
-    node->leaf_ = leaf_traits<Leaf>::NonExistValue();
+    node->leaf_ = leaf_traits<LeafType>::NonExistValue();
     return true;
   }
 
-  bool HasKey(StringViewType key) const noexcept {
+  bool HasKey(key_type key) const noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? false : leaf_traits<Leaf>::NonExistValue() != node->leaf_;
+    return (nullptr == node) ? false : leaf_traits<LeafType>::NonExistValue() != node->leaf_;
   }
 
   AhoCorasickEngine(const AhoCorasickEngine&) = delete;
@@ -76,7 +80,7 @@ private:
   // in this case traversal would almost free (could used the same allocator as in std::deque)
   template<typename CharType>
   struct Node {
-    Node() : leaf_(leaf_traits<Leaf>::NonExistValue()) {}
+    Node() : leaf_(leaf_traits<LeafType>::NonExistValue()) {}
     std::unordered_map<CharType, std::unique_ptr<Node>> routes_;
     LeafType leaf_;
   };
@@ -91,7 +95,7 @@ private:
     return current->routes_[ch].get();
   } 
 
-  CharNode *getPathNode(StringViewType key) const noexcept {
+  CharNode *getPathNode(key_type key) const noexcept {
     auto current = trie_.get();
 
     for (const auto &ch : key) {
