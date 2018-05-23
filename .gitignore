@@ -42,3 +42,6 @@ x64/
 [Oo]bj/
 *.vc.db
 */.vs/
+
+
+gtest/

@@ -18,42 +18,10 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\storage\Storage.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="ext\expected\expected.h" />
-    <ClInclude Include="src\common\filesystem.h" />
-    <ClInclude Include="src\common\macros.h" />
-    <ClInclude Include="src\common\common.h" />
-    <ClInclude Include="src\common\settings.hpp" />
-    <ClInclude Include="src\device_worker\PVDeviceWorker.hpp" />
-    <ClInclude Include="src\device_worker\devices\FileDevice.hpp" />
-    <ClInclude Include="src\exceptions\YASException.h" />
-    <ClInclude Include="src\exceptions\YASExceptionHandler.h" />
-    <ClInclude Include="src\physical_volume\freelist_helper\FreelistHelper.hpp" />
-    <ClInclude Include="src\physical_volume\freelist_helper\FreelistStrategy.hpp" />
-    <ClInclude Include="src\physical_volume\inverted_index_helper\AhoCorasickEngine.hpp" />
-    <ClInclude Include="src\physical_volume\inverted_index_helper\AhoCorasickSerializationHelper.hpp" />
-    <ClInclude Include="src\physical_volume\inverted_index_helper\aho_corasick_serialization_headers.hpp" />
-    <ClInclude Include="src\physical_volume\inverted_index_helper\id_type_type_traits.hpp" />
-    <ClInclude Include="src\physical_volume\inverted_index_helper\InvertedIndexHelper.hpp" />
-    <ClInclude Include="src\physical_volume\inverted_index_helper\leaf_type_traits.hpp" />
-    <ClInclude Include="src\physical_volume\pv_layout_headers.h" />
-    <ClInclude Include="src\storage\PVManagerFactory.hpp" />
-    <ClInclude Include="src\storage\PVMountPointManagerAdapter.hpp" />
-    <ClInclude Include="src\storage\PVMountPointManager.hpp" />
-    <ClInclude Include="src\storage\storage_errors.hpp" />
-    <ClInclude Include="src\utils\serialization_utils.h" />
-    <ClInclude Include="src\utils\Time.hpp" />
-    <ClInclude Include="src\utils\Version.hpp" />
-    <ClInclude Include="src\volume_group\VolumeGroup.hpp" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{77C1B70D-8E80-4CCB-A4A7-9983E521DC2A}</ProjectGuid>
-    <RootNamespace>yetanotherstorage</RootNamespace>
+    <ProjectGuid>{A1DDBA71-9ECA-40C6-9880-508E1A5AF892}</ProjectGuid>
+    <RootNamespace>unittests</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -101,23 +69,29 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
-    </ClCompile>
-  </ItemDefinitionGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)../yet_another_storage/ext/gtest/include;$(ProjectDir)../yet_another_storage/src;</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest -D_ITERATOR_DEBUG_LEVEL=0 -D_SCL_SECURE_NO_WARNING %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(ProjectDir)../yet_another_storage/ext/gtest/lib/gtestd_amd64_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -142,7 +116,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalOptions>/std:c++latest -D_ITERATOR_DEBUG_LEVEL=0 -D_SCL_SECURE_NO_WARNING %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -150,6 +123,10 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="aho_corasick_tests.hpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
