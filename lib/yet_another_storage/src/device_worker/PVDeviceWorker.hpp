@@ -1,13 +1,14 @@
 #pragma once
 #include "../common/filesystem.h"
 #include "../physical_volume/pv_layout_headers.h"
+#include "../utils/serialization_utils.h"
 
 using namespace yas::pv_layout_headers;
 
 namespace yas {
 namespace device_worker {
 
-// TODO : need to refactoring - too many similar functions
+// the main pupose of this class is to proper read and write to file
 template <typename Device, typename OffsetType>
 class PVDeviceWorker {
  public:
@@ -18,75 +19,33 @@ class PVDeviceWorker {
     }
   }
 
-  template <typename ValueType>
-  ValueType Read(OffsetType offset) {
-    if constexpr (4 >= sizeof(ValueType)) {
-      return Read4BytesType(offset);
-    }
-    if constexpr (8 >= sizeof(ValueType)) {
-      return Read8BytesType(offset);
-    }
-    return ReadComplexType(offset);
-  }
-
-  template<>
-  PVHeader Read(OffsetType offset) {
-    device_.Read
+  template <typename Header>
+  Header Read(OffsetType offset) {
+    static_assert(std::is_trivially_copyable_v<ValueType>, "Could read only POD types");
+    // we know that PVHeader always placed at the file beginning 
+    auto bytes = device_.Read(offset, sizeof(PVHeader));
+    Header header;
+    serialization_utils::LoadFromBytes(std::cbegin(bytes), std::cend(bytes), &header);
   }
   
-  template<>
-  Simple4TypeHeader Read(OffsetType offset) {
-
-  }
-
-  template<>
-  Simple8TypeHeader Read(OffsetType offset) {
-
-  }
-
+  // 3rd objects type could 
   template<>
   CommonTypeHeader Read(OffsetType offset) {
 
   }
 
-  template<>
-  FreelistHeader<OffsetType> Read(OffsetType offset) {
-
+  template <typename Header>
+  void Write(OffsetType offset, ) {
+    static_assert(std::is_trivially_copyable_v<ValueType>, "Could read only POD types");
+    // we know that PVHeader always placed at the file beginning 
+    auto bytes = device_.Read(offset, sizeof(PVHeader));
+    Header header;
+    serialization_utils::LoadFromBytes(std::cbegin(bytes), std::cend(bytes), &header);
   }
 
-  template <typename ValueType>
-  void Write(OffsetType offset, const ValueType &type) {
-    if constexpr (4 >= sizeof(ValueType)) {
-      return Write4BytesType(offset, type);
-    }
-    if constexpr (8 >= sizeof(ValueType)) {
-      return Write8BytesType(offset, type);
-    }
-    return WriteComplexType(offset, type);
-  }
-
-  template <>
-  void Write(OffsetType offset, const PVHeader &type) {
-
-  }
-
-  template <>
-  void Write(OffsetType offset, const Simple4TypeHeader &type) {
-
-  }
-
-  template <>
-  void Write(OffsetType offset, const Simple8TypeHeader &type) {
-
-  }
 
   template <>
   void Write(OffsetType offset, const ComplexTypeHeader &type) {
-
-  }
-
-  template <>
-  void Write(OffsetType offset, const FreelistHeader<OffsetType> &type) {
 
   }
 
@@ -100,6 +59,10 @@ class PVDeviceWorker {
 
   template <typename ValueType>
   ValueType Read4BytesType(OffsetType offset) {
+    Simple4TypeHeader header;
+    auto bytes = Read<Simple4TypeHeader>(offset, sizeof(Simple4TypeHeader));
+    serialization_utils::LoadFromBytes(std::cbegin(bytes), std::cend(bytes), &header);
+    return header.body_.value;
   }
 
   template <typename ValueType>
@@ -111,19 +74,8 @@ class PVDeviceWorker {
   }
 
   template <typename ValueType>
-  void Write4BytesType(OffsetType offset, const ValueType &type) {
-  }
-
-  template <typename ValueType>
-  void Write8BytesType(OffsetType offset, const ValueType &type) {
-  }
-
-  template <typename ValueType>
   void WriteComplexType(OffsetType offset, const ValueType &type) {
   }
-
-  uint64_t read(OffsetType offset, char* buf, size_t buf_size);
-  uint64_t write(OffsetType offset, const char* buf, size_t buf_size);
 };
 
 } // namespace device_worker

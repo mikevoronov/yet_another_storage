@@ -100,7 +100,7 @@ class AhoCorasickSerializationHelper {
 
     // at first completely construct the trie on function level
     // and only then modify engine for exception safety
-    std::unique_ptr<CharNode> root(new CharNode());         
+    auto root = std::make_unique<CharNode>();
 
     NodeDescriptorStorage previous_level_nodes;
     NodeDescriptorStorage current_level_nodes;
@@ -111,6 +111,7 @@ class AhoCorasickSerializationHelper {
     for (IdType node_id = 1; node_id < header.nodes_count_; ++node_id) {
       current_cursor = deserializeNodeDescriptor(current_cursor, end, node_descriptor);
       if (depth_level < node_descriptor.depth_level_) {
+        // gone to the next level
         prepareForNextDeserializationDepth(previous_level_nodes, current_level_nodes);
         ++depth_level;
       }
@@ -141,6 +142,11 @@ class AhoCorasickSerializationHelper {
     engine.trie_.swap(*(std::unique_ptr<AhoCorasickEngine<CharType, LeafType>::CharNode>*)(&root));
   }
 
+  AhoCorasickSerializationHelper(const AhoCorasickSerializationHelper&) = delete;
+  AhoCorasickSerializationHelper(AhoCorasickSerializationHelper&&) = delete;
+  AhoCorasickSerializationHelper& operator=(const AhoCorasickSerializationHelper&) = delete;
+  AhoCorasickSerializationHelper& operator=(AhoCorasickSerializationHelper&&) = delete;
+
  private:
   using NodeSerializationDescriptor = aho_corasick_serialization_headers::NodeSerializationDescriptorT<IdType, CharType>;
   using LeafSerializationDescriptor = aho_corasick_serialization_headers::LeafSerializationDescriptorT<IdType, LeafType>;
@@ -170,6 +176,7 @@ class AhoCorasickSerializationHelper {
         sizeof(NodeSerializationDescriptorStorage::value_type)*serialized_nodes.size() + 
         sizeof(LeafSerializationDescriptorStorage::value_type)*serialized_leafs.size());
 
+    // TODO : to make SerializedDataHeader ctor explicit it is need to add a list-initialization
     SerializedDataHeader header = { 
         version_, 
         static_cast<IdType>(serialized_leafs.size()), 

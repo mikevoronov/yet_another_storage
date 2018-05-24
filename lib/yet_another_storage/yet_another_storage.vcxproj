@@ -28,6 +28,7 @@
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\common\common.h" />
     <ClInclude Include="src\common\settings.hpp" />
+    <ClInclude Include="src\device_worker\devices\TestDevice.hpp" />
     <ClInclude Include="src\device_worker\PVDeviceWorker.hpp" />
     <ClInclude Include="src\device_worker\devices\FileDevice.hpp" />
     <ClInclude Include="src\exceptions\YASException.h" />

@@ -16,14 +16,11 @@ class TestDevice {
   explicit TestDevice(fs::path path)
   {}
 
-  ~TestDevice()
-  {}
-
-  TestDevice(const TestDevice &other)
-  {}
+  ~TestDevice() = default;
+  TestDevice(const TestDevice &other) = default;
 
   ByteVector Read(uint64_t position, uint64_t data_size) {
-    // possible overflow but it is just a device for test
+    // possible overflow but it is just a test device
     if ((position + data_size) < storage_.size()) {
       throw(exception::YASException("The device's get cursor position mismath", StorageError::kDeviceReadError));
     }
@@ -45,6 +42,7 @@ class TestDevice {
     const auto data_size = std::distance(begin, end);
     storage_.reserve(position + data_size);
     if (position == storage_.size()) {
+      // case one: add new content strictly to the end of file
       for (auto it = begin; it != end; ++it) {
         storage_.push_back(*it);
       }
