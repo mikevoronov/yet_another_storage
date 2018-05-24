@@ -19,18 +19,20 @@ class TestDevice {
   ~TestDevice() = default;
   TestDevice(const TestDevice &other) = default;
 
-  ByteVector Read(uint64_t position, uint64_t data_size) {
-    // possible overflow but it is just a test device
-    if ((position + data_size) < storage_.size()) {
+  template <typename Iterator>
+  void Read(uint64_t position, Iterator begin, Iterator end) {
+    const auto read_size = std::distance(begin, end);
+
+    // possible int overflow but it is just a test device
+    if ((position + read_size) > storage_.size()) {
       throw(exception::YASException("The device's get cursor position mismath", StorageError::kDeviceReadError));
     }
 
-    auto begin = std::cbegin(storage_);
-    auto end = std::cbegin(storage_);
-    std::advance(begin, position);
-    std::advance(end, position + data_size);
-
-    return { begin, end };
+    auto storage_begin = std::cbegin(storage_);
+    auto storage_end   = std::cbegin(storage_);
+    std::advance(storage_begin, position);
+    std::advance(storage_end,   position + read_size);
+    std::copy(storage_begin, storage_end, begin);
   }
 
   template<typename Iterator>

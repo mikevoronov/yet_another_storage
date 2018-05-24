@@ -3,71 +3,70 @@
 #include "device_worker/devices/TestDevice.hpp"
 #include "common/common.h"
 
+using namespace yas;
+
 namespace {
-TEST(TestDevice, ReadTest) {
-  yas::devices::TestDevice<uint64_t> test_device("/root");
-  
-  yas::ByteVector vector = {'\x00', '\x01', '\x02', '\x04', '\x05'};
 
-  test_device.SetStorageContent(std::cbegin(vector), std::cend(vector));
-  const auto result = test_device.Read(0, vector.size());
-
-  EXPECT_EQ(vector.size(), result.size());
-  auto result_it = std::cbegin(result);
-  for (auto it = std::cbegin(vector), end = std::cend(vector); it != end; ++it) {
-    EXPECT_EQ(*it, *result_it);
-    ++result_it;
+void CompareByteVectors(const ByteVector &first, const ByteVector &second) {
+  EXPECT_EQ(first.size(), second.size());
+  auto first_vector_iterator = std::cbegin(first);
+  for (auto second_vector_iterator = std::cbegin(second), end = std::cend(second);
+      second_vector_iterator != end; ++second_vector_iterator) {
+    EXPECT_EQ(*first_vector_iterator, *second_vector_iterator);
+    ++first_vector_iterator;
   }
 }
 
+TEST(TestDevice, ReadTest) {
+  devices::TestDevice<uint64_t> test_device("/root");
+  
+  ByteVector write_vector = {'\x00', '\x01', '\x02', '\x04', '\x05'};
+  test_device.SetStorageContent(std::cbegin(write_vector), std::cend(write_vector));
+
+  ByteVector read_vector(write_vector.size());
+  test_device.Read(0, std::begin(read_vector), std::end(read_vector));
+
+  CompareByteVectors(read_vector, write_vector);
+}
+
 TEST(TestDevice, WriteToEndEmptyFileTest) {
-  yas::devices::TestDevice<uint64_t> test_device("/root");
+  devices::TestDevice<uint64_t> test_device("/root");
 
-  yas::ByteVector vector = { '\x00', '\x01', '\x02', '\x04', '\x05' };
-  test_device.Write(0, std::cbegin(vector), std::cend(vector));
+  ByteVector write_vector = { '\x00', '\x01', '\x02', '\x04', '\x05' };
+  test_device.Write(0, std::cbegin(write_vector), std::cend(write_vector));
 
-  const auto result = test_device.Read(0, vector.size());
-
-  EXPECT_EQ(vector.size(), result.size());
-  auto result_it = std::cbegin(result);
-  for (auto it = std::cbegin(vector), end = std::cend(vector); it != end; ++it) {
-    EXPECT_EQ(*it, *result_it);
-    ++result_it;
-  }
+  ByteVector read_vector(write_vector.size());
+  test_device.Read(0, std::begin(read_vector), std::end(read_vector));
+  CompareByteVectors(read_vector, write_vector);
 }
 
 TEST(TestDevice, WriteToEndNonEmptyFileTest) {
   yas::devices::TestDevice<uint64_t> test_device("/root");
 
-  yas::ByteVector vector = { '\x00', '\x01', '\x02', '\x04', '\x05' };
-  test_device.SetStorageContent(std::cbegin(vector), std::cend(vector));
-  test_device.Write(5, std::cbegin(vector), std::cend(vector));
+  yas::ByteVector write_vector = { '\x00', '\x01', '\x02', '\x04', '\x05' };
+  test_device.SetStorageContent(std::cbegin(write_vector), std::cend(write_vector));
+  test_device.Write(5, std::cbegin(write_vector), std::cend(write_vector));
 
-  const auto result = test_device.Read(5, vector.size());
+  ByteVector read_vector(write_vector.size());
+  test_device.Read(0, std::begin(read_vector), std::end(read_vector));
 
-  EXPECT_EQ(vector.size(), result.size());
-  auto result_it = std::cbegin(result);
-  for (auto it = std::cbegin(vector), end = std::cend(vector); it != end; ++it) {
-    EXPECT_EQ(*it, *result_it);
-    ++result_it;
-  }
+  CompareByteVectors(read_vector, write_vector);
+
+  test_device.Read(5, std::begin(read_vector), std::end(read_vector));
+  CompareByteVectors(read_vector, write_vector);
 }
 
 TEST(TestDevice, WriteToMiddleFileTest) {
   yas::devices::TestDevice<uint64_t> test_device("/root");
 
-  yas::ByteVector vector = { '\x00', '\x01', '\x02', '\x04', '\x05' };
-  test_device.SetStorageContent(std::cbegin(vector), std::cend(vector));
-  test_device.Write(3, std::cbegin(vector), std::cend(vector));
+  yas::ByteVector write_vector = { '\x00', '\x01', '\x02', '\x04', '\x05' };
+  test_device.SetStorageContent(std::cbegin(write_vector), std::cend(write_vector));
+  test_device.Write(3, std::cbegin(write_vector), std::cend(write_vector));
 
-  const auto result = test_device.Read(3, vector.size());
+  ByteVector read_vector(write_vector.size());
+  test_device.Read(3, std::begin(read_vector), std::end(read_vector));
 
-  EXPECT_EQ(vector.size(), result.size());
-  auto result_it = std::cbegin(result);
-  for (auto it = std::cbegin(vector), end = std::cend(vector); it != end; ++it) {
-    EXPECT_EQ(*it, *result_it);
-    ++result_it;
-  }
+  CompareByteVectors(read_vector, write_vector);
 }
 
 }

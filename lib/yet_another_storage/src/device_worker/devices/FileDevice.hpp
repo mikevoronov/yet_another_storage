@@ -23,38 +23,46 @@ class FileDevice {
     Open();
   }
 
-  ByteVector Read(uint64_t position, uint64_t data_size) {
+  template <typename Iterator>
+  void Read(uint64_t position, Iterator begin, Iterator end) {
     if (!IsOpen()) {
-      throw(exception::YASException("The device hasn't been opened during read", StorageError::kDeviceReadError));
+      throw(exception::YASException("Raw device read error: the device hasn't been opened during read", 
+          StorageError::kDeviceReadError));
     }
 
     device_.seekg(position);
     if (device_.eof()) {
-      throw(exception::YASException("The device's get cursor position mismath", StorageError::kDeviceReadError));
+      throw(exception::YASException("Raw device read error: the device's get cursor position mismath", 
+          StorageError::kDeviceReadError));
     }
 
-    std::vector<uint8_t> data(data_size);
-    device_.read((char *)data.data(), data_size);
+    const auto read_size = std::distance(begin, end);
+    device_.read(static_cast<char*>(begin), data_size);
     if (device_.eof()) {
-      throw(exception::YASException("Read after file end", StorageError::kDeviceReadError));
+      throw(exception::YASException("Raw device read error: read after the file end", StorageError::kDeviceReadError));
     }
 
     return data;
   }
 
-  uint64_t Write(uint64_t position, std::vector<uint8_t> &data) {
+   template <typename Iterator>
+  uint64_t Write(uint64_t position, Iterator begin, Iterator end) {
     if (!IsOpen()) {
-      throw(exception::YASException("The device hasn't been opened during write", StorageError::kDeviceWriteError));
+      throw(exception::YASException("Raw device write error: The device hasn't been opened during write", 
+          StorageError::kDeviceWriteError));
     }
 
     device_.seekp(position);
     if (device_.eof()) {
-      throw(exception::YASException("The device's put cursor position mismath", StorageError::kDeviceWriteError));
+      throw(exception::YASException("Raw device write error: the device's put cursor position mismath", 
+          StorageError::kDeviceWriteError));
     }
 
-    device_.write((char *)data.data(), data.size());
+    const auto write_size = std::distance(begin, end);
+    device_.write(static_cast<char*>(begin), data_size);
     if (!device_.good()) {
-      throw(exception::YASException("Smth bad happened during device write", StorageError::kDeviceWriteError));
+      throw(exception::YASException("Raw device write error: something bad happened during device write", 
+          StorageError::kDeviceWriteError));
     }
 
     return data.size();
@@ -74,15 +82,14 @@ class FileDevice {
   FileDevice operator=(FileDevice&&) = delete;
   FileDevice(FileDevice&&) = delete;
 
- protected:
+ private:
+  mutable std::fstream device_;     // IsOpen should be "logically" const
+  fs::path path_;
+
   void Open() {
     device_.rdbuf()->pubsetbuf(0, 0);     // in Windows it is also desirable to disable NTFS write cache
     device_.open(path_, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
   }
-
- private:
-  mutable std::fstream device_;     // IsOpen should be "logically" const
-  fs::path path_;
 };
 
 } // namespace devices
