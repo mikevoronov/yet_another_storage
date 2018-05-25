@@ -19,19 +19,14 @@ constexpr uint32_t kBinCount = 11;
 
 STRUCT_PACK(
 struct PVHeader {
+  PVHeader() {};
+
   uint8_t signature[6] = { 'Y', 'A', 'S', '_', 'P', 'V' };                        //  + 6 bytes
   utils::Version version;                                                         //  + 2 bytes
   uint64_t pv_size_;                                                              //  + 8 bytes
-  uint32_t cluster_size_;                                                         //  + 4 bytes
+  uint32_t cluster_size_ = kDefaultClusterSize;                                   //  + 4 bytes
   uint32_t priority_;                                                             //  + 4 bytes
-  uint32_t freelist_bins_count_;                                                  //  + 4 bytes
-  uint32_t priority_;                                                             //  + 4 bytes
-
-  template<typename OffsetType>
-  static PVHeader Read(Device<OffsetType> &device);
-
-  template<typename OffsetType>
-  static PVHeader Write(Device<OffsetType> &device);
+  uint32_t freelist_bins_count_ = kBinCount;                                      //  + 4 bytes
 });
 
 STRUCT_PACK(
@@ -114,12 +109,12 @@ struct ComplexTypeHeader {
   };
 });
 
-constexpr uint32_t kTimeSize = sizeof(ComplexTypeHeader::expired_time_high_) + sizeof(ComplexTypeHeader::expired_time_low_);
+constexpr uint32_t kTimeSize = sizeof ComplexTypeHeader::expired_time_high_ + sizeof ComplexTypeHeader::expired_time_low_;
 
-static_assert(32 == sizeof(PVHeader),          "PVHeader should be 12 bytes long - please check aligments and type size on your setup");
+static_assert(28 == sizeof(PVHeader),          "PVHeader should be 12 bytes long - please check aligments and type size on your setup");
 static_assert(12 == sizeof(Simple4TypeHeader), "Simple4TypeHeader should be 12 bytes long - please check aligments and type size on your setup");
 static_assert(16 == sizeof(Simple8TypeHeader), "Simple8TypeHeader should be 16 bytes long - please check aligments and type size on your setup");
-static_assert(16 == sizeof(ComplexTypeHeader), "ComplexTypeHeader should be 16 bytes long - please check aligments and type size on your setup");
+static_assert(40 == sizeof(ComplexTypeHeader), "ComplexTypeHeader should be 16 bytes long - please check aligments and type size on your setup");
 
 } // namespace pv_layout_headers
 } // namespace yas

@@ -13,6 +13,9 @@ enum StorageError : uint32_t {
   kInvertedIndexDesirializationVersionUnsopportedError = 5,   // explicit type from kInvertedIndexDesirializationError
                                                               // because of it could be recover from it with different
                                                               // version header
+  kReadComplexTypeError = 6,
+  kInvalidSignatureError = 7,
+  kPVVersionNotSupported = 8,
 
   kFileNotFound = 1,
   kKeyNotFound = 2,

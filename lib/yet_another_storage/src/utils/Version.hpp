@@ -11,7 +11,7 @@ namespace utils {
 STRUCT_PACK(
 class Version {
  public:
-  constexpr Version(uint8_t major, uint8_t minor)
+  constexpr Version(uint8_t major = 0, uint8_t minor = 0)
       : major_(major), minor_(minor)
   {}
   ~Version() = default;

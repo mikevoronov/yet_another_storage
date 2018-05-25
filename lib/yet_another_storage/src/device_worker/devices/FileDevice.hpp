@@ -45,7 +45,8 @@ class FileDevice {
     return data;
   }
 
-   template <typename Iterator>
+  // TODO : add const
+  template <typename Iterator>
   uint64_t Write(uint64_t position, Iterator begin, Iterator end) {
     if (!IsOpen()) {
       throw(exception::YASException("Raw device write error: The device hasn't been opened during write", 

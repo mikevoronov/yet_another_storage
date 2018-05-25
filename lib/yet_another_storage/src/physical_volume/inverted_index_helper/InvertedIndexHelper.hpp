@@ -3,6 +3,7 @@
 #include "AhoCorasickSerializationHelper.hpp"
 #include "../../utils/Version.hpp"
 #include "../../common/common.h"
+#include "../../common/settings.hpp"
 #include <memory>
 #include <string_view>
 #include <type_traits>

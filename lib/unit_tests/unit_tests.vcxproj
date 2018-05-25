@@ -124,12 +124,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="aho_corasick_tests.h" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inverted_index_tests.h" />
-    <ClInclude Include="test_device_tests.h" />
+    <ClInclude Include="tests\aho_corasick_tests.h" />
+    <ClInclude Include="tests\inverted_index_tests.h" />
+    <ClInclude Include="tests\test_device_tests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

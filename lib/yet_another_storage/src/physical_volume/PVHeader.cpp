@@ -6,6 +6,8 @@
 namespace yas {
 namespace pv_layout_headers {
 
+
+
 template<typename OffsetType, typename Device>
 PVHeader PVHeader::Read(Device<OffsetType> &device) {
   ByteVector raw_bytes(sizeof(PVHeader));
@@ -17,7 +19,7 @@ PVHeader PVHeader::Read(Device<OffsetType> &device) {
 }
 
 template<typename OffsetType, typename Device>
-void PVHeader::Write(Header &header, Device<OffsetType> &device) {
+void PVHeader::Save(PVHeader &header, Device<OffsetType> &device) {
   ByteVector raw_bytes(sizeof(PVHeader));
   serialization_utils::SaveAsBytes(std::cbegin(raw_bytes), std::cend(raw_bytes), &header);
 
