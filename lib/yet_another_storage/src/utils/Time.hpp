@@ -3,6 +3,8 @@
 #include "../common/macros.h"
 #include <cstdint>
 #include <vector>
+#include <ctime>
+#include <limits>
 
 using namespace yas::macros;
 
@@ -13,37 +15,44 @@ STRUCT_PACK(
 class Time {
  public:
   constexpr explicit Time(uint32_t expired_time_low, uint16_t expired_time_high = 0)
-      : expired_time_high_(expired_time_high), expired_time_low(expired_time_low_)
+      : expired_time_high_(expired_time_high), expired_time_low_(expired_time_low)
   {}
 
+  explicit Time(time_t expired_time) {
+    uint64_t time = static_cast<uint64_t>(expired_time);      // time_t can be int or floating point type
+    if (time & 0xFFFF000000000000) {
+      // some kind of infinite future time
+      expired_time_high_ = std::numeric_limits<uint16_t>::max();
+      expired_time_low_ = std::numeric_limits<uint32_t>::max();
+      return;
+    }
+    expired_time_high_ = (time >> 32) & 0xFFFF;
+    expired_time_low_ = time & 0xFFFFFFFF;
+  }
+
   bool IsExpired() const noexcept {
-    return !(*this < Now());
+    return *this < Time(std::time(nullptr));
   }
 
-  // TODO : return now time in seconds
-  Time Now() const noexcept {
-    return { 0, 0 };
+  friend constexpr bool operator<(Time lhs, Time rhs) {
+    return (lhs.expired_time_high() == rhs.expired_time_high() && lhs.expired_time_low() < rhs.expired_time_low()) ||
+      (lhs.expired_time_high() < rhs.expired_time_high());
   }
 
+  friend constexpr bool operator==(const Time &lhs, const Time &rhs) {
+    return !(lhs < rhs) && !(rhs < lhs);
+  }
+  
   constexpr uint16_t expired_time_high() const { return expired_time_high_; }
   constexpr uint32_t expired_time_low() const { return expired_time_low_; }
-
-  Time(const Time&) = default;
-  Time(Time &&) = default;
-  Time& operator=(const Time&) = default;
-  Time& operator=(Time&&) = default;
 
  private:
   uint16_t expired_time_high_;
   uint32_t expired_time_low_;
 });
 
-constexpr bool operator<(const Time &lhs, const Time &rhs) {
-  return (lhs.expired_time_high() < rhs.expired_time_high()) ||
-      (lhs.expired_time_high() == rhs.expired_time_high() && lhs.expired_time_low() < rhs.expired_time_low());
-}
-
 // this class then would used to unpack raw bytes
 static_assert(pv_layout_headers::kTimeSize == sizeof(Time), "size of Time should be the same as the size in physical_volume_layout");
+
 } // namespace utils
 } // namespace yas
