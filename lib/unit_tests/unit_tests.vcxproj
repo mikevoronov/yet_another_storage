@@ -129,7 +129,10 @@
   <ItemGroup>
     <ClInclude Include="tests\aho_corasick_tests.h" />
     <ClInclude Include="tests\inverted_index_tests.h" />
+    <ClInclude Include="tests\pv_mount_point_manager_tests.h" />
     <ClInclude Include="tests\test_device_tests.h" />
+    <ClInclude Include="tests\time_tests.h" />
+    <ClInclude Include="tests\version_tests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

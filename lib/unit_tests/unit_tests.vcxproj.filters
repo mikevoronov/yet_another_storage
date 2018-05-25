@@ -24,5 +24,14 @@
     <ClInclude Include="tests\aho_corasick_tests.h">
       <Filter>Source Files\tests</Filter>
     </ClInclude>
+    <ClInclude Include="tests\time_tests.h">
+      <Filter>Source Files\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\version_tests.h">
+      <Filter>Source Files\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\pv_mount_point_manager_tests.h">
+      <Filter>Source Files\tests</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
