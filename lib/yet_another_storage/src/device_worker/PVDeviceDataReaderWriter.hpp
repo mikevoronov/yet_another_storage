@@ -23,20 +23,25 @@ template <typename OffsetType, typename Device = DefaultDevice<OffsetType>>
 class PVDeviceDataReaderWriter {
  public:
    using pv_device_type = PVDeviceDataReaderWriter<OffsetType, Device>;
+   ~PVDeviceDataReaderWriter() {
+     // need to be very accurate - we also need to save inverted index which
+     device_.Close();
+   }
 
-   static std::unique_ptr<pv_device_type> Load(fs::path &file_path, Version version) {
-    auto device_worker = std::unique_ptr<pv_device_type>(new pv_device_type(file_path, cluster_size));
+   static std::unique_ptr<pv_device_type> Load(fs::path &file_path, utils::Version version) {
+    auto device_worker = std::unique_ptr<pv_device_type>(new pv_device_type(file_path));
     PVHeader pv_header = device_worker->Read<PVHeader>(0);
 
     PVHeader default_header;
-    if (0 != memcmp(default_header.signature, pv_header.signature, sizeof signature.signature)) {
-      throw exception::YASException("Invalid PV header: corrupted signature", ErrorCode::kInvalidSignatureError);
+    if (0 != memcmp(default_header.signature_, pv_header.signature_, sizeof default_header.signature_)) {
+      throw exception::YASException("Invalid PV header: corrupted signature", StorageError::kInvalidSignatureError);
     }
-    else if (version < pv_header.version) {
-      throw exception::YASException("Invalid PV header: unsupported version", ErrorCode::kInvalidSignatureError);
+    else if (version < pv_header.version_) {
+      throw exception::YASException("Invalid PV header: unsupported version", StorageError::kInvalidSignatureError);
     }
 
-    device_end_ = pv_header.pv_size_;
+    device_worker->device_end_ = pv_header.pv_size_;
+    device_worker->cluster_size_ = pv_header.cluster_size_;
     return device_worker;
   }
 
@@ -46,12 +51,15 @@ class PVDeviceDataReaderWriter {
     if (fs::exists(file_path)) {
       fs::resize_file(file_path, device_end);
     }
+    else {
+      std::ofstream out(file_path, std::ios_base::out);
+    }
 
     // can't use std::make_unique because of it needs access to class ctor
     auto device_worker = std::unique_ptr<pv_device_type>(new pv_device_type(file_path, cluster_size));
 
     PVHeader pv_header;
-    pv_header.version = version;
+    pv_header.version_ = version;
     pv_header.priority_ = priority;
     pv_header.pv_size_ = device_end;
     pv_header.cluster_size_ = cluster_size;
@@ -98,9 +106,9 @@ class PVDeviceDataReaderWriter {
   uint32_t cluster_size_;
   OffsetType device_end_;
 
-  explicit PVDeviceDataReaderWriter(fs::path file_path, uint32_t cluster_size = kDefaultClusterSize)
+  explicit PVDeviceDataReaderWriter(fs::path &file_path, uint32_t cluster_size = kDefaultClusterSize)
       : device_(file_path),
-    cluster_size_(cluster_size) {
+        cluster_size_(cluster_size) {
     if (!device_.IsOpen()) {
       throw(exception::YASException("Device worker error: the device hasn't been opened correctly",
         StorageError::kDeviceGeneralError));
@@ -109,42 +117,45 @@ class PVDeviceDataReaderWriter {
 
   template <typename ValueType>
   ValueType Read(OffsetType offset) {
-    static_assert(std::is_trivially_copyable_v<Type>, "PVDeviceDataReaderWriter::Read<Type>: Type should be POD");
+    static_assert(std::is_trivially_copyable_v<ValueType>, "PVDeviceDataReaderWriter::Read<Type>: Type should be POD");
 
-    ByteVector data(sizeof(Type));
-    device_.Read(offset, std::begin(data), std::end(data));
+    ByteVector raw_bytes(sizeof(ValueType));
+    device_.Read(offset, std::begin(raw_bytes), std::end(raw_bytes));
+
     ValueType type;
     serialization_utils::LoadFromBytes(std::cbegin(raw_bytes), std::cend(raw_bytes), &type);
     return type;
   }
 
-   // TODO : universal link
-   template <typename ValueType>
-   void Write(OffsetType offset, ValueType &type) {
-     static_assert(std::is_trivially_copyable_v<ValueType>, "Could read only POD types");
-     // we know that PVHeader always placed at the file beginning 
-     //auto bytes = device_.Read(offset, sizeof(ValueType));
-     //ValueType header;
-     //serialization_utils::LoadFromBytes(std::cbegin(bytes), std::cend(bytes), &header);
-   }
+  // TODO : universal link
+  template <typename ValueType>
+  void Write(OffsetType position, ValueType &type) {
+    static_assert(std::is_trivially_copyable_v<ValueType>, "Could read only POD types");
 
-   void CheckComplexTypeHeader(const ComplexTypeHeader &complex_header, bool is_first_header) const {
-     if (is_first_header && complex_type_header.value_type_ != ValueType::kComplexBegin) {
-       // read complex types is only possible from the beggining of sequence
-       throw exception::YASException("Read complex type error: kComplexBegin type expected", kReadComplexTypeError);
-     }
-     else if (is_first_header && complex_type_header.value_type_ != ValueType::kComplexSequel) {
-       throw exception::YASException("Read complex type error: kComplexSequel type expected", kReadComplexTypeError);
-     }
-     else if (complex_type_header.chunk_size_ > cluster_size_) {
-       throw exception::YASException("Read complex type error: chunk size is bigger than device cluster size", 
-          kReadComplexTypeError);
-     }
-     else if (complex_type_header.overall_size_ > kMaximumTypeSize) {
-       throw exception::YASException("Read complex type error: chunk size is bigger than device cluster size",
-         kReadComplexTypeError);
-     }
-   }
+    ByteVector data(sizeof(ValueType));
+    serialization_utils::SaveAsBytes(std::begin(data), std::end(data), &type);
+    device_.Write(position, std::cbegin(data), std::cend(data));
+  }
+
+  void CheckComplexTypeHeader(const ComplexTypeHeader &complex_header, bool is_first_header) const {
+    if (is_first_header && complex_type_header.value_type_ != ValueType::kComplexBegin) {
+      // read complex types is only possible from the beggining of sequence
+      throw exception::YASException("Read complex type error: kComplexBegin type expected",
+          StorageError::kReadComplexTypeError);
+    }
+    else if (is_first_header && complex_type_header.value_type_ != ValueType::kComplexSequel) {
+      throw exception::YASException("Read complex type error: kComplexSequel type expected",
+         StorageError::kReadComplexTypeError);
+    }
+    else if (complex_type_header.chunk_size_ > cluster_size_) {
+      throw exception::YASException("Read complex type error: chunk size is bigger than device cluster size",
+         StorageError::kReadComplexTypeError);
+    }
+    else if (complex_type_header.overall_size_ > kMaximumTypeSize) {
+      throw exception::YASException("Read complex type error: chunk size is bigger than device cluster size",
+         StorageError::kReadComplexTypeError);
+    }
+  }
 };
 
 } // namespace device_worker

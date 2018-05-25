@@ -21,8 +21,8 @@ STRUCT_PACK(
 struct PVHeader {
   PVHeader() {};
 
-  uint8_t signature[6] = { 'Y', 'A', 'S', '_', 'P', 'V' };                        //  + 6 bytes
-  utils::Version version;                                                         //  + 2 bytes
+  uint8_t signature_[6] = { 'Y', 'A', 'S', '_', 'P', 'V' };                        //  + 6 bytes
+  utils::Version version_;                                                         //  + 2 bytes
   uint64_t pv_size_;                                                              //  + 8 bytes
   uint32_t cluster_size_ = kDefaultClusterSize;                                   //  + 4 bytes
   uint32_t priority_;                                                             //  + 4 bytes

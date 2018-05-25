@@ -11,8 +11,9 @@ template <typename OffsetType>
 class FileDevice {
  public:
    explicit FileDevice(fs::path path)
-     : path_(path) 
-  {}
+     : path_(path) {
+     Open();
+   }
 
   ~FileDevice() {
     Close();
@@ -37,17 +38,15 @@ class FileDevice {
     }
 
     const auto read_size = std::distance(begin, end);
-    device_.read(static_cast<char*>(begin), data_size);
+    device_.read(reinterpret_cast<char*>(&(*begin)), read_size);
     if (device_.eof()) {
       throw(exception::YASException("Raw device read error: read after the file end", StorageError::kDeviceReadError));
     }
-
-    return data;
   }
 
   // TODO : add const
   template <typename Iterator>
-  uint64_t Write(uint64_t position, Iterator begin, Iterator end) {
+  uint64_t Write(uint64_t position, const Iterator begin, const Iterator end) {
     if (!IsOpen()) {
       throw(exception::YASException("Raw device write error: The device hasn't been opened during write", 
           StorageError::kDeviceWriteError));
@@ -60,13 +59,13 @@ class FileDevice {
     }
 
     const auto write_size = std::distance(begin, end);
-    device_.write(static_cast<char*>(begin), data_size);
+    device_.write(reinterpret_cast<const char*>(&(*begin)), write_size);
     if (!device_.good()) {
       throw(exception::YASException("Raw device write error: something bad happened during device write", 
           StorageError::kDeviceWriteError));
     }
 
-    return data.size();
+    return write_size;
   }
 
   bool IsOpen() const noexcept {
