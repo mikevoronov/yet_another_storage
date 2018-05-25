@@ -26,6 +26,12 @@ struct PVHeader {
   uint32_t priority_;                                                             //  + 4 bytes
   uint32_t freelist_bins_count_;                                                  //  + 4 bytes
   uint32_t priority_;                                                             //  + 4 bytes
+
+  template<typename OffsetType>
+  static PVHeader Read(Device<OffsetType> &device);
+
+  template<typename OffsetType>
+  static PVHeader Write(Device<OffsetType> &device);
 });
 
 STRUCT_PACK(
@@ -46,7 +52,9 @@ enum ValueType : uint16_t {
   kInt64  = 8,
   kUint64 = 9,
   kString = 10,
-  kBlob   = 11,
+  kComplexBegin   = 11,   // beginning of Complex type
+  kComplexSequel  = 12,   // 
+  
 
   kEmpty = 0x7FFF,        // high bit determines is this value expired or not (tradeoff (types count)/performance
                           // because of expired_time_high - 2 bytes aligment)
@@ -72,11 +80,11 @@ STRUCT_PACK(
 template <typename T>
 struct CommonTypeHeader {
   ValueType value_type_;
-  uint16_t expired_time_high;    // goodbye 2038 problem :)
+  uint16_t expired_time_high_;    // goodbye 2038 problem :)
   union {
     struct {
-      uint32_t expired_time_low;
-      T value;
+      uint32_t expired_time_low_;
+      T value_;
     };
     OffsetType next_free_entry_offset_;
   };
@@ -95,15 +103,18 @@ struct Simple8TypeHeader {
 STRUCT_PACK(
 struct ComplexTypeHeader {
   ValueType value_type_;
-  uint16_t expired_time_high;
-  uint32_t expired_time_low;
+  uint16_t expired_time_high_;
+  uint32_t expired_time_low_;
+  OffsetType overall_size_;     
+  OffsetType chunk_size_;
+  OffsetType sequel_offset_;
   union {
     OffsetType next_free_entry_offset_;
     uint8_t data[1];
   };
 });
 
-constexpr uint32_t kTimeSize = sizeof(ComplexTypeHeader::expired_time_high) + sizeof(ComplexTypeHeader::expired_time_low);
+constexpr uint32_t kTimeSize = sizeof(ComplexTypeHeader::expired_time_high_) + sizeof(ComplexTypeHeader::expired_time_low_);
 
 static_assert(32 == sizeof(PVHeader),          "PVHeader should be 12 bytes long - please check aligments and type size on your setup");
 static_assert(12 == sizeof(Simple4TypeHeader), "Simple4TypeHeader should be 12 bytes long - please check aligments and type size on your setup");
