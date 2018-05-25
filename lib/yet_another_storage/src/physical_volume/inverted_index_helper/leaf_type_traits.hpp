@@ -3,10 +3,10 @@
 namespace yas {
 namespace index_helper {
 
-template<typename Type>
+template<typename LeafType>
 struct leaf_traits {
-  static Type NonExistValue() {
-    return static_cast<Type>(0);
+  static LeafType NonExistValue() {
+    return static_cast<LeafType>(0);
   }
 };
 
