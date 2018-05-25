@@ -5,8 +5,9 @@
 
 namespace {
 
+using IndexHelper = yas::index_helper::InvertedIndexHelper<char, uint64_t>;
+
 TEST(InvertedIndexHelper, BasicSerializeDeserializeTest) {
-  using IndexHelper = yas::index_helper::InvertedIndexHelper<char, uint64_t>;
   IndexHelper helper;
 
   IndexHelper::key_type key_1 = "/home/user1/tmp1";
@@ -38,7 +39,6 @@ TEST(InvertedIndexHelper, BasicSerializeDeserializeTest) {
 }
 
 TEST(InvertedIndexHelper, SerializeDeserializeTest) {
-  using IndexHelper = yas::index_helper::InvertedIndexHelper<char, uint64_t>;
   IndexHelper helper;
 
   helper.Insert("/root", 1);
@@ -135,19 +135,41 @@ TEST(InvertedIndexHelper, SerializeDeserializeTest) {
   EXPECT_EQ(1, engine.Get("/home/user5/dir1/dir4/dir2"));
   EXPECT_EQ(1, engine.Get("/home/user5/dir1/dir5/dir2"));
 
-  EXPECT_EQ(false, engine.HasKey("/home1"));
-  EXPECT_EQ(false, engine.HasKey("/aaa"));
-  EXPECT_EQ(false, engine.HasKey("home"));
-  EXPECT_EQ(false, engine.HasKey("/home/user6/dir1/dir1/dir11"));
-  EXPECT_EQ(false, engine.HasKey("/home/user2/file1"));
-  EXPECT_EQ(false, engine.HasKey("/home/user1/file1/"));
-  EXPECT_EQ(false, engine.HasKey("/home/user1/file1/asd"));
-  EXPECT_EQ(false, engine.HasKey("/home/user5/dir1/dir4/dir33"));
-  EXPECT_EQ(false, engine.HasKey("/home/user6/dir1/di"));
-  EXPECT_EQ(false, engine.HasKey("/home/user5/dir1/dir"));
-  EXPECT_EQ(false, engine.HasKey("/home/userr"));
-  EXPECT_EQ(false, engine.HasKey("/root/aa1/bb"));
-  EXPECT_EQ(false, engine.HasKey("/bin/ls"));
+  EXPECT_FALSE(engine.HasKey("/home1"));
+  EXPECT_FALSE(engine.HasKey("/aaa"));
+  EXPECT_FALSE(engine.HasKey("home"));
+  EXPECT_FALSE(engine.HasKey("/home/user6/dir1/dir1/dir11"));
+  EXPECT_FALSE(engine.HasKey("/home/user2/file1"));
+  EXPECT_FALSE(engine.HasKey("/home/user1/file1/"));
+  EXPECT_FALSE(engine.HasKey("/home/user1/file1/asd"));
+  EXPECT_FALSE(engine.HasKey("/home/user5/dir1/dir4/dir33"));
+  EXPECT_FALSE(engine.HasKey("/home/user6/dir1/di"));
+  EXPECT_FALSE(engine.HasKey("/home/user5/dir1/dir"));
+  EXPECT_FALSE(engine.HasKey("/home/userr"));
+  EXPECT_FALSE(engine.HasKey("/root/aa1/bb"));
+  EXPECT_FALSE(engine.HasKey("/bin/ls"));
+}
+
+TEST(InvertedIndexHelper, IsChangedTest) {
+  IndexHelper helper_1;
+  EXPECT_FALSE(helper_1.is_changed());
+
+  helper_1.Get("/root");
+  EXPECT_FALSE(helper_1.is_changed());
+
+  helper_1.Insert("/root", 5);
+  EXPECT_TRUE(helper_1.is_changed());
+
+  utils::Version version(1, 1);
+  const auto serialized_helper = helper_1.Serialize<uint32_t>(version);
+  auto helper_2 = IndexHelper::Deserialize<uint32_t>(std::cbegin(serialized_helper), std::cend(serialized_helper), version);
+  EXPECT_FALSE(helper_2.is_changed());
+
+  helper_2.HasKey("/root");
+  EXPECT_FALSE(helper_2.is_changed());
+
+  helper_2.Delete("/root");
+  EXPECT_TRUE(helper_2.is_changed());
 }
 
 }

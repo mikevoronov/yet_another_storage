@@ -29,6 +29,8 @@ public:
     if (key.empty()) {
       return false;
     }
+
+    is_changed = true;
     return engine_.Insert(key, leaf);
   }
 
@@ -50,6 +52,8 @@ public:
     if (key.empty()) {
       return false;
     }
+
+    is_changed = true;
     return engine_.Delete(key);
   }
 
@@ -59,6 +63,8 @@ public:
     }
     return engine_.HasKey(key);
   }
+
+  constexpr bool is_changed() const { return is_changed_; }
 
   template<typename IdType>
   ByteVector Serialize(utils::Version version) const {
@@ -78,9 +84,12 @@ public:
   InvertedIndexHelper(const InvertedIndexHelper&) = delete;
   InvertedIndexHelper& operator=(const InvertedIndexHelper&) = delete;
   InvertedIndexHelper& operator=(InvertedIndexHelper&&) = delete;
-private:
+
+ private:
   // TODO: engine probably should be template or inner class (pimpl?) - need to decide later
   AhoCorasickEngine<CharType, LeafType> engine_;
+  // true if index has been changed after creating
+  bool is_changed_ = true;
 };
 
 } // namespace index_helper
