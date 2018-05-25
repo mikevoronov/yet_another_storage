@@ -14,29 +14,23 @@ class Version {
   constexpr Version(uint8_t major = 0, uint8_t minor = 0)
       : major_(major), minor_(minor)
   {}
-  ~Version() = default;
+
+  friend constexpr bool operator<(const Version &lhs, const Version &rhs) {
+    return (lhs.major() < rhs.major()) ||
+      (lhs.major() == rhs.major() && lhs.minor() < rhs.minor());
+  }
+
+  friend constexpr bool operator==(const Version &lhs, const Version &rhs) {
+    return !(lhs < rhs) && !(rhs < lhs);
+  }
 
   constexpr uint16_t major() const { return major_; }
   constexpr uint32_t minor() const { return minor_; }
-
-  Version(const Version&) = default;
-  Version(Version &&) = default;
-  Version& operator=(const Version&) = default;
-  Version& operator=(Version&&) = default;
 
  private:
   uint8_t major_;
   uint8_t minor_;
 });
-
-constexpr bool operator<(const Version &lhs, const Version &rhs) {
-  return (lhs.major() < rhs.major()) ||
-      (lhs.major() == rhs.major() && lhs.minor() < rhs.minor());
-}
-
-constexpr bool operator==(const Version &lhs, const Version &rhs) {
-  return !(lhs < rhs) && !(rhs < lhs);
-}
 
 } // namespace utils
 } // namespace yas
