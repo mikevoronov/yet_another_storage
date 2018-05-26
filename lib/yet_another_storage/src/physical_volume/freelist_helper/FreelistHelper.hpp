@@ -16,10 +16,24 @@ struct BinDescriptor {
   OffsetType limit_;
 };
 
-template <typename Strategy, typename OffsetType>
+template <typename OffsetType>
 class FreelistHelper {
  public:
-  FreelistHelper(const FreelistHeader &header) {
+  FreelistHelper() {
+    for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
+      bin_descriptors_[bin_id].offset_ = offset_traits<OffsetType>::NonExistValue();
+      bin_descriptors_[bin_id].limit_ = kFreelistLimits[bin_id];
+    }
+  }
+
+  explicit FreelistHelper(const FreelistHeader<OffsetType> &header) {
+    for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
+      bin_descriptors_[bin_id].offset_ = header.free_bins_[bin_id];
+      bin_descriptors_[bin_id].limit_ = kFreelistLimits[bin_id];
+    }
+  }
+
+  void SetBins(const FreelistHeader<OffsetType> &header) noexcept {
     for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
       bin_descriptors_[bin_id].offset_ = header.free_bins_[bin_id];
       bin_descriptors_[bin_id].limit_ = kFreelistLimits[bin_id];
@@ -28,7 +42,7 @@ class FreelistHelper {
 
   ~FreelistHelper() = default;
 
-  OffsetType GetFreeEntryOffset(uint32_t entry_size) {
+  OffsetType GetFreeEntryOffset(uint32_t entry_size) noexcept {
     // very simple strategy
     bool is_less_cluster_size = entry_size < kDefaultClusterSize;
 
@@ -55,7 +69,7 @@ class FreelistHelper {
     return offset_traits<OffsetType>::NonExistValue();
   }
 
-  OffsetType SetFreeEntry(OffsetType new_offset, uint32_t entry_size) {
+  OffsetType SetFreeEntry(OffsetType new_offset, uint32_t entry_size) noexcept {
     assert(entry_size > kDefaultClusterSize);
 
     for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
@@ -70,7 +84,7 @@ class FreelistHelper {
   FreelistHelper(FreelistHelper&) = delete;
   FreelistHelper(FreelistHelper&&) = delete;
   FreelistHelper& operator=(const FreelistHelper&) = delete;
-  FreelistHelper& opeartor = (FreelistHelper&&) = delete;
+  FreelistHelper& operator= (FreelistHelper&&) = delete;
 
  private:
   std::array<BinDescriptor, kBinCount> bin_descriptors_;
