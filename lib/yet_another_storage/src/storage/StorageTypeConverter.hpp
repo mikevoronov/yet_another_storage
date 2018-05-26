@@ -13,11 +13,8 @@ namespace storage {
 namespace types {
 
 struct StorageType {};
-
 struct Simple4Type : public StorageType { };
-
 struct Simple8Type : public StorageType { };
-
 struct ComplexType : public StorageType { };
 
 class TypeConverter {
@@ -26,12 +23,12 @@ class TypeConverter {
      init();
   }
 
-  PVType ConvertToPVType(std::any value) {
+  PVType ConvertToPVType(std::any &value) {
     return user_to_pv_type_mapping_[std::type_index(value.type())];
   }
 
   template <typename StorageType, typename UserType>
-  constexpr StorageType ConvertToStorageType(UserType type) {
+  static constexpr StorageType ConvertToStorageType(UserType type) {
     if constexpr (sizeof(type) <= 4) {
       return Simple4Type;
     }
@@ -65,19 +62,19 @@ class TypeConverter {
      user_to_pv_type_mapping_[std::type_index(typeid(ByteVector))] = PVType::kComplexBegin;
      user_to_pv_type_mapping_[std::type_index(typeid(void))] = PVType::kEmpty;
 
-     pv_to_storage_type_mapping_[PVType::kInt8] = std::type_index(typeid(Simple4Type));
-     pv_to_storage_type_mapping_[PVType::kUint8] = std::type_index(typeid(Simple4Type));
-     pv_to_storage_type_mapping_[PVType::kInt16] = std::type_index(typeid(Simple4Type));
-     pv_to_storage_type_mapping_[PVType::kUint16] = std::type_index(typeid(Simple4Type));
-     pv_to_storage_type_mapping_[PVType::kInt32] = std::type_index(typeid(Simple4Type));
-     pv_to_storage_type_mapping_[PVType::kUint32] = std::type_index(typeid(Simple4Type));
-     pv_to_storage_type_mapping_[PVType::kFloat] = std::type_index(typeid(Simple4Type));
-     pv_to_storage_type_mapping_[PVType::kDouble] = std::type_index(typeid(Simple8Type));
-     pv_to_storage_type_mapping_[PVType::kInt64] = std::type_index(typeid(Simple8Type));
-     pv_to_storage_type_mapping_[PVType::kUint64] = std::type_index(typeid(Simple8Type));
-     pv_to_storage_type_mapping_[PVType::kComplexBegin] = std::type_index(typeid(ComplexType));
-     pv_to_storage_type_mapping_[PVType::kComplexBegin] = std::type_index(typeid(ComplexType));
-     pv_to_storage_type_mapping_[PVType::kEmpty] = std::type_index(typeid(StorageType));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kInt8, std::type_index(typeid(Simple4Type))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kUint8, std::type_index(typeid(Simple4Type))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kInt16, std::type_index(typeid(Simple4Type))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kUint16, std::type_index(typeid(Simple4Type))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kInt32, std::type_index(typeid(Simple4Type))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kUint32, std::type_index(typeid(Simple4Type))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kFloat, std::type_index(typeid(Simple4Type))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kDouble, std::type_index(typeid(Simple8Type))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kInt64, std::type_index(typeid(Simple8Type))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kUint64, std::type_index(typeid(Simple8Type))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kComplexBegin, std::type_index(typeid(ComplexType))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kComplexBegin, std::type_index(typeid(ComplexType))));
+     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kEmpty, std::type_index(typeid(StorageType))));
    }
 };
 

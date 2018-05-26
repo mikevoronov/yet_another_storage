@@ -16,9 +16,8 @@ enum StorageError : uint32_t {
   kReadComplexTypeError = 6,
   kInvalidSignatureError = 7,
   kPVVersionNotSupported = 8,
-
-  kFileNotFound = 1,
-  kKeyNotFound = 2,
+  kKeyNotFound = 9,
+  kPVMountPointManagerAdapterNotReady = 10,
 
   kUnknownExceptionType
   // TODO : add list

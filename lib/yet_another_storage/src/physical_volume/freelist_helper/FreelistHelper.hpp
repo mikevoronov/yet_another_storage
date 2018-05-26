@@ -18,6 +18,7 @@ struct BinDescriptor {
 
 template <typename OffsetType>
 class FreelistHelper {
+  using FreelistHeaderType = FreelistHeader<OffsetType>;
  public:
   FreelistHelper() {
     for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
@@ -26,18 +27,27 @@ class FreelistHelper {
     }
   }
 
-  explicit FreelistHelper(const FreelistHeader<OffsetType> &header) {
+  explicit FreelistHelper(const FreelistHeaderType &header) {
     for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
       bin_descriptors_[bin_id].offset_ = header.free_bins_[bin_id];
       bin_descriptors_[bin_id].limit_ = kFreelistLimits[bin_id];
     }
   }
 
-  void SetBins(const FreelistHeader<OffsetType> &header) noexcept {
+  void SetBins(const FreelistHeaderType &header) noexcept {
     for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
       bin_descriptors_[bin_id].offset_ = header.free_bins_[bin_id];
       bin_descriptors_[bin_id].limit_ = kFreelistLimits[bin_id];
     }
+  }
+
+  FreelistHeaderType GetBins() const {
+    FreelistHeaderType header;
+    for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
+      header[bin_id] = header.free_bins_[bin_id];
+    }
+
+    return header;
   }
 
   ~FreelistHelper() = default;

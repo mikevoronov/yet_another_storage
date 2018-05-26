@@ -18,6 +18,8 @@ class IStorage {
   virtual nonstd::expected<bool,     StorageErrorDescriptor> Delete(key_type key) = 0;
   virtual nonstd::expected<bool,     StorageErrorDescriptor> SetExpiredDate(key_type key, time_t expired) = 0;
   virtual nonstd::expected<time_t,   StorageErrorDescriptor> GetExpiredDate(key_type key) = 0;
+
+  virtual ~IStorage() = default;
 };
 
 } // namespace storage

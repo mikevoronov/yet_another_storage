@@ -110,9 +110,6 @@
     <ClInclude Include="src\physical_volume\freelist_helper\FreelistHelper.hpp">
       <Filter>src\physical_volume\freelist_helper</Filter>
     </ClInclude>
-    <ClInclude Include="src\physical_volume\freelist_helper\FreelistStrategy.hpp">
-      <Filter>src\physical_volume\freelist_helper</Filter>
-    </ClInclude>
     <ClInclude Include="src\exceptions\YASException.h">
       <Filter>src\exception</Filter>
     </ClInclude>
@@ -120,12 +117,6 @@
       <Filter>src\exception</Filter>
     </ClInclude>
     <ClInclude Include="src\storage\PVManagerFactory.hpp">
-      <Filter>src\storage</Filter>
-    </ClInclude>
-    <ClInclude Include="src\storage\PVMountPointManagerAdapter.hpp">
-      <Filter>src\storage</Filter>
-    </ClInclude>
-    <ClInclude Include="src\storage\PVMountPointManager.hpp">
       <Filter>src\storage</Filter>
     </ClInclude>
     <ClInclude Include="src\physical_volume\pv_layout_headers.h">
@@ -140,8 +131,23 @@
     <ClInclude Include="src\device_worker\devices\TestDevice.hpp">
       <Filter>src\device_worker\devices\test_device</Filter>
     </ClInclude>
+    <ClInclude Include="src\common\offset_type_traits.hpp">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\storage\IStorage.hpp">
+      <Filter>src\storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\storage\PVVolumeManager.hpp">
+      <Filter>src\storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\storage\PVMountPoint.hpp">
+      <Filter>src\storage</Filter>
+    </ClInclude>
     <ClInclude Include="src\device_worker\PVDeviceDataReaderWriter.hpp">
       <Filter>src\device_worker</Filter>
+    </ClInclude>
+    <ClInclude Include="src\storage\StorageTypeConverter.hpp">
+      <Filter>src\storage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -160,7 +160,7 @@ TEST(InvertedIndexHelper, IsChangedTest) {
   helper_1.Insert("/root", 5);
   EXPECT_TRUE(helper_1.is_changed());
 
-  utils::Version version(1, 1);
+  yas::utils::Version version(1, 1);
   const auto serialized_helper = helper_1.Serialize<uint32_t>(version);
   auto helper_2 = IndexHelper::Deserialize<uint32_t>(std::cbegin(serialized_helper), std::cend(serialized_helper), version);
   EXPECT_FALSE(helper_2.is_changed());

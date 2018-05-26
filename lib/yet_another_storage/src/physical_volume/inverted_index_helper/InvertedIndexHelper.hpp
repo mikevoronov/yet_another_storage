@@ -30,7 +30,7 @@ public:
       return false;
     }
 
-    is_changed = true;
+    is_changed_ = true;
     return engine_.Insert(key, leaf);
   }
 
@@ -53,7 +53,7 @@ public:
       return false;
     }
 
-    is_changed = true;
+    is_changed_ = true;
     return engine_.Delete(key);
   }
 

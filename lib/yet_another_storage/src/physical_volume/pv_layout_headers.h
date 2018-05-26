@@ -35,7 +35,7 @@ struct FreelistHeader {
   OffsetType free_bins_[kBinCount];
 });
 
-enum ValueType : uint16_t {
+enum PVType : uint16_t {
   kInt8   = 0,
   kUint8  = 1,
   kInt16  = 2,
@@ -46,9 +46,8 @@ enum ValueType : uint16_t {
   kDouble = 7,
   kInt64  = 8,
   kUint64 = 9,
-  kString = 10,
-  kComplexBegin   = 11,   // beginning of Complex type
-  kComplexSequel  = 12,   // 
+  kComplexBegin   = 10,   // beginning of Complex type
+  kComplexSequel  = 11,   // next chunk of Complex type
   
 
   kEmpty = 0x7FFF,        // high bit determines is this value expired or not (tradeoff (types count)/performance
@@ -74,7 +73,7 @@ enum ValueType : uint16_t {
 STRUCT_PACK(
 template <typename T>
 struct CommonTypeHeader {
-  ValueType value_type_;
+  PVType value_type_;
   uint16_t expired_time_high_;    // goodbye 2038 problem :)
   union {
     struct {
@@ -97,7 +96,7 @@ struct Simple8TypeHeader {
 
 STRUCT_PACK(
 struct ComplexTypeHeader {
-  ValueType value_type_;
+  PVType value_type_;
   uint16_t expired_time_high_;
   uint32_t expired_time_low_;
   OffsetType overall_size_;     
@@ -108,6 +107,8 @@ struct ComplexTypeHeader {
     uint8_t data[1];
   };
 });
+
+static_assert(sizeof(float) == 4, "please fix type mapping because size of float isn't 4 byte in your setup");
 
 constexpr uint32_t kTimeSize = sizeof ComplexTypeHeader::expired_time_high_ + sizeof ComplexTypeHeader::expired_time_low_;
 
