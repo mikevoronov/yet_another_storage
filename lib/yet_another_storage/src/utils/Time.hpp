@@ -43,6 +43,10 @@ class Time {
     return !(lhs < rhs) && !(rhs < lhs);
   }
 
+  friend constexpr bool operator>(const Time &lhs, const Time &rhs) {
+    return rhs < lhs;
+  }
+
   time_t GetTime() const noexcept {
     uint64_t time = expired_time_low_;    
     time |= (static_cast<uint64_t>(expired_time_high_) << 48);

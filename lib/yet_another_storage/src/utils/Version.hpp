@@ -20,6 +20,10 @@ class Version {
       (lhs.major() == rhs.major() && lhs.minor() < rhs.minor());
   }
 
+  friend constexpr bool operator>(const Version &lhs, const Version &rhs) {
+    return rhs < lhs;
+  }
+
   friend constexpr bool operator==(const Version &lhs, const Version &rhs) {
     return !(lhs < rhs) && !(rhs < lhs);
   }
