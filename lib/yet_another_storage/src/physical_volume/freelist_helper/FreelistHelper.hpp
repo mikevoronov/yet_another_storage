@@ -11,10 +11,6 @@ namespace freelist_helper {
 
 // the last one must be equals to default cluster size 
 std::array<OffsetType, kBinCount> kFreelistLimits = { 12, 16, 32, 64, 128, 256, 512, 1024, 2048, kDefaultClusterSize };
-struct BinDescriptor {
-  OffsetType offset_;
-  OffsetType limit_;
-};
 
 template <typename OffsetType>
 class FreelistHelper {
@@ -52,25 +48,25 @@ class FreelistHelper {
 
   ~FreelistHelper() = default;
 
-  OffsetType GetFreeEntryOffset(uint32_t entry_size) noexcept {
+  OffsetType PopFreeEntryOffset(OffsetType entry_size) {
     // very simple strategy
     bool is_less_cluster_size = entry_size < kDefaultClusterSize;
 
     OffsetType last_viewed_freed_bin_id = offset_traits<OffsetType>::NonExistValue();
     for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
       if (entry_size <= bin_descriptors_[bin_id].limit_ 
-          && bin_descriptors_[bin_id].offset_ != offset_traits<OffsetType>::NonExistValue()) {
+          && offset_traits<OffsetType>::IsExistValue(bin_descriptors_[bin_id].offset_)) {
         const auto offset = bin_descriptors_[bin_id].offset_;
         bin_descriptors_[bin_id].offset_ = offset_traits<OffsetType>::NonExistValue();
         return offset;
       }
-      if (is_less_cluster_size && bin_descriptors_[bin_id].offset_ != offset_traits<OffsetType>::NonExistValue()) {
+      if (is_less_cluster_size && offset_traits<OffsetType>::IsExistValue(bin_descriptors_[bin_id].offset_)) {
         last_viewed_freed_bin_id = bin_id;
       }
     }
 
     if (!is_less_cluster_size && last_viewed_freed_bin_id > 5 
-        && last_viewed_freed_bin_id != offset_traits<OffsetType>::NonExistValue()) {
+        && offset_traits<OffsetType>::IsExistValue(last_viewed_freed_bin_id)) {
       const auto offset = bin_descriptors_[last_viewed_freed_bin_id].offset_;
       bin_descriptors_[last_viewed_freed_bin_id].offset_ = offset_traits<OffsetType>::NonExistValue();
       return offset;
@@ -79,16 +75,17 @@ class FreelistHelper {
     return offset_traits<OffsetType>::NonExistValue();
   }
 
-  OffsetType SetFreeEntry(OffsetType new_offset, uint32_t entry_size) noexcept {
-    assert(entry_size > kDefaultClusterSize);
+  OffsetType PushFreeEntry(OffsetType new_offset, OffsetType entry_size) {
+    //assert(entry_size > kDefaultClusterSize);
+    const auto bin_id = getBinIdForSize(entry_size);
+    const auto offset = bin_descriptors_[bin_id].offset_;
+    bin_descriptors_[bin_id].offset_ = new_offset;
+    return offset;
+  }
 
-    for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
-      if (entry_size <= bin_descriptors_[bin_id].limit_) {
-        const auto offset = bin_descriptors_[bin_id].offset_;
-        bin_descriptors_[bin_id].offset_ = new_offset;
-        return offset;
-      }
-    }
+  OffsetType GetFreeEntry(OffsetType entry_size) const {
+    const auto bin_id = getBinIdForSize(entry_size);
+    return bin_descriptors_[bin_id].offset_;
   }
 
   FreelistHelper(FreelistHelper&) = delete;
@@ -97,7 +94,23 @@ class FreelistHelper {
   FreelistHelper& operator= (FreelistHelper&&) = delete;
 
  private:
+  struct BinDescriptor {
+    OffsetType offset_;
+    OffsetType limit_;
+  };
   std::array<BinDescriptor, kBinCount> bin_descriptors_;
+
+  uint32_t getBinIdForSize(OffsetType entry_size) const {
+    //assert(entry_size > kDefaultClusterSize);
+
+    auto found_value_it = std::lower_bound(std::cbegin(bin_descriptors_), std::cend(bin_descriptors_), entry_size, [](
+        const BinDescriptor &left,
+        const OffsetType entry_size) {
+      return left.limit_ < entry_size;
+    });
+
+    return static_cast<uint32_t>(std::distance(std::cbegin(bin_descriptors_), found_value_it));
+  }
 };
 
 } // namespace freelist_helper
