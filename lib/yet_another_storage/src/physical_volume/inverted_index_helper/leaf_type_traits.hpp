@@ -8,6 +8,10 @@ struct leaf_traits {
   static LeafType NonExistValue() {
     return static_cast<LeafType>(0);
   }
+
+  static bool IsExistValue(LeafType value) {
+    return value != NonExistValue();
+  }
 };
 
 } // namespace index_helper
