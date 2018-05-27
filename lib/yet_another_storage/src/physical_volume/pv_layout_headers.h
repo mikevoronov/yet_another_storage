@@ -48,7 +48,6 @@ enum PVType : uint16_t {
   kUint64 = 9,
   kComplexBegin   = 10,   // beginning of Complex type
   kComplexSequel  = 11,   // next chunk of Complex type
-  
 
   kEmpty = 0x7FFF,        // high bit determines is this value expired or not (tradeoff (types count)/performance
                           // because of expired_time_high - 2 bytes aligment)
@@ -85,13 +84,11 @@ struct CommonTypeHeader {
 });
 
 STRUCT_PACK(
-struct Simple4TypeHeader {
-  CommonTypeHeader<uint32_t> body_;
+struct Simple4TypeHeader : public CommonTypeHeader<uint32_t> {
 });
 
 STRUCT_PACK(
-struct Simple8TypeHeader {
-  CommonTypeHeader<uint64_t> body_;
+struct Simple8TypeHeader : public CommonTypeHeader<uint64_t> {
 });
 
 STRUCT_PACK(
