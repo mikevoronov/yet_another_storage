@@ -30,7 +30,7 @@ class Time {
     expired_time_low_ = time & 0xFFFFFFFF;
   }
 
-  bool IsExpired() const noexcept {
+  bool IsExpired() const {
     return *this < Time(std::time(nullptr));
   }
 
@@ -41,6 +41,13 @@ class Time {
 
   friend constexpr bool operator==(const Time &lhs, const Time &rhs) {
     return !(lhs < rhs) && !(rhs < lhs);
+  }
+
+  time_t GetTime() const noexcept {
+    uint64_t time = expired_time_low_;    
+    time |= (static_cast<uint64_t>(expired_time_high_) << 48);
+
+    return static_cast<time_t>(time);
   }
   
   constexpr uint16_t expired_time_high() const { return expired_time_high_; }
