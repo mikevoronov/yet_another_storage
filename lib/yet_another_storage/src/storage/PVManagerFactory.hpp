@@ -1,5 +1,5 @@
 #pragma once
-#include "PVMountPointManagerAdapter.hpp"
+#include "PVManager.hpp"
 #include "../utils/Version.hpp"
 #include "../common/filesystem.h"
 #include <mutex>
@@ -10,31 +10,54 @@
 namespace yas {
 namespace storage {
 
-// factory 
+// TODO : add comments
 class PVManagerFactory {
-  using Manager = PVMountPointManagerAdapter<CharType>;
-
  public:
-  static std::shared_ptr<Manager> Create(utils::Version version, const std::string &mount_point) {
-    // can be spin lock on atomics
-    std::lock_guard<std::mutex> lock(factory_mutex_);
+  using Manager = PVManager<CharType, OffsetType, DefaultDevice<OffsetType>>;
 
-    if (!managers_.count(mount_point)) {
-      managers_[mount_point].reset(new Manager());
-    }
-
-    return managers_[mount_point];
+  static PVManagerFactory& Instance() {
+    static PVManagerFactory factory;
+    return factory;
   }
 
-  PVManagerFactory() = delete;
-  ~PVManagerFactory() = delete;
+  nonstd::expected<std::shared_ptr<Manager>, StorageErrorDescriptor> Create(const fs::path path, utils::Version requested_version, uint32_t priority = 0,
+      uint32_t cluster_size = kDefaultClusterSize) {
+
+    if (max_supported_version < requested_version) {
+      return nonstd::make_unexpected(StorageErrorDescriptor("requested PV version is unsopported", StorageError::kPVVersionUnsopported));
+    }
+    
+    auto canonical_path = fs::canonical(path);
+    auto canonical_path_str = std::wstring(fs::canonical(path));
+    std::lock_guard<std::mutex> lock(factory_mutex_);
+
+    if (managers_.count(canonical_path_str)) {
+      return managers_[canonical_path];
+    }
+
+    auto new_manager = Manager::Create(canonical_path, requested_version, priority, cluster_size);
+    managers_[canonical_path_str] = std::move(new_manager);
+    return managers_[canonical_path_str];
+  }
+
+  std::shared_ptr<Manager> GetPVManager(const fs::path path) {
+    auto canonical_path = std::wstring(fs::canonical(path));
+
+    std::lock_guard<std::mutex> lock(factory_mutex_);
+    return managers_.count(canonical_path) ? managers_[canonical_path] : nullptr;
+  }
+
+  ~PVManagerFactory() = default;
   PVManagerFactory(const PVManagerFactory&) = delete;
   PVManagerFactory(PVManagerFactory&&) = delete;
   PVManagerFactory operator=(const PVManagerFactory&) = delete;
 
  private:
-  static std::unordered_map<std::string, std::shared_ptr<Manager>> managers_;
-  static std::mutex factory_mutex_;
+  std::unordered_map<std::wstring, std::shared_ptr<Manager>> managers_;
+  std::mutex factory_mutex_;
+  utils::Version max_supported_version_ = max_supported_version;
+
+  PVManagerFactory() = default;
 };
 
 } // namespace storage
