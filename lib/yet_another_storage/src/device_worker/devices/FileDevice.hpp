@@ -25,7 +25,7 @@ class FileDevice {
   }
 
   template <typename Iterator>
-  void Read(uint64_t position, Iterator begin, Iterator end) {
+  void Read(OffsetType position, Iterator begin, Iterator end) {
     if (!IsOpen()) {
       throw(exception::YASException("Raw device read error: the device hasn't been opened during read", 
           StorageError::kDeviceReadError));
@@ -46,7 +46,7 @@ class FileDevice {
 
   // TODO : add const
   template <typename Iterator>
-  uint64_t Write(uint64_t position, const Iterator begin, const Iterator end) {
+  uint64_t Write(OffsetType position, const Iterator begin, const Iterator end) {
     if (!IsOpen()) {
       throw(exception::YASException("Raw device write error: The device hasn't been opened during write", 
           StorageError::kDeviceWriteError));
