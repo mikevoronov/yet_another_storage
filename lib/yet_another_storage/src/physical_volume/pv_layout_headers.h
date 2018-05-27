@@ -46,12 +46,14 @@ enum PVType : uint16_t {
   kDouble = 7,
   kInt64  = 8,
   kUint64 = 9,
-  kComplexBegin   = 10,   // beginning of Complex type
-  kComplexSequel  = 11,   // next chunk of Complex type
+  kString = 10,
+  kBlob   = 11,
 
   kEmpty = 0x7FFF,        // high bit determines is this value expired or not (tradeoff (types count)/performance
                           // because of expired_time_high - 2 bytes aligment)
 };
+constexpr uint16_t kComplexBeginBitMask = 0x4000;     // beginning of Complex type
+constexpr uint16_t kComplexSequelBitMask = 0x2000;    // next chunk of Complex type
 
 // I assume that the most common types would be types with 4 and 8 bytes size. So there are specially
 // size-optimized header for them. Each header could be in 2 states: allocated and freed. Allocated 
