@@ -53,7 +53,7 @@ class AhoCorasickSerializationHelper {
     while (!current_level_nodes.empty()) {
       for (const auto &node_descriptor : current_level_nodes) {
         auto leaf_id = id_type_traits<IdType>::NonExistValue();
-        if (leaf_traits<LeafType>::NonExistValue() != node_descriptor.node_->leaf_) {
+        if (leaf_traits<LeafType>::IsExistValue(node_descriptor.node_->leaf_)) {
           leaf_id = current_leaf_id;
           serialized_leafs.push_back(serialize(node_descriptor.node_->leaf_, node_descriptor.node_id_));
           ++current_leaf_id;
@@ -127,7 +127,7 @@ class AhoCorasickSerializationHelper {
       const auto route = parent->node_->routes_[node_descriptor.parent_node_ch_].get();
       current_level_nodes.push_back(deserialize(node_descriptor, route));
 
-      if (node_descriptor.leaf_id_ != id_type_traits<IdType>::NonExistValue()) {
+      if (id_type_traits<IdType>::IsExistValue(node_descriptor.leaf_id_)) {
         const auto found_leaf_iterator = findLeafByNodeId(std::cbegin(leaf_descriptors), std::cend(leaf_descriptors),
             node_descriptor.node_id_);
         if (std::cend(leaf_descriptors) == found_leaf_iterator) {
@@ -177,9 +177,9 @@ class AhoCorasickSerializationHelper {
         sizeof(LeafSerializationDescriptorStorage::value_type)*serialized_leafs.size());
 
     // TODO : to make SerializedDataHeader ctor explicit it is need to add a list-initialization
-    SerializedDataHeader header = { 
-        version_, 
-        static_cast<IdType>(serialized_leafs.size()), 
+    SerializedDataHeader header {
+        version_,
+        static_cast<IdType>(serialized_leafs.size()),
         static_cast<IdType>(serialized_nodes.size()),
         aho_corasick_serialization_headers::ConvertIdType(sizeof(IdType))
     };
