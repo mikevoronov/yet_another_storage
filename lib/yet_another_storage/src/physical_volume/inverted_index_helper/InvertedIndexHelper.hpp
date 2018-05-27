@@ -73,12 +73,12 @@ public:
   }
 
   template<typename IdType, typename Iterator>
-  static InvertedIndexHelper Deserialize(Iterator begin, Iterator end, utils::Version version) {
+  static std::unique_ptr<InvertedIndexHelper> Deserialize(Iterator begin, Iterator end, utils::Version version) {
     AhoCorasickSerializationHelper<CharType, LeafType, IdType> serializer(version);
-    InvertedIndexHelper<CharType, LeafType> index_helper;
-    serializer.Deserialize(begin, end, index_helper.engine_);
+    auto inverted_index = std::make_unique<InvertedIndexHelper<CharType, LeafType>>();
+    serializer.Deserialize(begin, end, inverted_index->engine_);
 
-    return index_helper;
+    return inverted_index;
   }
 
   InvertedIndexHelper(const InvertedIndexHelper&) = delete;
