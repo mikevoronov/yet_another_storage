@@ -9,13 +9,13 @@ using namespace yas::pv_layout_headers;
 namespace yas {
 namespace freelist_helper {
 
-// the last one must be equals to default cluster size 
-std::array<OffsetType, kBinCount> kFreelistLimits = { sizeof(Simple4TypeHeader), sizeof(Simple8TypeHeader), 64, 100, 128, 256, 512, 1024, 1520, 2048, kDefaultClusterSize };
-
 template <typename OffsetType>
 class FreelistHelper {
   using FreelistHeaderType = FreelistHeader<OffsetType>;
  public:
+  // the last one must be equals to default cluster size 
+  static constexpr std::array<OffsetType, kBinCount> kFreelistLimits = { sizeof(Simple4TypeHeader), sizeof(Simple8TypeHeader), 64, 100, 128, 256, 512, 1024, 1520, 2048, kDefaultClusterSize };
+   
   FreelistHelper() {
     for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
       bin_descriptors_[bin_id].offset_ = offset_traits<OffsetType>::NonExistValue();

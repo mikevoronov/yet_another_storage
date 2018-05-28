@@ -12,8 +12,8 @@ TEST(FreelistHelper, BasicPushPopTest) {
   FreelistHelperType helper;
 
   for (int bin_id = 0; bin_id < kBinCount; ++bin_id) {
-    helper.PushFreeEntry(bin_id * 0x10101010, kFreelistLimits[bin_id] - 5);
-    EXPECT_EQ(helper.PopFreeEntryOffset(kFreelistLimits[bin_id] - 5), bin_id * 0x10101010);
+    helper.PushFreeEntry(bin_id * 0x10101010, FreelistHelperType::kFreelistLimits[bin_id] - 5);
+    EXPECT_EQ(helper.PopFreeEntryOffset(FreelistHelperType::kFreelistLimits[bin_id] - 5), bin_id * 0x10101010);
   }
 }
 
