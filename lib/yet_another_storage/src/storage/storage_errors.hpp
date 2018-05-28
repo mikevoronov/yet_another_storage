@@ -18,10 +18,12 @@ enum StorageError : uint32_t {
   kInvalidPVSignatureError = 8,
   kPVVersionNotSupported = 9,
   kKeyNotFound = 10,
-  kPVMountPointManagerAdapterNotReady = 11,
-  kValueNotFound = 12,          // used for std::any
-  kKeyAlreadyCreated = 13,
-  kPVVersionUnsopported = 14,
+  kKeyExpired = 11,
+  kKeyDoesntExpired = 12,
+  kPVMountPointManagerAdapterNotReady = 13,
+  kValueNotFound = 14,                                         // used for std::any
+  kKeyAlreadyCreated = 15,
+  kPVVersionUnsopported = 16,
 
   kUnknownExceptionType
 };

@@ -321,22 +321,22 @@ TEST(PVManager, PutDeleteGetBlob) {
   EXPECT_FALSE(result);
 }
 
-//TEST(PVManager, PutDeleteGetBigBlob) {
-//  using TestType = ByteVector;
-//  const TestType test_value(kMaximumTypeSize - 100, '\x41');
-//  const std::basic_string<CharType> key = "/root/asd17";
-//  const auto pv_path = fs::temp_directory_path() / "pv16";
-//
-//  auto &factory = PVManagerFactory::Instance();
-//  auto manager = factory.Create(pv_path, max_supported_version);
-//  EXPECT_TRUE(manager);
-//
-//  auto pv_manager = manager.value();
-//  pv_manager->Put(key, std::make_any<TestType>(test_value));
-//  pv_manager->Delete(key);
-//  auto result = pv_manager->Get(key);
-//  EXPECT_FALSE(result);
-//}
+TEST(PVManager, PutDeleteGetBigBlob) {
+  using TestType = ByteVector;
+  const TestType test_value(kMaximumTypeSize - 100, '\x41');
+  const std::basic_string<CharType> key = "/root/asd17";
+  const auto pv_path = fs::temp_directory_path() / "pv16";
+
+  auto &factory = PVManagerFactory::Instance();
+  auto manager = factory.Create(pv_path, max_supported_version);
+  EXPECT_TRUE(manager);
+
+  auto pv_manager = manager.value();
+  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Delete(key);
+  auto result = pv_manager->Get(key);
+  EXPECT_FALSE(result);
+}
 
 TEST(PVManager, PutGetBigBlob) {
   using TestType = ByteVector;

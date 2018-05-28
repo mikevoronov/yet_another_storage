@@ -292,6 +292,7 @@ class PVManager : public IStorage<CharType> {
 
     HeaderType header;
     header.value_type_ = pv_type;
+    header.value_state_ = PVTypeState::kEmpty;
     header.value_ = value;
     data_reader_writer_.Write<HeaderType>(new_entry_offset, header);
 
@@ -338,31 +339,45 @@ class PVManager : public IStorage<CharType> {
   template<typename HeaderType>
   std::any getEntryValue(OffsetType offset) {
     HeaderType header = data_reader_writer_.Read<HeaderType>(offset);
+    if (header.value_state_ & PVTypeState::kIsExpired) {
+      utils::Time value_time(header.expired_time_low_, header.expired_time_high_);
+      if (value_time.IsExpired()) {
+        throw (exception::YASException("The key has been expired but doesn't delete from storage",
+          StorageError::kKeyExpired));
+      }
+    }
+
     return type_converter_.ConvertToUserType(header.value_type_, header.value_);
   }
 
   template<>
   std::any getEntryValue<ComplexTypeHeader>(OffsetType offset) {
     ComplexTypeHeader header = data_reader_writer_.Read<ComplexTypeHeader>(offset);
-    utils::Time value_time(header.expired_time_low_, header.expired_time_high_);
-    if (value_time.IsExpired()) {
-      throw (exception::YASException("The key has been expired but doesn't delete from storage", 
+    if (header.value_state_ & PVTypeState::kIsExpired) {
+      utils::Time value_time(header.expired_time_low_, header.expired_time_high_);
+      if (value_time.IsExpired()) {
+        throw (exception::YASException("The key has been expired but doesn't delete from storage",
           StorageError::kKeyExpired));
+      }
     }
-
     const auto data = data_reader_writer_.ReadComplexType(offset);
     return type_converter_.ConvertToUserType(header.value_type_, std::cbegin(data), std::cend(data));
   }
 
   utils::Time getExpiredDate(OffsetType offset) {
-    const PVType pv_type = getRecordType(offset);
-    if (pv_type < PVType::k4TypeMax) {
+    const PVState pv_state = data_reader_writer_.Read<PVState>(offset);
+    if (!(pv_state.value_state_ & PVTypeState::kIsExpired)) {
+      throw (exception::YASException("Expired date hasn't been setted for this value yet",
+          StorageError::kKeyDoesntExpired));
+    }
+
+    if (pv_state.value_type_ < PVType::k4TypeMax) {
       return getExpiredDate<Simple4TypeHeader>(offset);
     }
-    else if (pv_type < PVType::k8TypeMax) {
+    else if (pv_state.value_type_ < PVType::k8TypeMax) {
       return getExpiredDate<Simple8TypeHeader>(offset);
     }
-    else if (pv_type < PVType::kComplexMax) {
+    else if (pv_state.value_type_ < PVType::kComplexMax) {
       return getExpiredDate<ComplexTypeHeader>(offset);
     }
 
@@ -395,6 +410,7 @@ class PVManager : public IStorage<CharType> {
   void deleteEntry(OffsetType offset) {
     HeaderType header = data_reader_writer_.Read<HeaderType>(offset);
     header.value_type_ = (sizeof(HeaderType) == sizeof(Simple4TypeHeader) ? PVType::kEmpty4Simple : PVType::kEmpty8Simple);
+    header.value_state_ = PVTypeState::kEmpty;
     header.next_free_entry_offset_ = freelist_helper_.GetFreeEntry(sizeof(HeaderType));
     data_reader_writer_.Write<HeaderType>(offset, header);
     freelist_helper_.PushFreeEntry(offset, sizeof(HeaderType));
