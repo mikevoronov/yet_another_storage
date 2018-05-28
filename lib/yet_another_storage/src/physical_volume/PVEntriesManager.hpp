@@ -145,7 +145,7 @@ class PVEntriesManager {
     else if (pv_type < PVType::kComplexMax) {
       return deleteEntry<ComplexTypeHeader>(offset);
     }
-    throw (exception::YASException("Corrupted storage header type: unsupported type",
+    throw (exception::YASException("Corrupted storage header type: unsupported entry type",
         StorageError::kCorruptedHeaderError));
   }
 
@@ -161,8 +161,8 @@ class PVEntriesManager {
       return getEntryExpiredDate<ComplexTypeHeader>(offset, expired_date);
     }
 
-    throw (exception::YASException("Corrupted storage header type: unsupported type",
-      StorageError::kCorruptedHeaderError));
+    throw (exception::YASException("Corrupted storage header type: unsupported entry type",
+        StorageError::kCorruptedHeaderError));
   }
 
   void SetEntryExpiredDate(OffsetType offset, utils::Time &expired_date) {
@@ -176,11 +176,11 @@ class PVEntriesManager {
     else if (pv_type < PVType::kComplexMax) {
       return setEntryExpiredDate<ComplexTypeHeader>(offset, expired_date);
     }
-    throw (exception::YASException("Corrupted storage header type: unsupported type",
+    throw (exception::YASException("Corrupted storage header type: unsupported entry type",
         StorageError::kCorruptedHeaderError));
   }
 
-  uint32_t priority() const { return priority; }
+  uint32_t priority() const { return priority_; }
 
  private:
   PVDeviceDataReaderWriter<OffsetType, Device> data_reader_writer_;
@@ -188,7 +188,7 @@ class PVEntriesManager {
   EntriesTypeConverter type_converter_;
   OffsetType device_end_;
   uint32_t cluster_size_;
-  utils::Version version_;
+  utils::Version version_;    // there could be some parsing issues depends on version
   uint32_t priority_;
 
   template<typename HeaderType, typename ValueType>
@@ -226,28 +226,12 @@ class PVEntriesManager {
   template<typename HeaderType>
   std::any getEntryContent(OffsetType offset) {
     HeaderType header = data_reader_writer_.Read<HeaderType>(offset);
-    if (header.value_state_ & PVTypeState::kIsExpired) {
-      utils::Time value_time(header.expired_time_low_, header.expired_time_high_);
-      if (value_time.IsExpired()) {
-        throw (exception::YASException("The key has been expired but doesn't delete from storage",
-          StorageError::kKeyExpired));
-      }
-    }
-
     return type_converter_.ConvertToUserType(header.value_type_, header.value_);
   }
 
   template<>
   std::any getEntryContent<ComplexTypeHeader>(OffsetType offset) {
     ComplexTypeHeader header = data_reader_writer_.Read<ComplexTypeHeader>(offset);
-    if (header.value_state_ & PVTypeState::kIsExpired) {
-      utils::Time value_time(header.expired_time_low_, header.expired_time_high_);
-      if (value_time.IsExpired()) {
-        throw (exception::YASException("The key has been expired but doesn't delete from storage",
-          StorageError::kKeyExpired));
-      }
-    }
-
     const auto data = data_reader_writer_.ReadComplexType(offset);
     return type_converter_.ConvertToUserType(header.value_type_, std::cbegin(data), std::cend(data));
   }
@@ -297,7 +281,7 @@ class PVEntriesManager {
       header.next_free_entry_offset_ = freelist_helper_.GetFreeEntry(header.chunk_size_);
       data_reader_writer_.Write<ComplexTypeHeader>(saved_next_entry_offset, header);
       freelist_helper_.PushFreeEntry(saved_next_entry_offset, header.chunk_size_
-        + offsetof(ComplexTypeHeader, data_));
+          + offsetof(ComplexTypeHeader, data_));
       deleted += header.chunk_size_;
     }
   }
@@ -331,7 +315,7 @@ class PVEntriesManager {
       std::advance(new_begin, overall_written);
       auto next_free_offset = getFreeOffset(data_size - written + sizeof(ComplexTypeHeader));
       written = data_reader_writer_.WriteComplexType(free_offset, value_type, is_first, next_free_offset,
-        new_begin, end);
+          new_begin, end);
       is_first = false;
 
       free_offset = next_free_offset;
@@ -351,7 +335,8 @@ class PVEntriesManager {
       expandPV();
       offset = freelist_helper_.PopFreeEntryOffset(entry_size);
       if (!offset_traits<OffsetType>::IsExistValue(offset)) {
-        throw (exception::YASException("Error during physical volume size extended", StorageError::kDeviceExpandError));
+        throw (exception::YASException("Error during physical volume size extended", 
+            StorageError::kDeviceExpandError));
       }
     }
 
@@ -363,7 +348,7 @@ class PVEntriesManager {
       else if (PVType::kEmpty8Simple == value_type) {
         recoverAndPushNextEntry<Simple8TypeHeader>(offset);
       }
-      // difference between sizeof Simple header isn't much to split
+      // difference between sizeof Simple header isn't too much to split
       return offset;
     }
 
