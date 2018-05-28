@@ -16,13 +16,12 @@ namespace pv {
 
 template <typename OffsetType, typename Device>
 class PVEntriesManager {
+  using FreelistHeaderType = FreelistHeader<OffsetType>;
+  using PVPathType = typename Device::path_type;
+ 
  public:
-  using offset_type = OffsetType;
-  using pv_entries_manager_type = PVEntriesManager<OffsetType, Device>;
-  using data_reader_writer_type = PVDeviceDataReaderWriter<OffsetType, Device>;
-  using freelist_header_type = FreelistHeader<OffsetType>;
-
-  explicit PVEntriesManager(fs::path &file_path, utils::Version version, uint32_t cluster_size = kDefaultClusterSize)
+  explicit PVEntriesManager(const PVPathType &file_path, utils::Version version,
+      uint32_t cluster_size = kDefaultClusterSize)
       : data_reader_writer_(file_path, cluster_size),
         cluster_size_(cluster_size),
         version_(version) {
@@ -46,7 +45,7 @@ class PVEntriesManager {
     }
 
     current_cursor += sizeof(PVHeader);
-    freelist_header_type freelist_header = data_reader_writer_.Read<freelist_header_type>(current_cursor);
+    FreelistHeaderType freelist_header = data_reader_writer_.Read<FreelistHeaderType>(current_cursor);
     freelist_helper_.SetBins(freelist_header);
     device_end_ = pv_header.pv_size_;
     cluster_size_ = pv_header.cluster_size_;
@@ -62,8 +61,8 @@ class PVEntriesManager {
     pv_header.cluster_size_ = cluster_size_;
     pv_header.inverted_index_offset_ = index_offset;
     data_reader_writer_.Write<PVHeader>(0, pv_header);
-    data_reader_writer_.Write<freelist_header_type>(sizeof(PVHeader), freelist_helper_.GetBins());
-    device_end_ = sizeof(PVHeader) + sizeof(freelist_header_type);
+    data_reader_writer_.Write<FreelistHeaderType>(sizeof(PVHeader), freelist_helper_.GetBins());
+    device_end_ = sizeof(PVHeader) + sizeof(FreelistHeaderType);
   }
 
   OffsetType CreateNewEntryValue(const std::any &content) {

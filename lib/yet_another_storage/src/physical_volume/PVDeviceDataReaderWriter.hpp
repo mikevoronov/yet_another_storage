@@ -16,11 +16,10 @@ namespace pv {
 // class can read and write control headers of device layout
 template <typename OffsetType, typename Device>
 class PVDeviceDataReaderWriter {
- public:
-  using offset_type = OffsetType;
-  using pv_device_type = PVDeviceDataReaderWriter<OffsetType, Device>;
+  using PVPathType = typename Device::path_type;
 
-  explicit PVDeviceDataReaderWriter(fs::path &file_path, uint32_t cluster_size = kDefaultClusterSize)
+ public:
+  explicit PVDeviceDataReaderWriter(const PVPathType &file_path, uint32_t cluster_size = kDefaultClusterSize)
       : device_(file_path),
         cluster_size_(cluster_size) {
     if (!device_.IsOpen()) {
@@ -30,7 +29,6 @@ class PVDeviceDataReaderWriter {
   }
 
   ~PVDeviceDataReaderWriter() {
-    // (!) need to be very accurate - we also need also to save inverted index first 
     device_.Close();
   }
 

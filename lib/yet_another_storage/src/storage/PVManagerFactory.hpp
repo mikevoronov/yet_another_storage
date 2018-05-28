@@ -10,15 +10,16 @@ namespace storage {
 
 class PVManagerFactory {
  public:
-  using Manager = PVManager<CharType, OffsetType, DefaultDevice<OffsetType>>;
+  using manager_type = PVManager<CharType, OffsetType, DefaultDevice<OffsetType>>;
+  using pv_path_type = typename manager_type::pv_path_type;
 
   static PVManagerFactory& Instance() {
     static PVManagerFactory factory(kMaximumSupportedVersion);
     return factory;
   }
 
-  nonstd::expected<std::shared_ptr<IStorage<CharType>>, StorageErrorDescriptor> Create(const fs::path path, utils::Version requested_version, uint32_t priority = 0,
-      uint32_t cluster_size = kDefaultClusterSize) {
+  nonstd::expected<std::shared_ptr<IStorage<CharType>>, StorageErrorDescriptor> Create(const pv_path_type path,
+      utils::Version requested_version, uint32_t priority = 0, uint32_t cluster_size = kDefaultClusterSize) {
 
     if (max_supported_version_ < requested_version) {
       return nonstd::make_unexpected(StorageErrorDescriptor("requested PV version is unsopported", 
@@ -35,12 +36,12 @@ class PVManagerFactory {
 
     try {
       if (fs::exists(canonical_path)) {
-        auto loaded_manager = Manager::Load(canonical_path, max_supported_version_);
+        auto loaded_manager = manager_type::Load(canonical_path, max_supported_version_);
         managers_[canonical_path_str] = std::move(loaded_manager);
         return managers_[canonical_path_str];
       }
 
-      auto new_manager = Manager::Create(canonical_path, requested_version, priority, cluster_size);
+      auto new_manager = manager_type::Create(canonical_path, requested_version, priority, cluster_size);
       managers_[canonical_path_str] = std::move(new_manager);
       return managers_[canonical_path_str];
     }
@@ -49,7 +50,7 @@ class PVManagerFactory {
     }
   }
 
-  std::shared_ptr<Manager> GetPVManager(const fs::path path) {
+  std::shared_ptr<manager_type> GetPVManager(const pv_path_type path) {
     auto canonical_path = std::wstring(fs::canonical(path));
 
     std::lock_guard<std::mutex> lock(factory_mutex_);
@@ -62,7 +63,7 @@ class PVManagerFactory {
   PVManagerFactory operator=(const PVManagerFactory&) = delete;
 
  private:
-  std::unordered_map<std::wstring, std::shared_ptr<Manager>> managers_;
+  std::unordered_map<std::wstring, std::shared_ptr<manager_type>> managers_;
   std::mutex factory_mutex_;
   utils::Version max_supported_version_;
 

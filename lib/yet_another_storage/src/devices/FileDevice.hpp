@@ -10,10 +10,12 @@ namespace devices {
 template <typename OffsetType>
 class FileDevice {
  public:
-   explicit FileDevice(fs::path path)
-     : path_(path) {
-     Open();
-   }
+  using path_type = fs::path;
+
+  explicit FileDevice(const path_type &path)
+      : path_(path) {
+    Open();
+  }
 
   ~FileDevice() {
     Close();
@@ -40,11 +42,11 @@ class FileDevice {
     const auto read_size = std::distance(begin, end);
     device_.read(reinterpret_cast<char*>(&(*begin)), read_size);
     if (device_.eof()) {
-      throw(exception::YASException("Raw device read error: read after the file end", StorageError::kDeviceReadError));
+      throw(exception::YASException("Raw device read error: read after the file end", 
+          StorageError::kDeviceReadError));
     }
   }
 
-  // TODO : add const
   template <typename Iterator>
   uint64_t Write(OffsetType position, const Iterator begin, const Iterator end) {
     if (!IsOpen()) {
@@ -76,6 +78,14 @@ class FileDevice {
     device_.flush();
     device_.close();
     return !device_.fail();
+  }
+
+  static bool Exist(const path_type &pv_path) {
+    return fs::exists(pv_path);
+  }
+
+  static void CreateEmpty(const path_type &pv_path) {
+    std::ofstream out(pv_path, std::ios_base::out);
   }
 
   FileDevice operator=(const FileDevice&) = delete;
