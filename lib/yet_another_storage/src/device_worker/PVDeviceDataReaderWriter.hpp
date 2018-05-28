@@ -48,7 +48,7 @@ class PVDeviceDataReaderWriter {
   }
 
   template <typename ValueType>
-  void Write(OffsetType position, ValueType &type) {
+  void Write(OffsetType position, const ValueType &type) {
     static_assert(std::is_trivially_copyable_v<ValueType>, "PVDeviceDataReaderWriter::Write<Type>: type should be POD");
 
     ByteVector data(sizeof(ValueType));
@@ -61,13 +61,17 @@ class PVDeviceDataReaderWriter {
     CheckComplexTypeHeader(type_header, true);
 
     ByteVector complex_data(type_header.overall_size_);
+    OffsetType readed_size = 0;
+    const OffsetType overall_size = type_header.overall_size_;
+
     offset += offsetof(ComplexTypeHeader, data_);
     auto read_cursor_begin = std::begin(complex_data);
     auto read_cursor_end = std::begin(complex_data);
     std::advance(read_cursor_end, type_header.chunk_size_);
     device_.Read(offset, read_cursor_begin, read_cursor_end);
+    readed_size += type_header.chunk_size_;
 
-    while (offset_traits<OffsetType>::IsExistValue(type_header.sequel_offset_)) {
+    while (readed_size < overall_size) {
       offset = type_header.sequel_offset_;
       type_header = Read<ComplexTypeHeader>(type_header.sequel_offset_);
       CheckComplexTypeHeader(type_header, false);
@@ -75,6 +79,7 @@ class PVDeviceDataReaderWriter {
 
       read_cursor_begin = read_cursor_end;
       std::advance(read_cursor_end, type_header.chunk_size_);
+      readed_size += type_header.chunk_size_;
       device_.Read(offset, read_cursor_begin, read_cursor_end);
     }
 
@@ -85,18 +90,19 @@ class PVDeviceDataReaderWriter {
   OffsetType WriteComplexType(OffsetType offset, PVType pv_type, bool is_first, Iterator begin, Iterator end) {
     ComplexTypeHeader header = Read<ComplexTypeHeader>(offset);
     const auto data_size = std::distance(begin, end);
-    const auto written = std::min(header.chunk_size_, data_size);
+    const auto written = std::min<OffsetType>(header.chunk_size_, data_size);
 
     header.overall_size_ = data_size;
-    header.value_type_ = (is_first ? pv_type | kComplexBeginBitMask : pv_type | kComplexSequelBitMask) ;
+    header.value_type_ = pv_type;
+    header.value_state_ = (is_first ? PVTypeState::kComplexBegin : PVTypeState::kComplexSequel);
     header.chunk_size_ = written;
 
-    const auto new_end = begin;
+    auto new_end = begin;
     std::advance(new_end, written);
     // at first try to write data 
-    device_.Write(offset + offsetof(ComplexTypeHeader, data), begin, new_end);
-    // and only then header to don't loose original header if data writing will fails with exception
     Write<ComplexTypeHeader>(offset, header);
+    device_.Write(offset + offsetof(ComplexTypeHeader, data_), begin, new_end);
+    // and only then header to don't loose original header if data writing will fails with exception
 
     return written;
   }
@@ -127,12 +133,12 @@ class PVDeviceDataReaderWriter {
   uint32_t cluster_size_;
 
   void CheckComplexTypeHeader(const ComplexTypeHeader &complex_header, bool is_first_header) const {
-    if (is_first_header && !(complex_header.value_type_ & kComplexBeginBitMask)) {
+    if (is_first_header && !(complex_header.value_state_ & PVTypeState::kComplexBegin)) {
       // read complex types is only possible from the beggining of sequence
       throw exception::YASException("Read complex type error: kComplexBegin type expected",
           StorageError::kCorruptedHeaderError);
     }
-    else if (!is_first_header && !(complex_header.value_type_ & kComplexSequelBitMask)) {
+    else if (!is_first_header && !(complex_header.value_state_ & PVTypeState::kComplexSequel)) {
       throw exception::YASException("Read complex type error: kComplexSequel type expected",
           StorageError::kCorruptedHeaderError);
     }

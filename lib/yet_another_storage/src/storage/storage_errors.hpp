@@ -9,18 +9,21 @@ enum StorageError : uint32_t {
   kDeviceGeneralError = 1,
   kDeviceReadError = 2,
   kDeviceWriteError = 3,
-  kInvertedIndexDesirializationError = 4,
-  kInvertedIndexDesirializationVersionUnsopportedError = 5,   // explicit type from kInvertedIndexDesirializationError
+  kDeviceExpandError = 4,
+  kInvertedIndexDesirializationError = 5,
+  kInvertedIndexDesirializationVersionUnsopportedError = 6,   // explicit type from kInvertedIndexDesirializationError
                                                               // because of it could be recover from it with different
                                                               // version header
-  kReadComplexTypeError = 6,
-  kInvalidSignatureError = 7,
-  kPVVersionNotSupported = 8,
-  kKeyNotFound = 9,
-  kPVMountPointManagerAdapterNotReady = 10,
+  kCorruptedHeaderError = 7,
+  kInvalidPVSignatureError = 8,
+  kPVVersionNotSupported = 9,
+  kKeyNotFound = 10,
+  kPVMountPointManagerAdapterNotReady = 11,
+  kValueNotFound = 12,          // used for std::any
+  kKeyAlreadyCreated = 13,
+  kPVVersionUnsopported = 14,
 
   kUnknownExceptionType
-  // TODO : add list
 };
 
 struct StorageErrorDescriptor {

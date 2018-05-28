@@ -62,7 +62,7 @@ class Time {
   uint32_t expired_time_low_;
 });
 
-// this class then would used to unpack raw bytes
+// this class then would be used to unpack from raw bytes
 static_assert(pv_layout_headers::kTimeSize == sizeof(Time), "size of Time should be the same as the size in physical_volume_layout");
 
 } // namespace utils

@@ -19,14 +19,13 @@ constexpr uint32_t kBinCount = 11;
 
 STRUCT_PACK(
 struct PVHeader {
-  PVHeader() {};
-
   uint8_t signature_[6] = { 'Y', 'A', 'S', '_', 'P', 'V' };                        //  + 6 bytes
   utils::Version version_;                                                         //  + 2 bytes
-  uint64_t pv_size_;                                                              //  + 8 bytes
-  uint32_t cluster_size_ = kDefaultClusterSize;                                   //  + 4 bytes
-  uint32_t priority_;                                                             //  + 4 bytes
-  uint32_t freelist_bins_count_ = kBinCount;                                      //  + 4 bytes
+  uint64_t pv_size_;                                                               //  + 8 bytes
+  uint32_t cluster_size_ = kDefaultClusterSize;                                    //  + 4 bytes
+  uint32_t priority_;                                                              //  + 4 bytes
+  OffsetType inverted_index_offset_;                                               //  + sizeof(OffsetType) : 4 or 8 bytes
+  uint32_t freelist_bins_count_ = kBinCount;                                       //  + 4 bytes
 });
 
 STRUCT_PACK(
@@ -35,7 +34,7 @@ struct FreelistHeader {
   OffsetType free_bins_[kBinCount];
 });
 
-enum PVType : uint16_t {
+enum PVType : uint8_t {
   kInt8   = 0,
   kUint8  = 1,
   kInt16  = 2,
@@ -48,12 +47,35 @@ enum PVType : uint16_t {
   kUint64 = 9,
   kString = 10,
   kBlob   = 11,
+  kInvertedIndex = 12,
 
-  kEmpty = 0x7FFF,        // high bit determines is this value expired or not (tradeoff (types count)/performance
-                          // because of expired_time_high - 2 bytes aligment)
+  kEmpty4Simple = 0xFD,
+  kEmpty8Simple = 0xFE,
+  kEmptyComplex = 0xFF
 };
-constexpr uint16_t kComplexBeginBitMask = 0x4000;     // beginning of Complex type
-constexpr uint16_t kComplexSequelBitMask = 0x2000;    // next chunk of Complex type
+
+enum PVTypeState : uint8_t {
+  kIsExpired = 0x01,
+  kComplexBegin = 0x02,   // beginning of Complex type
+  kComplexSequel = 0x04   // next chunk of Complex type
+};
+
+constexpr PVTypeState operator|(PVTypeState lhs, PVTypeState rhs) {
+  using T = std::underlying_type_t<PVTypeState>;
+  return (PVTypeState)(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
+
+constexpr PVTypeState operator&(PVTypeState lhs, PVTypeState rhs) {
+  using T = std::underlying_type_t<PVTypeState>;
+  return (PVTypeState)(static_cast<T>(lhs) & static_cast<T>(rhs));
+}
+
+constexpr PVTypeState& operator|=(PVTypeState &lhs, PVTypeState rhs)
+{
+  using T = std::underlying_type_t<PVTypeState>;
+  lhs = (PVTypeState)(static_cast<T>(lhs) | static_cast<T>(rhs));
+  return lhs;
+}
 
 // I assume that the most common types would be types with 4 and 8 bytes size. So there are specially
 // size-optimized header for them. Each header could be in 2 states: allocated and freed. Allocated 
@@ -72,9 +94,14 @@ constexpr uint16_t kComplexSequelBitMask = 0x2000;    // next chunk of Complex t
 // exploit the similar conception. But i think that for test task it is too complex :).
 
 STRUCT_PACK(
-template <typename T>
-struct CommonTypeHeader {
+  struct PVState {
   PVType value_type_;
+  PVTypeState value_state_;
+});
+
+STRUCT_PACK(
+template <typename T>
+struct CommonTypeHeader : public PVState {
   uint16_t expired_time_high_;    // goodbye 2038 problem :)
   union {
     struct {
@@ -94,16 +121,15 @@ struct Simple8TypeHeader : public CommonTypeHeader<uint64_t> {
 });
 
 STRUCT_PACK(
-struct ComplexTypeHeader {
-  PVType value_type_;
-  uint16_t expired_time_high_;
-  uint32_t expired_time_low_;
-  OffsetType overall_size_;     
+struct ComplexTypeHeader : public PVState {
+  uint16_t expired_time_high_ = 0;
+  uint32_t expired_time_low_ = 0;
+  OffsetType overall_size_;
   OffsetType chunk_size_;
   OffsetType sequel_offset_;
   union {
     OffsetType next_free_entry_offset_;
-    uint8_t data[1];
+    uint8_t data_[1];
   };
 });
 
@@ -111,10 +137,10 @@ static_assert(sizeof(float) == 4, "please fix type mapping because size of float
 
 constexpr uint32_t kTimeSize = sizeof ComplexTypeHeader::expired_time_high_ + sizeof ComplexTypeHeader::expired_time_low_;
 
-static_assert(28 == sizeof(PVHeader),          "PVHeader should be 12 bytes long - please check aligments and type size on your setup");
+static_assert((28 + sizeof(OffsetType)) == sizeof(PVHeader), "PVHeader should be 28+sizeof(OffsetType) bytes long - please check aligments and type size on your setup");
 static_assert(12 == sizeof(Simple4TypeHeader), "Simple4TypeHeader should be 12 bytes long - please check aligments and type size on your setup");
 static_assert(16 == sizeof(Simple8TypeHeader), "Simple8TypeHeader should be 16 bytes long - please check aligments and type size on your setup");
-static_assert(40 == sizeof(ComplexTypeHeader), "ComplexTypeHeader should be 16 bytes long - please check aligments and type size on your setup");
+static_assert(40 == sizeof(ComplexTypeHeader), "ComplexTypeHeader should be 40 bytes long - please check aligments and type size on your setup");
 
 } // namespace pv_layout_headers
 } // namespace yas

@@ -77,6 +77,7 @@ public:
     AhoCorasickSerializationHelper<CharType, LeafType, IdType> serializer(version);
     auto inverted_index = std::make_unique<InvertedIndexHelper<CharType, LeafType>>();
     serializer.Deserialize(begin, end, inverted_index->engine_);
+    inverted_index->is_changed_ = false;
 
     return inverted_index;
   }
@@ -89,7 +90,7 @@ public:
   // TODO: engine probably should be template or inner class (pimpl?) - need to decide later
   AhoCorasickEngine<CharType, LeafType> engine_;
   // true if index has been changed after creating
-  bool is_changed_ = true;
+  bool is_changed_ = false;
 };
 
 } // namespace index_helper

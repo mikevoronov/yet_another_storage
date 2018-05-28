@@ -10,12 +10,6 @@ using namespace yas::pv_layout_headers;
 
 namespace yas {
 namespace storage {
-namespace types {
-
-struct StorageType {};
-struct Simple4Type : public StorageType { };
-struct Simple8Type : public StorageType { };
-struct ComplexType : public StorageType { };
 
 class TypeConverter {
  public:
@@ -23,31 +17,57 @@ class TypeConverter {
      init();
   }
 
-  PVType ConvertToPVType(std::any &value) {
+  PVType ConvertToPVType(const std::any &value) {
     return user_to_pv_type_mapping_[std::type_index(value.type())];
   }
 
-  template <typename StorageType, typename UserType>
-  static constexpr StorageType ConvertToStorageType(UserType type) {
-    if constexpr (sizeof(type) <= 4) {
-      return Simple4Type;
+  std::any ConvertToUserType(PVType pv_type, uint64_t value) const noexcept {
+    // TODO
+    switch (pv_type) {
+    case PVType::kInt8:
+      return static_cast<int8_t>(value);
+    case PVType::kUint8:
+      return static_cast<uint8_t>(value);
+    case PVType::kInt16:
+      return static_cast<int16_t>(value);
+    case PVType::kUint16:
+      return static_cast<uint16_t>(value);
+    case PVType::kInt32:
+      return static_cast<int32_t>(value);
+    case PVType::kUint32:
+      return static_cast<uint32_t>(value);
+    case PVType::kFloat:
+      static_assert(std::numeric_limits<float>::is_iec559, "The YAS requires using of IEEE 754 floating point format for binary serialization of floats and doubles.");
+      return *(reinterpret_cast<float *>(&value));
+    case PVType::kDouble:
+      static_assert(std::numeric_limits<double>::is_iec559, "The YAS requires using of IEEE 754 floating point format for binary serialization of floats and doubles.");
+      return *(reinterpret_cast<double *>(&value));
+    case PVType::kInt64:
+      return static_cast<int64_t>(value);
+    case PVType::kUint64:
+      return static_cast<uint64_t>(value);
+    default:
+      return 0;
     }
-    else if constexpr (sizeof(type) <= 8) {
-      return Simple8Type;
-    }
-    return ComplexType;
   }
 
-  template <typename StorageType>
-  constexpr StorageType ConvertToStorageType(PVType type) {
-    return pv_to_storage_type_mapping_[type];
+  template<typename Iterator>
+  std::any ConvertToUserType(PVType pv_type, const Iterator begin, const Iterator end) const {
+    switch (pv_type) {
+    case PVType::kString:
+      return std::string{ begin, end };
+    case PVType::kBlob:
+      return ByteVector{ begin, end };
+    default:
+      return 0;
+    }
   }
 
  private:
    std::unordered_map<std::type_index, PVType> user_to_pv_type_mapping_;
-   std::unordered_map<PVType, std::type_index> pv_to_storage_type_mapping_;
 
    void init() {
+     // std::type_index hasn't constexpr ctor -> we can't easy make this compile-time
      user_to_pv_type_mapping_[std::type_index(typeid(int8_t))] = PVType::kInt8;
      user_to_pv_type_mapping_[std::type_index(typeid(uint8_t))] = PVType::kUint8;
      user_to_pv_type_mapping_[std::type_index(typeid(int16_t))] = PVType::kInt16;
@@ -58,27 +78,10 @@ class TypeConverter {
      user_to_pv_type_mapping_[std::type_index(typeid(double))] = PVType::kDouble;
      user_to_pv_type_mapping_[std::type_index(typeid(int64_t))] = PVType::kInt64;
      user_to_pv_type_mapping_[std::type_index(typeid(uint64_t))] = PVType::kUint64;
-     user_to_pv_type_mapping_[std::type_index(typeid(std::string))] = PVType::kComplexBegin;
-     user_to_pv_type_mapping_[std::type_index(typeid(ByteVector))] = PVType::kComplexBegin;
-     user_to_pv_type_mapping_[std::type_index(typeid(void))] = PVType::kEmpty;
-
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kInt8, std::type_index(typeid(Simple4Type))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kUint8, std::type_index(typeid(Simple4Type))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kInt16, std::type_index(typeid(Simple4Type))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kUint16, std::type_index(typeid(Simple4Type))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kInt32, std::type_index(typeid(Simple4Type))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kUint32, std::type_index(typeid(Simple4Type))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kFloat, std::type_index(typeid(Simple4Type))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kDouble, std::type_index(typeid(Simple8Type))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kInt64, std::type_index(typeid(Simple8Type))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kUint64, std::type_index(typeid(Simple8Type))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kComplexBegin, std::type_index(typeid(ComplexType))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kComplexBegin, std::type_index(typeid(ComplexType))));
-     pv_to_storage_type_mapping_.insert(std::make_pair(PVType::kEmpty, std::type_index(typeid(StorageType))));
+     user_to_pv_type_mapping_[std::type_index(typeid(std::string))] = PVType::kString;
+     user_to_pv_type_mapping_[std::type_index(typeid(ByteVector))] = PVType::kBlob;
    }
 };
 
-
-} // namespace types
 } // namespace storage
 } // namespace yas

@@ -32,12 +32,23 @@ class PVManagerFactory {
     std::lock_guard<std::mutex> lock(factory_mutex_);
 
     if (managers_.count(canonical_path_str)) {
-      return managers_[canonical_path];
+      return managers_[canonical_path_str];
     }
 
-    auto new_manager = Manager::Create(canonical_path, requested_version, priority, cluster_size);
-    managers_[canonical_path_str] = std::move(new_manager);
-    return managers_[canonical_path_str];
+    try {
+      if (fs::exists(canonical_path)) {
+        auto loaded_manager = Manager::Load(canonical_path, max_supported_version_);
+        managers_[canonical_path_str] = std::move(loaded_manager);
+        return managers_[canonical_path_str];
+      }
+
+      auto new_manager = Manager::Create(canonical_path, requested_version, priority, cluster_size);
+      managers_[canonical_path_str] = std::move(new_manager);
+      return managers_[canonical_path_str];
+    }
+    catch (...) {
+      return nonstd::make_unexpected(exception::YASExceptionHandler(std::current_exception()));
+    }
   }
 
   std::shared_ptr<Manager> GetPVManager(const fs::path path) {
