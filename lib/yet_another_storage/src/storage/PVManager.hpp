@@ -15,7 +15,13 @@ namespace storage {
 template<typename OffsetType>
 using DefaultDevice = devices::FileDevice<OffsetType>;
 
-// this class represent 
+/** 
+ *    \brief Class encapsulate all high-level storage-like operations on one Physical Volume (PV)
+ *
+ *    Objects of this class could be created by Load/Create static methods. Note that for each physically
+ *    seprated PV should be created only one instance of such class. If you want to simultaneously work
+ *    with several PV please create instances through PVManagerFactory
+ */
 template <typename CharType=CharType, typename OffsetType=OffsetType, typename Device=DefaultDevice<OffsetType>>
 class PVManager : public IStorage<CharType> {
   using InvertedIndexType = index_helper::InvertedIndexHelper<CharType, OffsetType>;
@@ -29,9 +35,13 @@ class PVManager : public IStorage<CharType> {
     close();
   }
 
-  // loads an existing PV according path
-  static std::unique_ptr<pv_manager_type> Load(fs::path &file_path, utils::Version version) {
-    auto pv_volume_manager = std::unique_ptr<pv_manager_type>(new pv_manager_type(file_path, version));
+  ///  \brief loads an already created PV from specifed path. Can throw YASExceptions if PV has invalid structure
+  ///         or device fails
+  ///  \param pv_path - path to exist PV
+  ///  \param version - maximum supported version (PVEntriesManager could also use it in future to parsing according to it)
+  ///  \return - new PVManager instance
+  static std::unique_ptr<pv_manager_type> Load(fs::path &pv_path, utils::Version version) {
+    auto pv_volume_manager = std::unique_ptr<pv_manager_type>(new pv_manager_type(pv_path, version));
 
     pv_volume_manager->inverted_index_offset_ = pv_volume_manager->entries_manager_.LoadStartSections();
     const auto serialized_index = pv_volume_manager->entries_manager_.GetEntryContent(pv_volume_manager->inverted_index_offset_);
@@ -43,19 +53,23 @@ class PVManager : public IStorage<CharType> {
     return pv_volume_manager;
   }
 
-  // create new PV in the scpecified path
-  static std::unique_ptr<pv_manager_type> Create(fs::path &file_path, utils::Version version,
+  ///  \brief create new PV in the specified path. Note that if PV already exist (it means that Device::Exist returns
+  ///  success) then it try to Load existing by Load method. Can throw YASExceptions if device fails. 
+  ///  \param pv_path - path to created PV
+  ///  \param version - maximum supported version (PVEntriesManager could also use it in future to parsing according to it)
+  ///  \return - new PVManager instance
+  static std::unique_ptr<pv_manager_type> Create(fs::path &pv_path, utils::Version version,
       uint32_t priority, uint32_t cluster_size = kDefaultClusterSize) {
     const OffsetType device_end = (sizeof(PVHeader) + sizeof(FreelistHeader<OffsetType>));
-    if (fs::exists(file_path)) {
-      fs::resize_file(file_path, device_end);
+    if (fs::exists(pv_path)) {
+      fs::resize_file(pv_path, device_end);
     }
     else {
-      std::ofstream out(file_path, std::ios_base::out);
+      std::ofstream out(pv_path, std::ios_base::out);
     }
 
     // std::make_unique needs access to the class ctor
-    auto pv_volume_manager = std::unique_ptr<pv_manager_type>(new pv_manager_type(file_path, version, cluster_size));
+    auto pv_volume_manager = std::unique_ptr<pv_manager_type>(new pv_manager_type(pv_path, version, cluster_size));
     pv_volume_manager->entries_manager_.CreateStartSections(offset_traits<OffsetType>::NonExistValue());
     pv_volume_manager->inverted_index_.reset(new InvertedIndexType());
     return pv_volume_manager;
