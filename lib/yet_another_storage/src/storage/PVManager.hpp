@@ -1,17 +1,10 @@
 #pragma once
-#include "../common/filesystem.h"
-#include "../physical_volume/pv_layout_headers.h"
-#include "../utils/Time.hpp"
-#include "../devices/FileDevice.hpp"
-#include "../common/common.h"
-#include "../utils/Version.hpp"
-#include "../storage/storage_errors.hpp"
-#include "../common/offset_type_traits.hpp"
-#include "../storage/IStorage.hpp"
-#include "../exceptions/YASExceptionHandler.h"
 #include "../physical_volume/PVDeviceDataReaderWriter.hpp"
-#include "../inverted_index_helper/InvertedIndexHelper.hpp"
 #include "../physical_volume/PVEntriesManager.hpp"
+#include "../inverted_index_helper/InvertedIndexHelper.hpp"
+#include "../storage/IStorage.hpp"
+#include "../common/offset_type_traits.hpp"
+#include "../exceptions/YASExceptionHandler.h"
 #include <mutex>
 
 using namespace yas::pv_layout_headers;
@@ -69,11 +62,11 @@ public:
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       if (!value.has_value()) {
-        return nonstd::make_unexpected(StorageErrorDescriptor("std::any doesn't contain any value", 
+        return nonstd::make_unexpected(StorageErrorDescriptor("Put key: std::any doesn't contain any value", 
             StorageError::kValueNotFound));
       }
       if (inverted_index_->HasKey(key)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor("The storage already has current key, please remove it \
+        return nonstd::make_unexpected(StorageErrorDescriptor("Put key: the storage already has current key, please remove it \
             first", StorageError::kKeyAlreadyCreated));
       }
 
@@ -91,9 +84,17 @@ public:
     try {
       const auto entry_offset = inverted_index_->Get(key);
       if (!offset_traits<OffsetType>::IsExistValue(entry_offset)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor("Delete key: key hasn't been found", StorageError::kKeyNotFound));
+        return nonstd::make_unexpected(StorageErrorDescriptor("Get key: key hasn't been found", StorageError::kKeyNotFound));
       }
-      return entries_manager_.GetEntryContent(entry_offset);
+
+      if (!isEntryExpired(entry_offset)) {
+        return entries_manager_.GetEntryContent(entry_offset);
+      }
+
+      // delete expired values during access
+      entries_manager_.DeleteEntry(entry_offset);
+      inverted_index_->Delete(key);
+      return nonstd::make_unexpected(StorageErrorDescriptor("Get key: key hasn't been found", StorageError::kKeyNotFound));
     }
     catch (...) {
       return nonstd::make_unexpected(exception::YASExceptionHandler(std::current_exception()));
@@ -103,7 +104,19 @@ public:
   virtual nonstd::expected<bool, StorageErrorDescriptor> HasKey(key_type key) override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
-      return inverted_index_->HasKey(key);
+      const auto entry_offset = inverted_index_->Get(key);
+      if (!offset_traits<OffsetType>::IsExistValue(entry_offset)) {
+        return false;
+      }
+
+      if (!isEntryExpired(entry_offset)) {
+        return true;
+      }
+
+      // delete expired values during access
+      entries_manager_.DeleteEntry(entry_offset);
+      inverted_index_->Delete(key);
+      return false;
     }
     catch (...) {
       return nonstd::make_unexpected(exception::YASExceptionHandler(std::current_exception()));
@@ -147,9 +160,12 @@ public:
     try {
       const auto entry_offset = inverted_index_->Get(key);
       if (!offset_traits<OffsetType>::IsExistValue(entry_offset)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor("SetExpiredDate key: key hasn't been found", StorageError::kKeyNotFound));
+        return nonstd::make_unexpected(StorageErrorDescriptor("GetExpiredDate key: key hasn't been found", StorageError::kKeyNotFound));
       }
-      const auto expired_date = entries_manager_.GetEntryExpiredDate(entry_offset);
+      utils::Time expired_date(0,1);
+      if (!entries_manager_.GetEntryExpiredDate(entry_offset, expired_date)) {
+        return nonstd::make_unexpected(StorageErrorDescriptor("GetExpiredDate key: the key doesn't has expired date", StorageError::kKeyDoesntExpired));
+      }
       return expired_date.GetTime();
     }
     catch (...) {
@@ -188,6 +204,15 @@ public:
     }
     const auto new_index_offset = entries_manager_.CreateNewEntryValue(serialized_index);
     entries_manager_.CreateStartSections(new_index_offset);
+  }
+
+  bool isEntryExpired(OffsetType offset) {
+    utils::Time expired_date(0, 0);
+    if (!entries_manager_.GetEntryExpiredDate(offset, expired_date)) {
+      return false;
+    }
+
+    return expired_date.IsExpired();
   }
 
 };

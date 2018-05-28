@@ -1,4 +1,5 @@
 #pragma once
+#include "../utils/Time.hpp"
 #include "PVDeviceDataReaderWriter.hpp"
 #include "../common/common.h"
 #include "../common/offset_type_traits.hpp"
@@ -148,36 +149,32 @@ class PVEntriesManager {
         StorageError::kCorruptedHeaderError));
   }
 
-  utils::Time GetEntryExpiredDate(OffsetType offset) {
+  bool GetEntryExpiredDate(OffsetType offset, utils::Time &expired_date) {
     const PVState pv_state = data_reader_writer_.Read<PVState>(offset);
-    if (!(pv_state.value_state_ & PVTypeState::kIsExpired)) {
-      throw (exception::YASException("Expired date hasn't been setted for this value yet",
-        StorageError::kKeyDoesntExpired));
-    }
     if (pv_state.value_type_ < PVType::k4TypeMax) {
-      return getEntryExpiredDate<Simple4TypeHeader>(offset);
+      return getEntryExpiredDate<Simple4TypeHeader>(offset, expired_date);
     }
     else if (pv_state.value_type_ < PVType::k8TypeMax) {
-      return getEntryExpiredDate<Simple8TypeHeader>(offset);
+      return getEntryExpiredDate<Simple8TypeHeader>(offset, expired_date);
     }
     else if (pv_state.value_type_ < PVType::kComplexMax) {
-      return getEntryExpiredDate<ComplexTypeHeader>(offset);
+      return getEntryExpiredDate<ComplexTypeHeader>(offset, expired_date);
     }
 
     throw (exception::YASException("Corrupted storage header type: unsupported type",
       StorageError::kCorruptedHeaderError));
   }
 
-  void SetEntryExpiredDate(OffsetType offset, utils::Time &expired_time) {
+  void SetEntryExpiredDate(OffsetType offset, utils::Time &expired_date) {
     const PVType pv_type = getRecordType(offset);
     if (pv_type < PVType::k4TypeMax) {
-      return setEntryExpiredDate<Simple4TypeHeader>(offset, expired_time);
+      return setEntryExpiredDate<Simple4TypeHeader>(offset, expired_date);
     }
     else if (pv_type < PVType::k8TypeMax) {
-      return setEntryExpiredDate<Simple8TypeHeader>(offset, expired_time);
+      return setEntryExpiredDate<Simple8TypeHeader>(offset, expired_date);
     }
     else if (pv_type < PVType::kComplexMax) {
-      return setEntryExpiredDate<ComplexTypeHeader>(offset, expired_time);
+      return setEntryExpiredDate<ComplexTypeHeader>(offset, expired_date);
     }
     throw (exception::YASException("Corrupted storage header type: unsupported type",
         StorageError::kCorruptedHeaderError));
@@ -256,9 +253,13 @@ class PVEntriesManager {
   }
 
   template<typename HeaderType>
-  utils::Time getEntryExpiredDate(OffsetType offset) {
+  bool getEntryExpiredDate(OffsetType offset, utils::Time &expired_date) {
     HeaderType header = data_reader_writer_.Read<HeaderType>(offset);
-    return utils::Time(header.expired_time_low_, header.expired_time_high_);
+    if (!(header.value_state_ & PVTypeState::kIsExpired)) {
+      return false;
+    }
+    expired_date = utils::Time(header.expired_time_low_, header.expired_time_high_);
+    return true;
   }
 
   template<typename HeaderType>
@@ -302,12 +303,12 @@ class PVEntriesManager {
   }
 
   template<typename HeaderType>
-  void setEntryExpiredDate(OffsetType offset, utils::Time &expired_time) {
+  void setEntryExpiredDate(OffsetType offset, utils::Time &expired_date) {
     HeaderType header = data_reader_writer_.Read<HeaderType>(offset);
     header.value_type_ = header.value_type_;
     header.value_state_ = PVTypeState::kIsExpired;
-    header.expired_time_high_ = expired_time.expired_time_high();
-    header.expired_time_low_ = expired_time.expired_time_low();
+    header.expired_time_high_ = expired_date.expired_time_high();
+    header.expired_time_low_ = expired_date.expired_time_low();
     data_reader_writer_.Write<HeaderType>(offset, header);
   }
 
@@ -450,7 +451,6 @@ class PVEntriesManager {
       device_end_ += cluster_size_;
     }
   }
-
 };
 
 } // namespace pv
