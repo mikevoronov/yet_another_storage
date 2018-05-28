@@ -8,25 +8,25 @@
 namespace yas {
 namespace storage {
 
-// TODO : add comments
 class PVManagerFactory {
  public:
   using Manager = PVManager<CharType, OffsetType, DefaultDevice<OffsetType>>;
 
   static PVManagerFactory& Instance() {
-    static PVManagerFactory factory;
+    static PVManagerFactory factory(kMaximumSupportedVersion);
     return factory;
   }
 
   nonstd::expected<std::shared_ptr<IStorage<CharType>>, StorageErrorDescriptor> Create(const fs::path path, utils::Version requested_version, uint32_t priority = 0,
       uint32_t cluster_size = kDefaultClusterSize) {
 
-    if (max_supported_version < requested_version) {
-      return nonstd::make_unexpected(StorageErrorDescriptor("requested PV version is unsopported", StorageError::kPVVersionUnsopported));
+    if (max_supported_version_ < requested_version) {
+      return nonstd::make_unexpected(StorageErrorDescriptor("requested PV version is unsopported", 
+          StorageError::kPVVersionUnsopported));
     }
     
     auto canonical_path = fs::canonical(path);
-    auto canonical_path_str = std::wstring(fs::canonical(path));
+    auto canonical_path_str = std::wstring(canonical_path);
     std::lock_guard<std::mutex> lock(factory_mutex_);
 
     if (managers_.count(canonical_path_str)) {
@@ -64,9 +64,11 @@ class PVManagerFactory {
  private:
   std::unordered_map<std::wstring, std::shared_ptr<Manager>> managers_;
   std::mutex factory_mutex_;
-  utils::Version max_supported_version_ = max_supported_version;
+  utils::Version max_supported_version_;
 
-  PVManagerFactory() = default;
+  PVManagerFactory(utils::Version max_supported_version) 
+      : max_supported_version_(max_supported_version)
+  {}
 };
 
 } // namespace storage
