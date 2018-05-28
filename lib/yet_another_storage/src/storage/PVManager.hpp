@@ -20,7 +20,8 @@ template <typename CharType=CharType, typename OffsetType=OffsetType, typename D
 class PVManager : public IStorage<CharType> {
   using InvertedIndexType = index_helper::InvertedIndexHelper<CharType, OffsetType>;
   using PVEntriesManagerType = pv::PVEntriesManager<OffsetType, Device>;
-public:
+
+ public:
   using pv_manager_type = PVManager<CharType, OffsetType, Device>;
   using key_type = IStorage<CharType>::key_type;
 
@@ -28,6 +29,7 @@ public:
     close();
   }
 
+  // loads an existing PV according path
   static std::unique_ptr<pv_manager_type> Load(fs::path &file_path, utils::Version version) {
     auto pv_volume_manager = std::unique_ptr<pv_manager_type>(new pv_manager_type(file_path, version));
 
@@ -41,6 +43,7 @@ public:
     return pv_volume_manager;
   }
 
+  // create new PV in the scpecified path
   static std::unique_ptr<pv_manager_type> Create(fs::path &file_path, utils::Version version,
       uint32_t priority, uint32_t cluster_size = kDefaultClusterSize) {
     const OffsetType device_end = (sizeof(PVHeader) + sizeof(FreelistHeader<OffsetType>));
@@ -128,7 +131,8 @@ public:
     try {
       const auto entry_offset = inverted_index_->Get(key);
       if (!offset_traits<OffsetType>::IsExistValue(entry_offset)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor( "Delete key: key hasn't been found", StorageError::kKeyNotFound));
+        return nonstd::make_unexpected(StorageErrorDescriptor( "Delete key: key hasn't been found", 
+            StorageError::kKeyNotFound));
       }
       entries_manager_.DeleteEntry(entry_offset);
       inverted_index_->Delete(key);
@@ -144,7 +148,8 @@ public:
     try {
       const auto entry_offset = inverted_index_->Get(key);
       if (!offset_traits<OffsetType>::IsExistValue(entry_offset)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor("SetExpiredDate key: key hasn't been found", StorageError::kKeyNotFound));
+        return nonstd::make_unexpected(StorageErrorDescriptor("SetExpiredDate key: key hasn't been found", 
+            StorageError::kKeyNotFound));
       }
       utils::Time expired_time(expired);
       entries_manager_.SetEntryExpiredDate(entry_offset, expired_time);
@@ -160,11 +165,13 @@ public:
     try {
       const auto entry_offset = inverted_index_->Get(key);
       if (!offset_traits<OffsetType>::IsExistValue(entry_offset)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor("GetExpiredDate key: key hasn't been found", StorageError::kKeyNotFound));
+        return nonstd::make_unexpected(StorageErrorDescriptor("GetExpiredDate key: key hasn't been found", 
+            StorageError::kKeyNotFound));
       }
       utils::Time expired_date(0,1);
       if (!entries_manager_.GetEntryExpiredDate(entry_offset, expired_date)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor("GetExpiredDate key: the key doesn't has expired date", StorageError::kKeyDoesntExpired));
+        return nonstd::make_unexpected(StorageErrorDescriptor("GetExpiredDate key: the key doesn't has expired date", 
+            StorageError::kKeyDoesntExpired));
       }
       return expired_date.GetTime();
     }
@@ -188,7 +195,7 @@ public:
   std::unique_ptr<InvertedIndexType> inverted_index_;
   OffsetType inverted_index_offset_;
   PVEntriesManagerType entries_manager_;
-  mutable std::mutex manager_guard_mutex_;        // std::lock_guard recieves the argument by non-const ref
+  std::mutex manager_guard_mutex_;
   utils::Version version_;
 
   explicit PVManager(fs::path &file_path, utils::Version version, uint32_t cluster_size = kDefaultClusterSize)
@@ -214,8 +221,7 @@ public:
 
     return expired_date.IsExpired();
   }
-
 };
 
-} // namespace device_worker
+} // namespace storage
 } // namespace yas

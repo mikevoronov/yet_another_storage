@@ -34,7 +34,7 @@ class PVMountPointManagerAdapter : public IStorage<CharType> {
   virtual nonstd::expected<std::any, StorageErrorDescriptor> Get(key_type key) const ovveride {
     if (!volume_manager_) {
       return nonstd::make_unexpected({ "PVMountPointManagerAdapter: manager isn't ready",
-        kPVMountPointManagerAdapterNotReady });
+          kPVMountPointManagerAdapterNotReady });
     }
 
     return volume_manager_->Get(adjust(key));
@@ -43,7 +43,7 @@ class PVMountPointManagerAdapter : public IStorage<CharType> {
   virtual nonstd::expected<bool, StorageErrorDescriptor> HasKey(key_type key) const ovveride {
     if (!volume_manager_) {
       return nonstd::make_unexpected({ "PVMountPointManagerAdapter: manager isn't ready",
-        kPVMountPointManagerAdapterNotReady });
+          kPVMountPointManagerAdapterNotReady });
     }
 
     return volume_manager_->HasKey(adjust(key));
@@ -52,7 +52,7 @@ class PVMountPointManagerAdapter : public IStorage<CharType> {
   virtual nonstd::expected<bool, StorageErrorDescriptor> Delete(key_type key) ovveride {
     if (!volume_manager_) {
       return nonstd::make_unexpected({ "PVMountPointManagerAdapter: manager isn't ready",
-        kPVMountPointManagerAdapterNotReady });
+          kPVMountPointManagerAdapterNotReady });
     }
 
     return volume_manager_->Delete(adjust(key));
@@ -61,7 +61,7 @@ class PVMountPointManagerAdapter : public IStorage<CharType> {
   virtual nonstd::expected<bool, StorageErrorDescriptor> SetExpiredDate(key_type key, time_t expired) ovveride {
     if (!volume_manager_) {
       return nonstd::make_unexpected({ "PVMountPointManagerAdapter: manager isn't ready",
-        kPVMountPointManagerAdapterNotReady });
+          kPVMountPointManagerAdapterNotReady });
     }
 
     return volume_manager_->SetExpiredDate(adjust(key), expired);
@@ -70,7 +70,7 @@ class PVMountPointManagerAdapter : public IStorage<CharType> {
   virtual nonstd::expected<time_t, StorageErrorDescriptor> GetExpiredDate(key_type key) ovveride {
     if (!volume_manager_) {
       return nonstd::make_unexpected({ "PVMountPointManagerAdapter: manager isn't ready",
-        kPVMountPointManagerAdapterNotReady });
+          kPVMountPointManagerAdapterNotReady });
     }
 
     return volume_manager_->GetExpiredDate(adjust(key));
