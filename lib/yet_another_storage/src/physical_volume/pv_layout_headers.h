@@ -2,6 +2,7 @@
 #include "../common/macros.h"
 #include "../common/settings.hpp"
 #include "../utils/Version.hpp"
+#include "../common/offset_type_traits.hpp"
 #include <cstdint>
 
 using namespace yas::macros;
@@ -42,12 +43,17 @@ enum PVType : uint8_t {
   kInt32  = 4,
   kUint32 = 5,
   kFloat  = 6,
-  kDouble = 7,
-  kInt64  = 8,
-  kUint64 = 9,
-  kString = 10,
-  kBlob   = 11,
-  kInvertedIndex = 12,
+  k4TypeMax = 7,
+
+  kDouble = 8,
+  kInt64  = 9,
+  kUint64 = 10,
+  k8TypeMax = 11,
+
+  kString = 12,
+  kBlob   = 13,
+  kInvertedIndex = 14,
+  kComplexMax = 15,
 
   kEmpty4Simple = 0xFD,
   kEmpty8Simple = 0xFE,
@@ -124,11 +130,11 @@ STRUCT_PACK(
 struct ComplexTypeHeader : public PVState {
   uint16_t expired_time_high_ = 0;
   uint32_t expired_time_low_ = 0;
-  OffsetType overall_size_;
-  OffsetType chunk_size_;
-  OffsetType sequel_offset_;
+  OffsetType overall_size_ = offset_traits<OffsetType>::NonExistValue();
+  OffsetType chunk_size_ = offset_traits<OffsetType>::NonExistValue();
+  OffsetType sequel_offset_ = offset_traits<OffsetType>::NonExistValue();
   union {
-    OffsetType next_free_entry_offset_;
+    OffsetType next_free_entry_offset_ = offset_traits<OffsetType>::NonExistValue();
     uint8_t data_[1];
   };
 });
