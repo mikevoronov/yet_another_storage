@@ -43,25 +43,25 @@ enum PVType : uint8_t {
   kInt32  = 4,
   kUint32 = 5,
   kFloat  = 6,
-  k4TypeMax = 7,
+  kEmpty4Simple = 7,
+  k4TypeMax = 8,
 
-  kDouble = 8,
-  kInt64  = 9,
-  kUint64 = 10,
-  k8TypeMax = 11,
+  kDouble = 9,
+  kInt64  = 10,
+  kUint64 = 11,
+  kEmpty8Simple = 12,
+  k8TypeMax = 13,
 
-  kString = 12,
-  kBlob   = 13,
-  kInvertedIndex = 14,
-  kComplexMax = 15,
-
-  kEmpty4Simple = 0xFD,
-  kEmpty8Simple = 0xFE,
-  kEmptyComplex = 0xFF
+  kString = 14,
+  kBlob   = 15,
+  kInvertedIndex = 16,
+  kEmptyComplex = 17,
+  kComplexMax = 18
 };
 
 enum PVTypeState : uint8_t {
-  kIsExpired = 0x01,
+  kEmpty = 0x00,
+  kIsExpired = 0x01,      // has expired time
   kComplexBegin = 0x02,   // beginning of Complex type
   kComplexSequel = 0x04   // next chunk of Complex type
 };

@@ -296,8 +296,6 @@ class PVManager : public IStorage<CharType> {
     header.value_ = value;
     data_reader_writer_.Write<HeaderType>(new_entry_offset, header);
 
-    // TODO : split chunk
-
     return new_entry_offset;
   }
 
@@ -394,13 +392,13 @@ class PVManager : public IStorage<CharType> {
   void deleteEntry(OffsetType offset) {
     const PVType pv_type = getRecordType(offset);
     if (pv_type < PVType::k4TypeMax) {
-      deleteEntry<Simple4TypeHeader>(offset);
+      return deleteEntry<Simple4TypeHeader>(offset);
     }
     else if (pv_type < PVType::k8TypeMax) {
-      deleteEntry<Simple8TypeHeader>(offset);
+      return deleteEntry<Simple8TypeHeader>(offset);
     }
     else if (pv_type < PVType::kComplexMax) {
-      deleteEntry<ComplexTypeHeader>(offset);
+      return deleteEntry<ComplexTypeHeader>(offset);
     }
     throw (exception::YASException("Corrupted storage header type: unsupported type",
         StorageError::kCorruptedHeaderError));
@@ -449,13 +447,13 @@ class PVManager : public IStorage<CharType> {
   void setExpiredDate(OffsetType offset, utils::Time &expired_time) {
     const PVType pv_type = getRecordType(offset);
     if (pv_type < PVType::k4TypeMax) {
-      setExpiredDate<Simple4TypeHeader>(offset, expired_time);
+      return setExpiredDate<Simple4TypeHeader>(offset, expired_time);
     }
     else if (pv_type < PVType::k8TypeMax) {
-      setExpiredDate<Simple8TypeHeader>(offset, expired_time);
+      return setExpiredDate<Simple8TypeHeader>(offset, expired_time);
     }
     else if (pv_type < PVType::kComplexMax) {
-      setExpiredDate<ComplexTypeHeader>(offset, expired_time);
+      return setExpiredDate<ComplexTypeHeader>(offset, expired_time);
     }
     throw (exception::YASException("Corrupted storage header type: unsupported type",
         StorageError::kCorruptedHeaderError));

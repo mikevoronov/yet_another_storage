@@ -20,7 +20,7 @@ class PVManagerFactory {
     return factory;
   }
 
-  nonstd::expected<std::shared_ptr<Manager>, StorageErrorDescriptor> Create(const fs::path path, utils::Version requested_version, uint32_t priority = 0,
+  nonstd::expected<std::shared_ptr<IStorage<CharType>>, StorageErrorDescriptor> Create(const fs::path path, utils::Version requested_version, uint32_t priority = 0,
       uint32_t cluster_size = kDefaultClusterSize) {
 
     if (max_supported_version < requested_version) {
