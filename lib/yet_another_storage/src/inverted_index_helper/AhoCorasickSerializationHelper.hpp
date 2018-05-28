@@ -18,13 +18,7 @@ namespace index_helper {
 template <typename CharType, typename LeafType, typename IdType>
 class AhoCorasickSerializationHelper {
   using Engine = AhoCorasickEngine<CharType, LeafType>;
-  template<typename CharType>
-  struct Node {
-    Node() : leaf_(leaf_traits<LeafType>::NonExistValue()) {}
-    std::unordered_map<CharType, std::unique_ptr<Node>> routes_;
-    LeafType leaf_;
-  };
-  using CharNode = Node<CharType>;
+  using CharNode = typename Engine::CharNode;
 
  public:
   static_assert(std::is_integral_v<IdType>, "IdType should be an integral type");
@@ -40,12 +34,12 @@ class AhoCorasickSerializationHelper {
     NodeDescriptorStorage current_level_nodes;
     NodeDescriptorStorage next_level_nodes;
     
-    if (!engine.trie_ || !engine.trie_.get()) {
+    if (!engine.trie_) {
+      // nothing to serialize
       return {};
     }
-    // TODO (!!) : bad type conversion (need to investigate how VS can view inner struct from friends class)
-    current_level_nodes.emplace_back(0, reinterpret_cast<CharNode*>(engine.trie_.get()), 0,
-        std::char_traits<CharType>::to_char_type('/'));
+
+    current_level_nodes.emplace_back(0, engine.trie_.get(), 0, std::char_traits<CharType>::to_char_type('/'));
 
     IdType current_node_id = 1;     // root node has been already counted 
     IdType current_leaf_id = 0;
@@ -141,8 +135,7 @@ class AhoCorasickSerializationHelper {
       }
     }
 
-    // TODO (!!) : bad type conversion (need to investigate how VS can view inner struct from friends class)
-    engine.trie_.swap(*(std::unique_ptr<AhoCorasickEngine<CharType, LeafType>::CharNode>*)(&root));
+    engine.trie_.swap(root);
   }
 
   AhoCorasickSerializationHelper(const AhoCorasickSerializationHelper&) = delete;
