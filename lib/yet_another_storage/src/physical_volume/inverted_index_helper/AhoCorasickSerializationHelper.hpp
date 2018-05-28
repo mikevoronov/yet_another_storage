@@ -39,7 +39,10 @@ class AhoCorasickSerializationHelper {
     LeafSerializationDescriptorStorage serialized_leafs;
     NodeDescriptorStorage current_level_nodes;
     NodeDescriptorStorage next_level_nodes;
-
+    
+    if (!engine.trie_ || !engine.trie_.get()) {
+      return {};
+    }
     // TODO (!!) : bad type conversion (need to investigate how VS can view inner struct from friends class)
     current_level_nodes.emplace_back(0, reinterpret_cast<CharNode*>(engine.trie_.get()), 0,
         std::char_traits<CharType>::to_char_type('/'));

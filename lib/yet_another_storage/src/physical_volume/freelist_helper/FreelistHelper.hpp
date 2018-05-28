@@ -60,7 +60,7 @@ class FreelistHelper {
         bin_descriptors_[bin_id].offset_ = offset_traits<OffsetType>::NonExistValue();
         return offset;
       }
-      if (is_less_cluster_size && offset_traits<OffsetType>::IsExistValue(bin_descriptors_[bin_id].offset_)) {
+      if (!is_less_cluster_size && offset_traits<OffsetType>::IsExistValue(bin_descriptors_[bin_id].offset_)) {
         last_viewed_freed_bin_id = bin_id;
       }
     }

@@ -311,7 +311,7 @@ class PVManager : public IStorage<CharType> {
     }
     case PVType::kBlob: {
       auto &vector_value = std::any_cast<const ByteVector&>(value);
-      return writeComplexType(PVType::kString, std::cbegin(vector_value), std::cend(vector_value));
+      return writeComplexType(PVType::kBlob, std::cbegin(vector_value), std::cend(vector_value));
       break;
     }
     default:
@@ -432,19 +432,30 @@ class PVManager : public IStorage<CharType> {
   template<>
   void deleteEntry<ComplexTypeHeader>(OffsetType offset) {
     ComplexTypeHeader header = data_reader_writer_.Read<ComplexTypeHeader>(offset);
+    const auto overall_size = header.overall_size_;
+    auto next_entry_offset = header.sequel_offset_;
+
     header.value_type_ = PVType::kEmptyComplex;
+    header.value_state_ = PVTypeState::kComplexBegin;
     header.overall_size_ = header.chunk_size_;
     header.next_free_entry_offset_ = freelist_helper_.GetFreeEntry(header.chunk_size_);
     data_reader_writer_.Write<ComplexTypeHeader>(offset, header);
-    freelist_helper_.PushFreeEntry(offset, header.chunk_size_);
+    freelist_helper_.PushFreeEntry(offset, header.chunk_size_ + offsetof(ComplexTypeHeader, data_));
 
-    while (header.next_free_entry_offset_ != offset_traits<OffsetType>::NonExistValue()) {
-      header = data_reader_writer_.Read<ComplexTypeHeader>(header.next_free_entry_offset_);
+    auto deleted = header.chunk_size_;
+    while (deleted < overall_size && offset_traits<OffsetType>::IsExistValue(next_entry_offset)) {
+      const auto saved_next_entry_offset = next_entry_offset;
+      header = data_reader_writer_.Read<ComplexTypeHeader>(next_entry_offset);
+
+      next_entry_offset = header.sequel_offset_;
       header.value_type_ = PVType::kEmptyComplex;
+      header.value_state_ = PVTypeState::kComplexBegin;
       header.overall_size_ = header.chunk_size_;
       header.next_free_entry_offset_ = freelist_helper_.GetFreeEntry(header.chunk_size_);
-      data_reader_writer_.Write<ComplexTypeHeader>(header.next_free_entry_offset_, header);
-      freelist_helper_.PushFreeEntry(header.next_free_entry_offset_, header.chunk_size_);
+      data_reader_writer_.Write<ComplexTypeHeader>(saved_next_entry_offset, header);
+      freelist_helper_.PushFreeEntry(saved_next_entry_offset, header.chunk_size_
+          + offsetof(ComplexTypeHeader, data_));
+      deleted += header.chunk_size_;
     }
   }
 
@@ -493,32 +504,30 @@ class PVManager : public IStorage<CharType> {
   template<typename Iterator>
   OffsetType writeComplexType(PVType value_type, const Iterator begin, const Iterator end) {
     const OffsetType data_size = std::distance(begin, end);
-    auto offset = getFreeOffset(data_size);
-    auto first_offset = offset;
+    auto free_offset = getFreeOffset(data_size + sizeof(ComplexTypeHeader));
+    auto first_free_offset = free_offset;
 
     bool is_first = true;
+    OffsetType written = 0;
     OffsetType overall_written = 0;
     while (overall_written < data_size) {
       auto new_begin = begin;
       std::advance(new_begin, overall_written);
-      const auto written = data_reader_writer_.WriteComplexType(offset, value_type, is_first, new_begin, end);
+      auto next_free_offset = getFreeOffset(data_size - written + sizeof(ComplexTypeHeader));
+      written = data_reader_writer_.WriteComplexType(free_offset, value_type, is_first, next_free_offset,
+          new_begin, end);
       is_first = false;
 
+      free_offset = next_free_offset;
       overall_written += written;
-      offset = getFreeOffset(data_size - written);
     }
 
-    return first_offset;
+    return first_free_offset;
   }
 
   OffsetType getFreeOffset(OffsetType entry_size) {
     if (0 == entry_size) {
       return offset_traits<OffsetType>::NonExistValue();
-    }
-
-    if (entry_size > sizeof(Simple8TypeHeader)) {
-      // if it isn't a simple type add size of big complex header
-      entry_size += sizeof(ComplexTypeHeader);
     }
 
     auto offset = freelist_helper_.PopFreeEntryOffset(entry_size);
@@ -612,8 +621,8 @@ class PVManager : public IStorage<CharType> {
     ByteVector new_cluster(cluster_size_, debug_filler);
 
     ComplexTypeHeader header;
-    header.overall_size_ = cluster_size_;
-    header.chunk_size_ = cluster_size_;
+    header.overall_size_ = cluster_size_ - offsetof(ComplexTypeHeader, data_);
+    header.chunk_size_ = cluster_size_ - offsetof(ComplexTypeHeader, data_);
     header.value_type_ = PVType::kEmptyComplex;
 
     for (int new_cluster_id = 0; new_cluster_id < clusters_count; ++new_cluster_id) {

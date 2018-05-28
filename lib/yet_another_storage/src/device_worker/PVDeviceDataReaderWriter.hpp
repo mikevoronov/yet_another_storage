@@ -87,7 +87,8 @@ class PVDeviceDataReaderWriter {
   }
 
   template <typename Iterator>
-  OffsetType WriteComplexType(OffsetType offset, PVType pv_type, bool is_first, Iterator begin, Iterator end) {
+  OffsetType WriteComplexType(OffsetType offset, PVType pv_type, bool is_first, OffsetType next_free_offset,
+        Iterator begin, Iterator end) {
     ComplexTypeHeader header = Read<ComplexTypeHeader>(offset);
     const auto data_size = std::distance(begin, end);
     const auto written = std::min<OffsetType>(header.chunk_size_, data_size);
@@ -96,6 +97,7 @@ class PVDeviceDataReaderWriter {
     header.value_type_ = pv_type;
     header.value_state_ = (is_first ? PVTypeState::kComplexBegin : PVTypeState::kComplexSequel);
     header.chunk_size_ = written;
+    header.sequel_offset_ = next_free_offset;
 
     auto new_end = begin;
     std::advance(new_end, written);
