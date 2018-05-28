@@ -1,6 +1,6 @@
 #pragma once
-#include "../../utils/Version.hpp"
-#include "../../common/macros.h"
+#include "../utils/Version.hpp"
+#include "../common/macros.h"
 #include "leaf_type_traits.hpp"
 #include <cstdint>
 #include <type_traits>    // for underlying_type_t

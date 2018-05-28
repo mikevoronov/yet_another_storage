@@ -1,7 +1,7 @@
 #pragma once
 #include "gtest/gtest.h"
-#include "physical_volume/inverted_index_helper/AhoCorasickEngine.hpp"
-#include "physical_volume/inverted_index_helper/leaf_type_traits.hpp"
+#include "inverted_index_helper/AhoCorasickEngine.hpp"
+#include "inverted_index_helper/leaf_type_traits.hpp"
 #include <string_view>
 
 namespace {

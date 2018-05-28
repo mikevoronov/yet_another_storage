@@ -1,5 +1,5 @@
 #pragma once
-#include "PVVolumeManager.hpp"
+#include "PVManager.hpp"
 #include "IStorage.hpp"
 #include <memory>
 #include <string>
@@ -10,12 +10,12 @@ namespace storage {
 template <typename CharType, typename OffsetType, typename Device = DefaultDevice<OffsetType>>
 class PVMountPointManagerAdapter : public IStorage<CharType> {
   using Path = std::basic_string<CharType>;
-  using VolumeManager = PVVolumeManager<CharType, OffsetType, Device>;
+  using VolumeManager = PVManager<CharType, OffsetType, Device>;
 
  public:
   using key_type = IStorage<CharType>::key_type;
 
-  PVMountPointManagerAdapter(Path mount_point, std::shared_ptr<PVVolumeManager> volume_manager)
+  PVMountPointManagerAdapter(Path mount_point, std::shared_ptr<VolumeManager> volume_manager)
       : mount_point_(std::move(mount_point)),
         volume_manager_(volume_manager)
   {}

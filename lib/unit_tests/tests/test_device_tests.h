@@ -1,6 +1,6 @@
 #pragma once
 #include "gtest/gtest.h"
-#include "device_worker/devices/TestDevice.hpp"
+#include "devices/TestDevice.hpp"
 #include "common/common.h"
 
 using namespace yas;

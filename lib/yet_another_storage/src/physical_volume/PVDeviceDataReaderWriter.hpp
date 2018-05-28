@@ -1,18 +1,17 @@
 #pragma once
 #include "../common/filesystem.h"
-#include "../physical_volume/pv_layout_headers.h"
+#include "pv_layout_headers.h"
 #include "../utils/serialization_utils.h"
-#include "devices/FileDevice.hpp"
+#include "../devices/FileDevice.hpp"
 #include "../common/common.h"
 #include "../common/offset_type_traits.hpp"
-#include "../storage/IStorage.hpp"
 #include <string_view>
 
 using namespace yas::pv_layout_headers;
 using namespace yas::storage;
 
 namespace yas {
-namespace device_worker {
+namespace pv {
 
 // class can read and write control headers of device layout
 template <typename OffsetType, typename Device>
@@ -155,5 +154,5 @@ class PVDeviceDataReaderWriter {
   }
 };
 
-} // namespace device_worker
+} // namespace pv
 } // namespace yas

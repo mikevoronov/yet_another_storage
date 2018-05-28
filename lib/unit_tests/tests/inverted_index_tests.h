@@ -1,6 +1,6 @@
 #pragma once
 #include "gtest/gtest.h"
-#include "physical_volume/inverted_index_helper/InvertedIndexHelper.hpp"
+#include "inverted_index_helper/InvertedIndexHelper.hpp"
 #include "utils/Version.hpp"
 
 namespace {

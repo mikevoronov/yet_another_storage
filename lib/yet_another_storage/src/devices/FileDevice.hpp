@@ -1,7 +1,7 @@
 #pragma once
-#include "../../common/filesystem.h"
-#include "../../common/common.h"
-#include "../../exceptions/YASException.h"
+#include "../common/filesystem.h"
+#include "../common/common.h"
+#include "../exceptions/YASException.h"
 #include <fstream>
 
 namespace yas {

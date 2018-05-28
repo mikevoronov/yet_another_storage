@@ -1,7 +1,7 @@
 #pragma once
-#include "../pv_layout_headers.h"
-#include "../../common/settings.hpp"
-#include "../../common/offset_type_traits.hpp"
+#include "pv_layout_headers.h"
+#include "../common/settings.hpp"
+#include "../common/offset_type_traits.hpp"
 #include <array>
 
 using namespace yas::pv_layout_headers;

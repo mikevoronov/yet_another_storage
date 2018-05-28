@@ -1,6 +1,6 @@
 #pragma once
 #include "gtest/gtest.h"
-#include "physical_volume/freelist_helper/FreelistHelper.hpp"
+#include "physical_volume/FreelistHelper.hpp"
 
 using namespace yas::freelist_helper;
 

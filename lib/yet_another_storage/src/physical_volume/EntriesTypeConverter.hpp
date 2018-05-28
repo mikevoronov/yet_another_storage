@@ -9,11 +9,11 @@
 using namespace yas::pv_layout_headers;
 
 namespace yas {
-namespace storage {
+namespace pv {
 
-class TypeConverter {
+class EntriesTypeConverter {
  public:
-  TypeConverter() {
+   EntriesTypeConverter() {
      init();
   }
 
@@ -22,7 +22,6 @@ class TypeConverter {
   }
 
   std::any ConvertToUserType(PVType pv_type, uint64_t value) const noexcept {
-    // TODO
     switch (pv_type) {
     case PVType::kInt8:
       return static_cast<int8_t>(value);
@@ -83,5 +82,5 @@ class TypeConverter {
    }
 };
 
-} // namespace storage
+} // namespace pv
 } // namespace yas
