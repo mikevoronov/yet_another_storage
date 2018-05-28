@@ -30,7 +30,10 @@
     <ClInclude Include="tests\version_tests.h">
       <Filter>Source Files\tests</Filter>
     </ClInclude>
-    <ClInclude Include="tests\pv_mount_point_manager_tests.h">
+    <ClInclude Include="tests\pv_manager_tests.h">
+      <Filter>Source Files\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\freelist_helper_tests.h">
       <Filter>Source Files\tests</Filter>
     </ClInclude>
   </ItemGroup>
