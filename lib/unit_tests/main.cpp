@@ -5,6 +5,7 @@
 #include "tests/time_tests.h"
 #include "tests/pv_manager_tests.h"
 #include "tests/freelist_helper_tests.h"
+#include "tests/storage_tests.h"
 
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);

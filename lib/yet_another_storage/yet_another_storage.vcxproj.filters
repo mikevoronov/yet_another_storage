@@ -83,9 +83,6 @@
     <ClInclude Include="src\storage\IStorage.hpp">
       <Filter>src\storage</Filter>
     </ClInclude>
-    <ClInclude Include="src\storage\PVMountPoint.hpp">
-      <Filter>src\storage</Filter>
-    </ClInclude>
     <ClInclude Include="src\storage\PVManager.hpp">
       <Filter>src\storage</Filter>
     </ClInclude>
@@ -118,9 +115,6 @@
     </ClInclude>
     <ClInclude Include="src\physical_volume\FreelistHelper.hpp">
       <Filter>src\physical_volume</Filter>
-    </ClInclude>
-    <ClInclude Include="src\storage\VolumeGroup.hpp">
-      <Filter>src\storage</Filter>
     </ClInclude>
     <ClInclude Include="src\physical_volume\PVEntriesManager.hpp">
       <Filter>src\physical_volume</Filter>

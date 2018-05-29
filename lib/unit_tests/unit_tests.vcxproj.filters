@@ -36,5 +36,8 @@
     <ClInclude Include="tests\freelist_helper_tests.h">
       <Filter>Source Files\tests</Filter>
     </ClInclude>
+    <ClInclude Include="tests\storage_tests.h">
+      <Filter>Source Files\tests</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

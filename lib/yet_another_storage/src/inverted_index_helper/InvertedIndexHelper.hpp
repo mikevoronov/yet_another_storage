@@ -61,11 +61,11 @@ public:
     return engine_.HasKey(key);
   }
 
-  bool HasPath(key_type key) const noexcept {
+  int64_t FindMaxSubKey(key_type key) const noexcept {
     if (key.empty()) {
-      return false;
+      return 0;
     }
-    return engine_.HasKey(key, false);
+    return engine_.FindMaxSubKey(key);
   }
 
   constexpr bool is_changed() const { return is_changed_; }

@@ -64,9 +64,25 @@ class AhoCorasickEngine {
     return true;
   }
 
-  bool HasKey(key_type key, bool is_leaf_expected=true) const noexcept {
+  bool HasKey(key_type key) const noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? !is_leaf_expected : leaf_traits<LeafType>::NonExistValue() != node->leaf_;
+    return (nullptr == node) ? false : leaf_traits<LeafType>::NonExistValue() != node->leaf_;
+  }
+
+  int64_t FindMaxSubKey(key_type key) const noexcept {
+    // to more generic view on future this method could be replaced with a method
+    // that could apply visitors to nodes
+    auto current = trie_.get();
+    int64_t max_path = 0;
+
+    for (const auto &ch : key) {
+      current = getNextNode(ch, current);
+      if (nullptr == current) {
+        return max_path;
+      }
+      ++max_path;
+    }
+    return max_path;
   }
 
   AhoCorasickEngine(const AhoCorasickEngine&) = delete;

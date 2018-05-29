@@ -24,6 +24,8 @@ enum StorageError : uint32_t {
   kValueNotFound = 14,                                         // used for std::any
   kKeyAlreadyCreated = 15,
   kPVVersionUnsopported = 16,
+  kUnknownError = 17,
+  kCatalogNotFoundError = 18,
 
   kUnknownExceptionType
 };
