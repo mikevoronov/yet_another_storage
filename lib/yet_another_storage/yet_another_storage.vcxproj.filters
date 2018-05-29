@@ -65,9 +65,6 @@
     <ClInclude Include="src\utils\serialization_utils.h">
       <Filter>src\utils</Filter>
     </ClInclude>
-    <ClInclude Include="src\exceptions\YASException.h">
-      <Filter>src\exception</Filter>
-    </ClInclude>
     <ClInclude Include="src\exceptions\YASExceptionHandler.h">
       <Filter>src\exception</Filter>
     </ClInclude>
@@ -133,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="src\physical_volume\EntriesTypeConverter.hpp">
       <Filter>src\physical_volume</Filter>
+    </ClInclude>
+    <ClInclude Include="src\exceptions\YASException.hpp">
+      <Filter>src\exception</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

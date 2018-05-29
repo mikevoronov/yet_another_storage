@@ -1,8 +1,6 @@
 #pragma once
 #include "../utils/Time.hpp"
 #include "PVDeviceDataReaderWriter.hpp"
-#include "../common/common.h"
-#include "../common/offset_type_traits.hpp"
 #include "FreelistHelper.hpp"
 #include "EntriesTypeConverter.hpp"
 #include <string_view>
@@ -41,7 +39,7 @@ class PVEntriesManager {
     }
     else if (!offset_traits<OffsetType>::IsExistValue(pv_header.inverted_index_offset_)) {
       throw exception::YASException("PV header parsing: invalid inverted index offset",
-        StorageError::kInvalidPVSignatureError);
+          StorageError::kInvalidPVSignatureError);
     }
 
     current_cursor += sizeof(PVHeader);

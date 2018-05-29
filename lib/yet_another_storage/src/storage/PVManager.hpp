@@ -3,7 +3,6 @@
 #include "../physical_volume/PVEntriesManager.hpp"
 #include "../inverted_index_helper/InvertedIndexHelper.hpp"
 #include "../storage/IStorage.hpp"
-#include "../common/offset_type_traits.hpp"
 #include "../exceptions/YASExceptionHandler.h"
 #include <mutex>
 
@@ -100,7 +99,8 @@ class PVManager : public IStorage<CharType> {
     try {
       const auto entry_offset = inverted_index_->Get(key);
       if (!offset_traits<OffsetType>::IsExistValue(entry_offset)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor("Get key: key hasn't been found", StorageError::kKeyNotFound));
+        return nonstd::make_unexpected(StorageErrorDescriptor("Get key: key hasn't been found", 
+            StorageError::kKeyNotFound));
       }
 
       if (!isEntryExpired(entry_offset)) {
@@ -110,7 +110,8 @@ class PVManager : public IStorage<CharType> {
       // delete expired values during access
       entries_manager_.DeleteEntry(entry_offset);
       inverted_index_->Delete(key);
-      return nonstd::make_unexpected(StorageErrorDescriptor("Get key: key hasn't been found", StorageError::kKeyNotFound));
+      return nonstd::make_unexpected(StorageErrorDescriptor("Get key: key hasn't been found", 
+          StorageError::kKeyNotFound));
     }
     catch (...) {
       return nonstd::make_unexpected(exception::YASExceptionHandler(std::current_exception()));
