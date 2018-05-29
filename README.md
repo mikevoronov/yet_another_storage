@@ -1,21 +1,22 @@
 # yet_another_storage
 
 ## Basic defenitions
-Physical volume (PV) - is a single physical storage unit located anywhere which is could be accessed by special device class.
-Catalog - is a any prefix substring from prefix trie of keys from PV. F.e. assume that we have 3 keys: "/home/user1/file1", "/home/user1/file2", "/home/user2/file". So catalog is any prefix from prefix trie build on these keys. Since if we have choosen "/home/us" (or any prefix substring of "/home/user") catalog that we have an access to all of these keys.
+**Physical volume (PV)** - is a single physical storage unit located anywhere which is could be accessed by special device class.
+
+**Catalog** - is any prefix substring from prefix trie of keys from PV. F.e. assume that we have 3 keys: "/home/user1/file1", "/home/user1/file2", "/home/user2/file". So catalog is any prefix from prefix trie build on these keys. Since if we have choosen "/home/us" (or any prefix substring of "/home/user") catalog that we have an access to all of these keys.
 
 ## PV layout
 
-Each PV has following layout on :
+Each PV has following layout:
 
 ### PVHeader
-  Header contains info about version, cluster size, bin counts, priority, and offsets of all other structures.
+  The header contains information about version, cluster size, bin counts, priority, and offsets of all other structures.
 
 ### Freelists
   Freelists exploits the same concept as fastbin in (dl)ptmalloc. In version 1.1 of library cluster size could be choosen arbitrarily but by default equals 3840 bytes (to guaranteed fit at page size on x86/amd64). Because of this there are following freelist buckets | 12 | 16 | <64 | <100 | <128 | <256 | <512 | <1024 | <1520 | <2048 | <3840 | have been chosen.
  
 ### Inverted index
-  The main purpose of inverted index in PV is to keep info (mainly offsets) for all keys. In version 1.1 inverted index is based on Aho-Corasick algorithm. In PV it is saved in serialized view.
+  The main purpose of inverted index in PV is to keep information (mainly offsets) for all keys. In version 1.1 inverted index is based on Aho-Corasick algorithm. In PV it is saved in serialized view.
 
 ### Data
   Similar to common filesystems: PV is divided on clusters with choosen size and has several types of data entry. For version 1.1 there are 3 types:
