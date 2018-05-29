@@ -140,6 +140,18 @@ class PVManager : public IStorage<CharType> {
     }
   }
   
+  StorageErrorDescriptor HasCatalog(key_type key) override {
+    std::lock_guard<std::mutex> lock(manager_guard_mutex_);
+    try {
+      return inverted_index_->HasPath(key) ? 
+          StorageErrorDescriptor( "", StorageError::kSuccess ) :
+          StorageErrorDescriptor( "", StorageError::kKeyNotFound );
+    }
+    catch (...) {
+      return exception::ExceptionHandler::Handle(std::current_exception());
+    }
+  }
+    
   virtual StorageErrorDescriptor Delete(key_type key) override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {

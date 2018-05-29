@@ -64,9 +64,9 @@ class AhoCorasickEngine {
     return true;
   }
 
-  bool HasKey(key_type key) const noexcept {
+  bool HasKey(key_type key, bool is_leaf_expected=true) const noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? false : leaf_traits<LeafType>::NonExistValue() != node->leaf_;
+    return (nullptr == node) ? !is_leaf_expected : leaf_traits<LeafType>::NonExistValue() != node->leaf_;
   }
 
   AhoCorasickEngine(const AhoCorasickEngine&) = delete;

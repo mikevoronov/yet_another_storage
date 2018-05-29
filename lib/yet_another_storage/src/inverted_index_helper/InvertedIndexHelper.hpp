@@ -61,6 +61,13 @@ public:
     return engine_.HasKey(key);
   }
 
+  bool HasPath(key_type key) const noexcept {
+    if (key.empty()) {
+      return false;
+    }
+    return engine_.HasKey(key, false);
+  }
+
   constexpr bool is_changed() const { return is_changed_; }
 
   template<typename IdType>
