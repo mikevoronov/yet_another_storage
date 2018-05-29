@@ -371,7 +371,7 @@ TEST(PVManager, HasKeyTest) {
 
   auto pv_manager = manager.value();
   pv_manager->Put(key, std::make_any<TestType>(test_value));
-  EXPECT_TRUE(pv_manager->HasKey(key));
+  EXPECT_EQ(StorageError::kSuccess, pv_manager->HasKey(key).error_code_);
 }
 
 TEST(PVManager, ExpiredTest) {
