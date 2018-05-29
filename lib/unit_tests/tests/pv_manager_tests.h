@@ -17,7 +17,7 @@ TEST(PVManager, PutGetInt8) {
   const auto pv_path = fs::temp_directory_path() / "pv1";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -38,7 +38,7 @@ TEST(PVManager, PutGetUInt8) {
   const auto pv_path = fs::temp_directory_path() / "pv2";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -59,7 +59,7 @@ TEST(PVManager, PutGetInt16) {
   const auto pv_path = fs::temp_directory_path() / "pv3";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -80,7 +80,7 @@ TEST(PVManager, PutGetUInt16) {
   const auto pv_path = fs::temp_directory_path() / "pv4";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -101,7 +101,7 @@ TEST(PVManager, PutGetInt32) {
   const auto pv_path = fs::temp_directory_path() / "pv5";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -122,7 +122,7 @@ TEST(PVManager, PutGetUInt32) {
   const auto pv_path = fs::temp_directory_path() / "pv6";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -143,7 +143,7 @@ TEST(PVManager, PutGetFloat1) {
   const auto pv_path = fs::temp_directory_path() / "pv7";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -164,7 +164,7 @@ TEST(PVManager, PutGetFloat2) {
   const auto pv_path = fs::temp_directory_path() / "pv8";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -185,7 +185,7 @@ TEST(PVManager, PutGetDouble1) {
   const auto pv_path = fs::temp_directory_path() / "pv9";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -206,7 +206,7 @@ TEST(PVManager, PutGetDouble2) {
   const auto pv_path = fs::temp_directory_path() / "pv10";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -227,7 +227,7 @@ TEST(PVManager, PutGetInt64) {
   const auto pv_path = fs::temp_directory_path() / "pv11";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -248,7 +248,7 @@ TEST(PVManager, PutGetUInt64) {
   const auto pv_path = fs::temp_directory_path() / "pv12";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -269,7 +269,7 @@ TEST(PVManager, PutGetString) {
   const auto pv_path = fs::temp_directory_path() / "pv13";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -290,7 +290,7 @@ TEST(PVManager, PutGetBlob) {
   const auto pv_path = fs::temp_directory_path() / "pv14";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -311,7 +311,7 @@ TEST(PVManager, PutDeleteGetBlob) {
   const auto pv_path = fs::temp_directory_path() / "pv15";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -328,7 +328,7 @@ TEST(PVManager, PutDeleteGetBigBlob) {
   const auto pv_path = fs::temp_directory_path() / "pv16";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -345,7 +345,7 @@ TEST(PVManager, PutGetBigBlob) {
   const auto pv_path = fs::temp_directory_path() / "pv17";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -366,7 +366,7 @@ TEST(PVManager, HasKeyTest) {
   const auto pv_path = fs::temp_directory_path() / "pv18";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
@@ -381,7 +381,7 @@ TEST(PVManager, ExpiredTest) {
   const auto pv_path = fs::temp_directory_path() / "pv19";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   const auto saved_time = time(nullptr) - 100;
@@ -401,7 +401,7 @@ TEST(PVManager, ExpiredDeleteTest) {
   const auto pv_path = fs::temp_directory_path() / "pv20";
 
   auto &factory = PVManagerFactory::Instance();
-  auto manager = factory.Create(pv_path, max_supported_version);
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
   const auto saved_time = time(nullptr) - 100;
