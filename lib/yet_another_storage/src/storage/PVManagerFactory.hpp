@@ -8,6 +8,13 @@
 namespace yas {
 namespace storage {
 
+/**
+*    \brief The class is used for creating PVManager on specified path.
+*
+*    The general rule of YAS is one PVManager for one PV file because of thread-safety. So this class creates new
+*    or loads an existing PV from device and keep shared_ptr on them in internal unordered_map. If user specifies 
+*    path for already created PVManager - class returns him already created one.
+*/
 class PVManagerFactory {
  public:
   using manager_type = PVManager<CharType, OffsetType, DefaultDevice<OffsetType>>;
@@ -18,6 +25,13 @@ class PVManagerFactory {
     return factory;
   }
 
+  ///  \brief creates new or returns existing PVManager
+  ///
+  ///  \param path - path to PVManager
+  ///  \param requested_version - maximum supported version of PV structure
+  ///  \param priority - a priority for newly created PVManager
+  ///  \param cluster_size - a cluster size for newly created PVManager
+  ///  \return - a PVManager for specified path or error
   nonstd::expected<std::shared_ptr<manager_type>, StorageErrorDescriptor> Create(const pv_path_type path,
       utils::Version requested_version, uint32_t priority = 0, uint32_t cluster_size = kDefaultClusterSize) {
 
@@ -50,6 +64,10 @@ class PVManagerFactory {
     }
   }
 
+  ///  \brief returns existing PVManager
+  ///
+  ///  \param path - path to PVManager
+  ///  \return - already created PVManager for specified path or nullptr if it hasn't been created yet
   std::shared_ptr<manager_type> GetPVManager(const pv_path_type path) {
     auto canonical_path = std::wstring(fs::canonical(path));
 

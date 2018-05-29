@@ -70,7 +70,7 @@ class AhoCorasickEngine {
   }
 
   int64_t FindMaxSubKey(key_type key) const noexcept {
-    // to more generic view on future this method could be replaced with a method
+    // to make class more generic on future this method could be replaced with a method
     // that could apply visitors to nodes
     auto current = trie_.get();
     int64_t max_path = 0;

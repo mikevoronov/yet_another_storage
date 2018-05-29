@@ -9,8 +9,13 @@ using namespace yas::index_helper;
 namespace yas {
 namespace storage {
 
-// should be class with basic exception safety garantee
-// all methods should catch inner class exception and transform it to StorageError class wrapper to nonstd::expected
+/**
+*    \brief The class represents virtual volume of key-value storage with possbility to mount physical volumes
+*
+*    This class is thread-safe with read-write blocks on shared_mutex. "Read" operation is all from IStorage
+*    interface, "write" is only mount operation which modifies this class inner structures. Take into account
+*    that this based on assumptions that PVManager is also thead-safe.
+*/
 template<typename CharType>
 class Storage : public IStorage<CharType> {
   using StringType = std::basic_string<CharType>;
@@ -189,7 +194,12 @@ class Storage : public IStorage<CharType> {
     return nonstd::make_unexpected(StorageErrorDescriptor("", StorageError::kKeyNotFound));
   }
 
-
+  ///  \brief mount a some catalog of PVManager to specified location in virtual volume
+  ///
+  ///  \param pv_path - path to PVManager. This method gets PVManager instances from PVManagerFactory.
+  ///  \param storage_mount_catalog - a catalog of virtual storage which would be used for mounting of PV
+  ///  \param pv_mount_catalog - a catalog of mounted PV which would mount to virtual storage
+  ///  \return - descriptor of errors
   StorageErrorDescriptor Mount(pv_path_type pv_path, StringType storage_mount_catalog, StringType pv_mount_catalog) {
     std::unique_lock<std::shared_mutex> lock(mutex_);
 

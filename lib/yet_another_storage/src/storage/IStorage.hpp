@@ -7,6 +7,11 @@
 namespace yas {
 namespace storage {
 
+/**
+ *    \brief Interface for storage-like classes of YAS: Storage and PVManager
+ *
+ *    Provides basic operations over key-value
+ */
 template <typename CharType>
 class IStorage {
  public:
