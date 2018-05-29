@@ -15,8 +15,8 @@ namespace storage {
 template<typename OffsetType>
 using DefaultDevice = devices::FileDevice<OffsetType>;
 
-/** 
- *    \brief Class encapsulate all high-level storage-like operations on one Physical Volume (PV)
+/**
+ *    \brief The class encapsulates all high-level storage-like operations on one Physical Volume (PV)
  *
  *    Objects of this class could be created by Load/Create static methods. Note that for each physically
  *    seprated PV should be created only one instance of this class. If you want to simultaneously work
@@ -69,7 +69,8 @@ class PVManager : public IStorage<CharType> {
     Device::CreateEmpty(pv_path);
 
     // std::make_unique needs access to the class ctor
-    auto pv_volume_manager = std::unique_ptr<pv_manager_type>(new pv_manager_type(pv_path, version, cluster_size));
+    auto pv_volume_manager = std::unique_ptr<pv_manager_type>(new pv_manager_type(pv_path, version, priority, 
+        cluster_size));
     pv_volume_manager->entries_manager_.CreateStartSections(offset_traits<OffsetType>::NonExistValue());
     pv_volume_manager->inverted_index_.reset(new InvertedIndexType());
     return pv_volume_manager;
@@ -223,19 +224,27 @@ class PVManager : public IStorage<CharType> {
   std::mutex manager_guard_mutex_;
   utils::Version version_;
 
-  explicit PVManager(const fs::path &file_path, utils::Version version, uint32_t cluster_size = kDefaultClusterSize)
-      : entries_manager_(file_path, version, cluster_size),
+  explicit PVManager(const fs::path &file_path, utils::Version version, uint32_t priority = 0, 
+      uint32_t cluster_size = kDefaultClusterSize)
+      : entries_manager_(file_path, version, priority, cluster_size),
         version_(version) {
   }
 
   void close() {
-    // TODO : exception during serailization 
-    const auto serialized_index = inverted_index_->Serialize<OffsetType>(version_);
-    if (leaf_traits<OffsetType>::IsExistValue(inverted_index_offset_)) {
-      entries_manager_.DeleteEntry(inverted_index_offset_);
+    if (!inverted_index_) {
+      return;
     }
-    const auto new_index_offset = entries_manager_.CreateNewEntryValue(serialized_index);
-    entries_manager_.CreateStartSections(new_index_offset);
+    try {
+      const auto serialized_index = inverted_index_->Serialize<OffsetType>(version_);
+      if (leaf_traits<OffsetType>::IsExistValue(inverted_index_offset_)) {
+        entries_manager_.DeleteEntry(inverted_index_offset_);
+      }
+      const auto new_index_offset = entries_manager_.CreateNewEntryValue(serialized_index);
+      entries_manager_.CreateStartSections(new_index_offset);
+    }
+    catch (...) {
+      // in future relize there should be some some code to save trie in trouble situation (generally OOM)
+    }
   }
 
   bool isEntryExpired(OffsetType offset) {

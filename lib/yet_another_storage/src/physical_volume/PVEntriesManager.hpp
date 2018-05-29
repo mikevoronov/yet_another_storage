@@ -18,11 +18,12 @@ class PVEntriesManager {
   using PVPathType = typename Device::path_type;
  
  public:
-  explicit PVEntriesManager(const PVPathType &file_path, utils::Version version,
+  explicit PVEntriesManager(const PVPathType &file_path, utils::Version version, uint32_t priority = 0,
       uint32_t cluster_size = kDefaultClusterSize)
       : data_reader_writer_(file_path, cluster_size),
-        cluster_size_(cluster_size),
-        version_(version) {
+        version_(version),
+        priority_(priority),
+        cluster_size_(cluster_size) {
   }
 
   ~PVEntriesManager() = default;
