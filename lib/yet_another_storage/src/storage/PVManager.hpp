@@ -3,7 +3,7 @@
 #include "../physical_volume/PVEntriesManager.hpp"
 #include "../inverted_index_helper/InvertedIndexHelper.hpp"
 #include "../storage/IStorage.hpp"
-#include "../exceptions/YASExceptionHandler.h"
+#include "../exceptions/ExceptionHandler.hpp"
 #include <mutex>
 
 using namespace yas::pv_layout_headers;
@@ -90,7 +90,7 @@ class PVManager : public IStorage<CharType> {
       return { "", StorageError::kSuccess };
     }
     catch (...) {
-      return exception::YASExceptionHandler(std::current_exception());
+      return exception::ExceptionHandler::Handle(std::current_exception());
     }
   }
 
@@ -114,7 +114,7 @@ class PVManager : public IStorage<CharType> {
           StorageError::kKeyNotFound));
     }
     catch (...) {
-      return nonstd::make_unexpected(exception::YASExceptionHandler(std::current_exception()));
+      return nonstd::make_unexpected(exception::ExceptionHandler::Handle(std::current_exception()));
     }
   }
 
@@ -136,7 +136,7 @@ class PVManager : public IStorage<CharType> {
       return { "", StorageError::kKeyNotFound};
     }
     catch (...) {
-      return exception::YASExceptionHandler(std::current_exception());
+      return exception::ExceptionHandler::Handle(std::current_exception());
     }
   }
   
@@ -152,7 +152,7 @@ class PVManager : public IStorage<CharType> {
       return { "", StorageError::kSuccess };
     }
     catch (...) {
-      return exception::YASExceptionHandler(std::current_exception());
+      return exception::ExceptionHandler::Handle(std::current_exception());
     }
   }
 
@@ -168,7 +168,7 @@ class PVManager : public IStorage<CharType> {
       return {"", StorageError::kSuccess};
     }
     catch (...) {
-      return exception::YASExceptionHandler(std::current_exception());
+      return exception::ExceptionHandler::Handle(std::current_exception());
     }
   }
 
@@ -188,7 +188,7 @@ class PVManager : public IStorage<CharType> {
       return expired_date.GetTime();
     }
     catch (...) {
-      return nonstd::make_unexpected(exception::YASExceptionHandler(std::current_exception()));
+      return nonstd::make_unexpected(exception::ExceptionHandler::Handle(std::current_exception()));
     }
   }
 

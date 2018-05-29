@@ -46,7 +46,7 @@ class PVManagerFactory {
       return managers_[canonical_path_str];
     }
     catch (...) {
-      return nonstd::make_unexpected(exception::YASExceptionHandler(std::current_exception()));
+      return nonstd::make_unexpected(exception::ExceptionHandler::Handle(std::current_exception()));
     }
   }
 
