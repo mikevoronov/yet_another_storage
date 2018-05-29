@@ -414,4 +414,20 @@ TEST(PVManager, ExpiredDeleteTest) {
   EXPECT_FALSE(result.has_value()); // value already expired
 }
 
+TEST(PVManager, GetNonExistKey) {
+  using TestType = ByteVector;
+  const TestType test_value(0x100, '\x41');
+  const std::basic_string<CharType> key = "/root/asd21";
+  const auto pv_path = fs::temp_directory_path() / "pv21";
+
+  auto &factory = PVManagerFactory::Instance();
+  auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
+  EXPECT_TRUE(manager);
+
+  auto pv_manager = manager.value();
+  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  auto result = pv_manager->Get("/////");
+  EXPECT_FALSE(result.has_value());
+}
+
 }
