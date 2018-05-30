@@ -231,7 +231,8 @@ class PVManager : public IStorage<CharType> {
   }
 
   void close() {
-    if (!inverted_index_) {
+    if (!inverted_index_ || !inverted_index_->is_changed()) {
+      // inverted_index may not be created if an exception has occured
       return;
     }
     try {
