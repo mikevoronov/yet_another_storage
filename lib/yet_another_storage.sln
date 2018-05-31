@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit_tests", "unit_tests\un
 		{77C1B70D-8E80-4CCB-A4A7-9983E521DC2A} = {77C1B70D-8E80-4CCB-A4A7-9983E521DC2A}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pv_manager_basic_operations", "..\examples\pv_manager_basic_operations\pv_manager_basic_operations\pv_manager_basic_operations.vcxproj", "{2B2143A1-B40B-4471-A852-ED77C8CCB586}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -34,6 +36,14 @@ Global
 		{A1DDBA71-9ECA-40C6-9880-508E1A5AF892}.Release|x64.Build.0 = Release|x64
 		{A1DDBA71-9ECA-40C6-9880-508E1A5AF892}.Release|x86.ActiveCfg = Release|Win32
 		{A1DDBA71-9ECA-40C6-9880-508E1A5AF892}.Release|x86.Build.0 = Release|Win32
+		{2B2143A1-B40B-4471-A852-ED77C8CCB586}.Debug|x64.ActiveCfg = Debug|x64
+		{2B2143A1-B40B-4471-A852-ED77C8CCB586}.Debug|x64.Build.0 = Debug|x64
+		{2B2143A1-B40B-4471-A852-ED77C8CCB586}.Debug|x86.ActiveCfg = Debug|Win32
+		{2B2143A1-B40B-4471-A852-ED77C8CCB586}.Debug|x86.Build.0 = Debug|Win32
+		{2B2143A1-B40B-4471-A852-ED77C8CCB586}.Release|x64.ActiveCfg = Release|x64
+		{2B2143A1-B40B-4471-A852-ED77C8CCB586}.Release|x64.Build.0 = Release|x64
+		{2B2143A1-B40B-4471-A852-ED77C8CCB586}.Release|x86.ActiveCfg = Release|Win32
+		{2B2143A1-B40B-4471-A852-ED77C8CCB586}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

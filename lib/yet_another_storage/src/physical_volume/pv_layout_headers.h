@@ -22,7 +22,7 @@ STRUCT_PACK(
 struct PVHeader {
   uint8_t signature_[6] = { 'Y', 'A', 'S', '_', 'P', 'V' };                        //  + 6 bytes
   utils::Version version_;                                                         //  + 2 bytes
-  uint64_t pv_size_;                                                               //  + 8 bytes
+  OffsetType pv_size_;                                                               //  + 8 bytes
   uint32_t cluster_size_ = kDefaultClusterSize;                                    //  + 4 bytes
   uint32_t priority_;                                                              //  + 4 bytes
   OffsetType inverted_index_offset_;                                               //  + sizeof(OffsetType) : 4 or 8 bytes
@@ -143,10 +143,10 @@ static_assert(sizeof(float) == 4, "please fix type mapping because size of float
 
 constexpr uint32_t kTimeSize = sizeof ComplexTypeHeader::expired_time_high_ + sizeof ComplexTypeHeader::expired_time_low_;
 
-static_assert((28 + sizeof(OffsetType)) == sizeof(PVHeader), "PVHeader should be 28+sizeof(OffsetType) bytes long - please check aligments and type size on your setup");
+static_assert((20 + 2*sizeof(OffsetType)) == sizeof(PVHeader), "PVHeader should be 28+sizeof(OffsetType) bytes long - please check aligments and type size on your setup");
 static_assert(12 == sizeof(Simple4TypeHeader), "Simple4TypeHeader should be 12 bytes long - please check aligments and type size on your setup");
 static_assert(16 == sizeof(Simple8TypeHeader), "Simple8TypeHeader should be 16 bytes long - please check aligments and type size on your setup");
-static_assert(40 == sizeof(ComplexTypeHeader), "ComplexTypeHeader should be 40 bytes long - please check aligments and type size on your setup");
+static_assert((8 + 4*sizeof(OffsetType)) == sizeof(ComplexTypeHeader), "ComplexTypeHeader should be 40 bytes long - please check aligments and type size on your setup");
 
 } // namespace pv_layout_headers
 } // namespace yas
