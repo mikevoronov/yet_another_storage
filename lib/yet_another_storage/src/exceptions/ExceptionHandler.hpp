@@ -8,13 +8,19 @@ namespace exception {
 
 class ExceptionHandler {
  public:
-// destinguish between our exception and other
   static storage::StorageErrorDescriptor Handle (std::exception_ptr exception) {
+    // destinguish between our exception and other
     try {
       std::rethrow_exception(exception);
     }
     catch(const YASException &yas_exception) {
       return yas_exception.getError();
+    }
+    catch (const std::runtime_error &runtime_exception) {
+      return { runtime_exception.what(), storage::StorageError::kUnknownExceptionType };
+    }
+    catch (const std::exception &exception) {
+      return { exception.what(), storage::StorageError::kUnknownExceptionType };
     }
     catch (...) {
       return { "unknown exception", storage::StorageError::kUnknownExceptionType };
