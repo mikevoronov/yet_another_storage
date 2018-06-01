@@ -1,7 +1,6 @@
 #pragma once
 #include "../common/macros.h"
 #include <cstdint>
-#include <vector>
 
 using namespace yas::macros;
 
@@ -17,7 +16,7 @@ class Version {
 
   friend constexpr bool operator<(const Version &lhs, const Version &rhs) {
     return (lhs.major() < rhs.major()) ||
-      (lhs.major() == rhs.major() && lhs.minor() < rhs.minor());
+        (lhs.major() == rhs.major() && lhs.minor() < rhs.minor());
   }
 
   friend constexpr bool operator>(const Version &lhs, const Version &rhs) {

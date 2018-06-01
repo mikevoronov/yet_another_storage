@@ -21,7 +21,7 @@ class PVDeviceDataReaderWriter {
         cluster_size_(cluster_size) {
     if (!device_.IsOpen()) {
       throw(exception::YASException("Device worker error: the device hasn't been opened correctly",
-        StorageError::kDeviceGeneralError));
+          StorageError::kDeviceGeneralError));
     }
   }
 

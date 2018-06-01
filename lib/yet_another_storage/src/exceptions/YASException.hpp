@@ -8,7 +8,7 @@ namespace exception {
 
 class YASException : public std::exception {
  public:
-  YASException(std::string message, storage::StorageError error_code) 
+  YASException(std::string message, storage::StorageError error_code)
       : message_(std::move(message)),
         error_code_(error_code)
   {}

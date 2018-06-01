@@ -36,8 +36,8 @@ class PVManagerFactory {
       utils::Version requested_version, uint32_t priority = 0, uint32_t cluster_size = kDefaultClusterSize) {
 
     if (max_supported_version_ < requested_version) {
-      return nonstd::make_unexpected(StorageErrorDescriptor("requested PV version is unsopported", 
-          StorageError::kPVVersionUnsopported));
+      return nonstd::make_unexpected(StorageErrorDescriptor("requested PV version is unsupported", 
+          StorageError::kPVVersionUnsupported));
     }
     
     auto canonical_path = fs::canonical(path);

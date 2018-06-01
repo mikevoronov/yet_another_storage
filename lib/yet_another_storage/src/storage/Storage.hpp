@@ -58,8 +58,8 @@ class Storage : public IStorage<CharType> {
     const auto volume_group_id = virtual_storage_index_.Get(storage_key);
 
     if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
-      return nonstd::make_unexpected(StorageErrorDescriptor( "Storage: there aren't any physical volume corresponds to\
-        specified path", StorageError::kCatalogNotFoundError));
+      return nonstd::make_unexpected(StorageErrorDescriptor( "Storage: there aren't any physical volume corresponds to"
+          " specified path", StorageError::kCatalogNotFoundError));
     }
     const auto &volume_group = virtual_storage_[volume_group_id];
 
@@ -131,7 +131,7 @@ class Storage : public IStorage<CharType> {
 
     if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
       return { "Storage: there aren't any physical volume corresponds to specified path",
-        StorageError::kCatalogNotFoundError };
+          StorageError::kCatalogNotFoundError };
     }
     const auto &volume_group = virtual_storage_[volume_group_id];
 
@@ -155,7 +155,7 @@ class Storage : public IStorage<CharType> {
 
     if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
       return { "Storage: there aren't any physical volume corresponds to specified path",
-        StorageError::kCatalogNotFoundError };
+          StorageError::kCatalogNotFoundError };
     }
     const auto &volume_group = virtual_storage_[volume_group_id];
 

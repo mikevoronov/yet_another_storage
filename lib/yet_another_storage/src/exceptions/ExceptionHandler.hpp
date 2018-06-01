@@ -8,8 +8,9 @@ namespace exception {
 
 class ExceptionHandler {
  public:
-  static storage::StorageErrorDescriptor Handle (std::exception_ptr exception) {
-    // destinguish between our exception and other
+   /// \brief convert the exception to StorageErrorDescriptor
+   /// \param exception - an pointer to exception to convert
+   static storage::StorageErrorDescriptor Handle (std::exception_ptr exception) {
     try {
       std::rethrow_exception(exception);
     }

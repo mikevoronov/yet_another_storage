@@ -11,7 +11,7 @@ enum StorageError : uint32_t {
   kDeviceWriteError = 3,
   kDeviceExpandError = 4,
   kInvertedIndexDesirializationError = 5,
-  kInvertedIndexDesirializationVersionUnsopportedError = 6,   // explicit type from kInvertedIndexDesirializationError
+  kInvertedIndexDesirializationVersionUnsupportedError = 6,   // explicit type from kInvertedIndexDesirializationError
                                                               // because of it could be recover from it with different
                                                               // version header
   kCorruptedHeaderError = 7,
@@ -23,7 +23,7 @@ enum StorageError : uint32_t {
   kPVMountPointManagerAdapterNotReady = 13,
   kValueNotFound = 14,                                         // used for std::any
   kKeyAlreadyCreated = 15,
-  kPVVersionUnsopported = 16,
+  kPVVersionUnsupported = 16,
   kUnknownError = 17,
   kCatalogNotFoundError = 18,
 
@@ -32,8 +32,8 @@ enum StorageError : uint32_t {
 
 struct StorageErrorDescriptor {
   StorageErrorDescriptor(std::string message, StorageError error_code)
-      : error_code_(error_code),
-        message_(std::move(message))
+      : message_(std::move(message)),
+        error_code_(error_code)
   {}
   StorageError error_code_;
   std::string message_;           // can be empty

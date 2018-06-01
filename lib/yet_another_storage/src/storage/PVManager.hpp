@@ -231,17 +231,18 @@ class PVManager : public IStorage<CharType> {
   }
 
   void close() {
-    if (!inverted_index_ || !inverted_index_->is_changed()) {
-      // inverted_index may not be created if an exception has occured
+    if (!inverted_index_) {
       return;
     }
     try {
-      const auto serialized_index = inverted_index_->Serialize<OffsetType>(version_);
-      if (leaf_traits<OffsetType>::IsExistValue(inverted_index_offset_)) {
-        entries_manager_.DeleteEntry(inverted_index_offset_);
+      if (inverted_index_->is_changed()) {
+        const auto serialized_index = inverted_index_->Serialize<OffsetType>(version_);
+        if (leaf_traits<OffsetType>::IsExistValue(inverted_index_offset_)) {
+          entries_manager_.DeleteEntry(inverted_index_offset_);
+        }
+        inverted_index_offset_ = entries_manager_.CreateNewEntryValue(serialized_index);
       }
-      const auto new_index_offset = entries_manager_.CreateNewEntryValue(serialized_index);
-      entries_manager_.CreateStartSections(new_index_offset);
+      entries_manager_.CreateStartSections(inverted_index_offset_);
     }
     catch (...) {
       // in future relize there should be some some code to save trie in trouble situation (generally OOM)

@@ -2,7 +2,6 @@
 #include "../physical_volume/pv_layout_headers.h"    // for sizeof expired time structure
 #include "../common/macros.h"
 #include <cstdint>
-#include <vector>
 #include <ctime>
 #include <limits>
 
@@ -19,7 +18,7 @@ class Time {
   {}
 
   explicit Time(time_t expired_time) {
-    uint64_t time = static_cast<uint64_t>(expired_time);      // time_t can be int or floating point type
+    const uint64_t time = static_cast<uint64_t>(expired_time);      // time_t can be int or floating point type
     if (time & 0xFFFF000000000000) {
       // some kind of infinite future time
       expired_time_high_ = std::numeric_limits<uint16_t>::max();
@@ -30,13 +29,16 @@ class Time {
     expired_time_low_ = time & 0xFFFFFFFF;
   }
 
-  bool IsExpired() const {
-    return *this < Time(std::time(nullptr));
+  time_t GetTime() const noexcept {
+    uint64_t time = expired_time_low_;
+    time |= (static_cast<uint64_t>(expired_time_high_) << 48);
+
+    return static_cast<time_t>(time);
   }
 
-  friend constexpr bool operator<(Time lhs, Time rhs) {
+  friend constexpr bool operator<(const Time &lhs, const Time &rhs) {
     return (lhs.expired_time_high() == rhs.expired_time_high() && lhs.expired_time_low() < rhs.expired_time_low()) ||
-      (lhs.expired_time_high() < rhs.expired_time_high());
+        (lhs.expired_time_high() < rhs.expired_time_high());
   }
 
   friend constexpr bool operator==(const Time &lhs, const Time &rhs) {
@@ -47,13 +49,10 @@ class Time {
     return rhs < lhs;
   }
 
-  time_t GetTime() const noexcept {
-    uint64_t time = expired_time_low_;    
-    time |= (static_cast<uint64_t>(expired_time_high_) << 48);
-
-    return static_cast<time_t>(time);
+  bool IsExpired() {
+    return *this < Time(std::time(nullptr));
   }
-  
+
   constexpr uint16_t expired_time_high() const { return expired_time_high_; }
   constexpr uint32_t expired_time_low() const { return expired_time_low_; }
 

@@ -202,7 +202,7 @@ class AhoCorasickSerializationHelper {
 
     if (version_ < header.version_) {
       throw (exception::YASException("Corrupted header: header version unsupported",
-          StorageError::kInvertedIndexDesirializationVersionUnsopportedError));
+          StorageError::kInvertedIndexDesirializationVersionUnsupportedError));
     }
 
     if (sizeof(IdType) != header.id_type_size_) {
@@ -238,7 +238,7 @@ class AhoCorasickSerializationHelper {
     auto current_cursor = serialization_utils::LoadFromBytes(begin, end, &node_descriptor);
     if (begin == current_cursor) {
       throw (exception::YASException("Invalid data size: there is a mismatch with size of data and descriptors count",
-        StorageError::kInvertedIndexDesirializationError));
+          StorageError::kInvertedIndexDesirializationError));
     }
 
     return current_cursor;
