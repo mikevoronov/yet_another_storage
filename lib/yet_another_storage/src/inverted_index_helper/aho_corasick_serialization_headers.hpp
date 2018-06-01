@@ -81,8 +81,8 @@ constexpr auto ConvertIdType(uint32_t size) {
 
 STRUCT_PACK(
 template <typename IdType>
-struct SerializedDataHeaderT {
-  SerializedDataHeaderT(utils::Version version = {1,1},
+struct SerializationDataHeaderT {
+  SerializationDataHeaderT(utils::Version version = {1,1},
       IdType leafs_count = 0,
       IdType nodes_count = 0,
       IdTypeSize id_type_size = IdTypeSize::k4Byte)
