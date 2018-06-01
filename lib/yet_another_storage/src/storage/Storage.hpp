@@ -22,27 +22,22 @@ class Storage : public IStorage<CharType> {
  public:
   using pv_path_type = PVManagerFactory::pv_path_type;
   using key_type = typename IStorage<CharType>::key_type;
-  
+
   Storage() = default;
   ~Storage() = default;
 
-  virtual StorageErrorDescriptor Put(key_type key, std::any value) {
+  virtual StorageErrorDescriptor Put(key_type key, storage_value_type value) {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto max_subkey_length = virtual_storage_index_.FindMaxSubKey(key);
-    StringType storage_key(key.substr(0, max_subkey_length));
-    const auto volume_group_id = virtual_storage_index_.Get(storage_key);
-    
-    if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
-      return { "Storage: there aren't any physical volume corresponds to specified path", 
-          StorageError::kCatalogNotFoundError };
+    const auto vg_range = getVolumeGroupRange(key);
+    if (!vg_range.has_value()) {
+      return vg_range.error();
     }
-    const auto &volume_group = virtual_storage_[volume_group_id];
 
-    StringType catalog_key(key.substr(max_subkey_length));
-    for (auto it = std::crbegin(volume_group), end = std::crend(volume_group); it != end; ++it) {
-      const auto new_key = it->mount_catalog_ + catalog_key;
-      if (StorageError::kSuccess == it->pv_manager_->Put(new_key, std::move(value)).error_code_) {
+    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+    for (auto &&it : vg_range.value()) {
+      const auto adjusted_key = it.mount_catalog_ + catalog_key;
+      if (StorageError::kSuccess == it.pv_manager_->Put(adjusted_key, std::move(value)).error_code_) {
         return { "", StorageError::kSuccess };
       }
     }
@@ -50,23 +45,18 @@ class Storage : public IStorage<CharType> {
     return { "", StorageError::kKeyNotFound };
   }
 
-  virtual nonstd::expected<std::any, StorageErrorDescriptor> Get(key_type key) {
+  virtual nonstd::expected<storage_value_type, StorageErrorDescriptor> Get(key_type key) {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto max_subkey_length = virtual_storage_index_.FindMaxSubKey(key);
-    StringType storage_key(key.substr(0, max_subkey_length));
-    const auto volume_group_id = virtual_storage_index_.Get(storage_key);
-
-    if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
-      return nonstd::make_unexpected(StorageErrorDescriptor( "Storage: there aren't any physical volume corresponds to"
-          " specified path", StorageError::kCatalogNotFoundError));
+    const auto vg_range = getVolumeGroupRange(key);
+    if (!vg_range.has_value()) {
+      return nonstd::make_unexpected(vg_range);
     }
-    const auto &volume_group = virtual_storage_[volume_group_id];
 
-    StringType catalog_key(key.substr(max_subkey_length));
-    for (auto it = std::crbegin(volume_group), end = std::crend(volume_group); it != end; ++it) {
-      const auto new_key = it->mount_catalog_ + catalog_key;
-      const auto result = it->pv_manager_->Get(new_key);
+    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+    for (auto &&it : vg_range.value()) {
+      const auto adjusted_key = it.mount_catalog_ + catalog_key;
+      const auto result = it.pv_manager_->Get(adjusted_key);
       if (result.has_value()) {
         return result.value();
       }
@@ -77,20 +67,15 @@ class Storage : public IStorage<CharType> {
   virtual StorageErrorDescriptor HasKey(key_type key) {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto max_subkey_length = virtual_storage_index_.FindMaxSubKey(key);
-    StringType storage_key(key.substr(0, max_subkey_length));
-    const auto volume_group_id = virtual_storage_index_.Get(storage_key);
-
-    if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
-      return { "Storage: there aren't any physical volume corresponds to specified path",
-        StorageError::kCatalogNotFoundError };
+    const auto vg_range = getVolumeGroupRange(key);
+    if (!vg_range.has_value()) {
+      return vg_range.error();
     }
-    const auto &volume_group = virtual_storage_[volume_group_id];
 
-    StringType catalog_key(key.substr(max_subkey_length));
-    for (auto it = std::crbegin(volume_group), end = std::crend(volume_group); it != end; ++it) {
-      const auto new_key = it->mount_catalog_ + catalog_key;
-      if (StorageError::kSuccess == it->pv_manager_->HasKey(new_key).error_code_) {
+    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+    for (auto &&it : vg_range.value()) {
+      const auto adjusted_key = it.mount_catalog_ + catalog_key;
+      if (StorageError::kSuccess == it.pv_manager_->HasKey(adjusted_key).error_code_) {
         return { "", StorageError::kSuccess };
       }
     }
@@ -101,20 +86,15 @@ class Storage : public IStorage<CharType> {
   virtual StorageErrorDescriptor HasCatalog(key_type key) {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto max_subkey_length = virtual_storage_index_.FindMaxSubKey(key);
-    StringType storage_key(key.substr(0, max_subkey_length));
-    const auto volume_group_id = virtual_storage_index_.Get(storage_key);
-
-    if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
-      return { "Storage: there aren't any physical volume corresponds to specified path",
-        StorageError::kCatalogNotFoundError };
+    const auto vg_range = getVolumeGroupRange(key);
+    if (!vg_range.has_value()) {
+      return vg_range.error();
     }
-    const auto &volume_group = virtual_storage_[volume_group_id];
 
-    StringType catalog_key(key.substr(max_subkey_length));
-    for (auto it = std::crbegin(volume_group), end = std::crend(volume_group); it != end; ++it) {
-      const auto new_key = it->mount_catalog_ + catalog_key;
-      if (StorageError::kSuccess == it->pv_manager_->HasCatalog(new_key).error_code_) {
+    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+    for (auto &&it : vg_range.value()) {
+      const auto adjusted_key = it.mount_catalog_ + catalog_key;
+      if (StorageError::kSuccess == it.pv_manager_->HasCatalog(adjusted_key).error_code_) {
         return { "", StorageError::kSuccess };
       }
     }
@@ -125,20 +105,15 @@ class Storage : public IStorage<CharType> {
   virtual StorageErrorDescriptor Delete(key_type key) {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto max_subkey_length = virtual_storage_index_.FindMaxSubKey(key);
-    StringType storage_key(key.substr(0, max_subkey_length));
-    const auto volume_group_id = virtual_storage_index_.Get(storage_key);
-
-    if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
-      return { "Storage: there aren't any physical volume corresponds to specified path",
-          StorageError::kCatalogNotFoundError };
+    const auto vg_range = getVolumeGroupRange(key);
+    if (!vg_range.has_value()) {
+      return vg_range.error();
     }
-    const auto &volume_group = virtual_storage_[volume_group_id];
 
-    StringType catalog_key(key.substr(max_subkey_length));
-    for (auto it = std::crbegin(volume_group), end = std::crend(volume_group); it != end; ++it) {
-      const auto new_key = it->mount_catalog_ + catalog_key;
-      if (StorageError::kSuccess == it->pv_manager_->Delete(new_key).error_code_) {
+    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+    for (auto &&it : vg_range.value()) {
+      const auto adjusted_key = it.mount_catalog_ + catalog_key;
+      if (StorageError::kSuccess == it.pv_manager_->Delete(adjusted_key).error_code_) {
         return { "", StorageError::kSuccess };
       }
     }
@@ -149,20 +124,15 @@ class Storage : public IStorage<CharType> {
   virtual StorageErrorDescriptor SetExpiredDate(key_type key, time_t expired) {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto max_subkey_length = virtual_storage_index_.FindMaxSubKey(key);
-    StringType storage_key(key.substr(0, max_subkey_length));
-    const auto volume_group_id = virtual_storage_index_.Get(storage_key);
-
-    if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
-      return { "Storage: there aren't any physical volume corresponds to specified path",
-          StorageError::kCatalogNotFoundError };
+    const auto vg_range = getVolumeGroupRange(key);
+    if (!vg_range.has_value()) {
+      return vg_range.error();
     }
-    const auto &volume_group = virtual_storage_[volume_group_id];
 
-    StringType catalog_key(key.substr(max_subkey_length));
-    for (auto it = std::crbegin(volume_group), end = std::crend(volume_group); it != end; ++it) {
-      const auto new_key = it->mount_catalog_ + catalog_key;
-      if (StorageError::kSuccess == it->pv_manager_->SetExpiredDate(new_key, expired).error_code_) {
+    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+    for (auto &&it : vg_range.value()) {
+      const auto adjusted_key = it.mount_catalog_ + catalog_key;
+      if (StorageError::kSuccess == it.pv_manager_->SetExpiredDate(adjusted_key, expired).error_code_) {
         return { "", StorageError::kSuccess };
       }
     }
@@ -172,21 +142,16 @@ class Storage : public IStorage<CharType> {
 
   virtual nonstd::expected<time_t, StorageErrorDescriptor> GetExpiredDate(key_type key) {
     std::shared_lock<std::shared_mutex> lock(mutex_);
-
-    const auto max_subkey_length = virtual_storage_index_.FindMaxSubKey(key);
-    StringType storage_key(key.substr(0, max_subkey_length));
-    const auto volume_group_id = virtual_storage_index_.Get(storage_key);
-
-    if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
-      return nonstd::make_unexpected(StorageErrorDescriptor("Storage: there aren't any physical volume corresponds to\
-        specified path", StorageError::kCatalogNotFoundError));
+    
+    const auto vg_range = getVolumeGroupRange(key);
+    if (!vg_range.has_value()) {
+      return nonstd::make_unexpected(vg_range.error());
     }
-    const auto &volume_group = virtual_storage_[volume_group_id];
 
-    StringType catalog_key(key.substr(max_subkey_length));
-    for (auto it = std::crbegin(volume_group), end = std::crend(volume_group); it != end; ++it) {
-      const auto new_key = it->mount_catalog_ + catalog_key;
-      const auto result = it->pv_manager_->GetExpiredDate(new_key);
+    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+    for (auto &&it : vg_range.value()) {
+      const auto adjusted_key = it.mount_catalog_ + catalog_key;
+      const auto result = it.pv_manager_->GetExpiredDate(adjusted_key);
       if (result.has_value()) {
         return result.value();
       }
@@ -196,10 +161,10 @@ class Storage : public IStorage<CharType> {
 
   ///  \brief mount a some catalog of PVManager to specified location in virtual volume
   ///
-  ///  \param pv_path - path to PVManager. This method gets PVManager instances from PVManagerFactory.
-  ///  \param storage_mount_catalog - a catalog of virtual storage which would be used for mounting of PV
-  ///  \param pv_mount_catalog - a catalog of mounted PV which would mount to virtual storage
-  ///  \return - descriptor of errors
+  ///  \param pv_path - path to PVManager. This method gets PVManager instances from PVManagerFactory by pv_path.
+  ///  \param storage_mount_catalog - the catalog of virtual storage which would be used for PV mounting.
+  ///  \param pv_mount_catalog - the catalog of mounted PV which would mount to virtual storage
+  ///  \return - descriptor of error
   StorageErrorDescriptor Mount(pv_path_type pv_path, StringType storage_mount_catalog, StringType pv_mount_catalog) {
     std::unique_lock<std::shared_mutex> lock(mutex_);
 
@@ -238,9 +203,38 @@ class Storage : public IStorage<CharType> {
   };
   using VolumeGroup = std::vector<PVMountPoint>;
 
+  struct VGReversedRange {
+    using Iterator = typename VolumeGroup::reverse_iterator;
+    Iterator begin_;
+    Iterator end_;
+    Iterator begin() noexcept { return begin_; }
+    Iterator end() noexcept { return end_; }
+    const Iterator begin() const noexcept { return begin_; }
+    const Iterator end() const noexcept { return end_; }
+
+    VGReversedRange(VolumeGroup &container)
+        : begin_(std::rbegin(container)),
+          end_(std::rend(container))
+    {}
+  };
+
+
   std::vector<VolumeGroup> virtual_storage_;
   index_helper::InvertedIndexHelper<CharType, uint32_t> virtual_storage_index_;
   std::shared_mutex mutex_;     // we have expensive and frequent "read" operation -> r/w lock that's we need
+
+  nonstd::expected<VGReversedRange, StorageErrorDescriptor> getVolumeGroupRange(key_type key) {
+    const auto max_subkey_length = virtual_storage_index_.FindMaxSubKey(key);
+    StringType storage_key(key.substr(0, max_subkey_length));
+    const auto volume_group_id = virtual_storage_index_.Get(storage_key);
+
+    if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
+      return nonstd::make_unexpected(StorageErrorDescriptor("Storage: there aren't any physical volume corresponds to\
+        specified path", StorageError::kCatalogNotFoundError));
+    }
+
+    return VGReversedRange(virtual_storage_[volume_group_id]);
+  }
 
   StorageErrorDescriptor addNewMountPoint(const PVMountPoint &mount_point, StringType &storage_mount_catalog) {
     const auto volume_group_id = virtual_storage_index_.Get(storage_mount_catalog);
