@@ -4,7 +4,8 @@
 #include "FreelistHelper.hpp"
 #include "EntriesTypeConverter.hpp"
 #include <string_view>
-#include <any>
+#include <type_traits>
+#include <variant>
 
 using namespace yas::pv_layout_headers;
 using namespace yas::freelist_helper;
@@ -64,49 +65,49 @@ class PVEntriesManager {
     device_end_ = sizeof(PVHeader) + sizeof(FreelistHeaderType);
   }
 
-  OffsetType CreateNewEntryValue(const std::any &content) {
-    const PVType pv_type = type_converter_.ConvertToPVType(content);
+  OffsetType CreateNewEntryValue(const std::any &value) {
+    const PVType pv_type = type_converter_.ConvertToPVType(value);
 
     switch (pv_type) {
     case PVType::kInt8:
-      return createNewEntryValue<Simple4TypeHeader>(PVType::kInt8, std::any_cast<int8_t>(content));
+      return createNewEntryValue<Simple4TypeHeader>(PVType::kInt8, std::any_cast<int8_t>(value));
       break;
     case PVType::kUint8:
-      return createNewEntryValue<Simple4TypeHeader>(PVType::kUint8, std::any_cast<uint8_t>(content));
+      return createNewEntryValue<Simple4TypeHeader>(PVType::kUint8, std::any_cast<uint8_t>(value));
       break;
     case PVType::kInt16:
-      return createNewEntryValue<Simple4TypeHeader>(PVType::kInt16, std::any_cast<int16_t>(content));
+      return createNewEntryValue<Simple4TypeHeader>(PVType::kInt16, std::any_cast<int16_t>(value));
       break;
     case PVType::kUint16:
-      return createNewEntryValue<Simple4TypeHeader>(PVType::kUint16, std::any_cast<uint16_t>(content));
+      return createNewEntryValue<Simple4TypeHeader>(PVType::kUint16, std::any_cast<uint16_t>(value));
       break;
     case PVType::kInt32:
-      return createNewEntryValue<Simple4TypeHeader>(PVType::kInt32, std::any_cast<int32_t>(content));
+      return createNewEntryValue<Simple4TypeHeader>(PVType::kInt32, std::any_cast<int32_t>(value));
       break;
     case PVType::kUint32:
-      return createNewEntryValue<Simple4TypeHeader>(PVType::kUint32, std::any_cast<uint32_t>(content));
+      return createNewEntryValue<Simple4TypeHeader>(PVType::kUint32, std::any_cast<uint32_t>(value));
       break;
     case PVType::kFloat: {
       static_assert(std::numeric_limits<float>::is_iec559, "The code requires using of IEEE 754 floating point format for binary serialization of floats and doubles.");
-      const float float_value = std::any_cast<float>(content);
+      const float float_value = std::any_cast<float>(value);
       return createNewEntryValue<Simple4TypeHeader>(PVType::kFloat, *(reinterpret_cast<const uint32_t*>(&float_value)));
       break;
     }
     case PVType::kDouble: {
       static_assert(std::numeric_limits<double>::is_iec559, "The code requires using of IEEE 754 floating point format for binary serialization of floats and doubles.");
-      const double double_value = std::any_cast<double>(content);
+      const double double_value = std::any_cast<double>(value);
       return createNewEntryValue<Simple8TypeHeader>(PVType::kDouble, *(reinterpret_cast<const uint64_t*>(&double_value)));
       break;
     }
     case PVType::kInt64:
-      return createNewEntryValue<Simple8TypeHeader>(PVType::kInt64, std::any_cast<int64_t>(content));
+      return createNewEntryValue<Simple8TypeHeader>(PVType::kInt64, std::any_cast<int64_t>(value));
       break;
     case PVType::kUint64:
-      return createNewEntryValue<Simple8TypeHeader>(PVType::kUint64, std::any_cast<uint64_t>(content));
+      return createNewEntryValue<Simple8TypeHeader>(PVType::kUint64, std::any_cast<uint64_t>(value));
       break;
     case PVType::kString:
     case PVType::kBlob:
-      return createNewEntryValue<ComplexTypeHeader>(content);
+      return createNewEntryValue<ComplexTypeHeader>(value);
       break;
     default:
       throw (exception::YASException("Corrupted storage header type: unsupported type",
@@ -118,64 +119,34 @@ class PVEntriesManager {
 
   std::any GetEntryContent(OffsetType offset) {
     const PVType pv_type = getRecordType(offset);
-    if (pv_type < PVType::k4TypeMax) {
-      return getEntryContent<Simple4TypeHeader>(offset);
-    }
-    else if (pv_type < PVType::k8TypeMax) {
-      return getEntryContent<Simple8TypeHeader>(offset);
-    }
-    else if (pv_type < PVType::kComplexMax) {
-      return getEntryContent<ComplexTypeHeader>(offset);
-    }
-
-    throw (exception::YASException("Corrupted storage header type: unsupported value type",
-        StorageError::kCorruptedHeaderError));
+    const StorageType storage_type = EntriesTypeConverter::ConvertToStorageType(pv_type);
+    return std::visit([this, offset](auto &&value) {
+        return getEntryContent<std::decay_t<decltype(value)>::HeaderType>(offset);
+    }, storage_type);
   }
 
   void DeleteEntry(OffsetType offset) {
     const PVType pv_type = getRecordType(offset);
-    if (pv_type < PVType::k4TypeMax) {
-      return deleteEntry<Simple4TypeHeader>(offset);
-    }
-    else if (pv_type < PVType::k8TypeMax) {
-      return deleteEntry<Simple8TypeHeader>(offset);
-    }
-    else if (pv_type < PVType::kComplexMax) {
-      return deleteEntry<ComplexTypeHeader>(offset);
-    }
-    throw (exception::YASException("Corrupted storage header type: unsupported entry type",
-        StorageError::kCorruptedHeaderError));
+    const StorageType storage_type = EntriesTypeConverter::ConvertToStorageType(pv_type);
+    std::visit([this, offset](auto &&value) {
+      return deleteEntry<std::decay_t<decltype(value)>::HeaderType>(offset);
+    }, storage_type);
   }
 
   bool GetEntryExpiredDate(OffsetType offset, utils::Time &expired_date) {
-    const PVState pv_state = data_reader_writer_.Read<PVState>(offset);
-    if (pv_state.value_type_ < PVType::k4TypeMax) {
-      return getEntryExpiredDate<Simple4TypeHeader>(offset, expired_date);
-    }
-    else if (pv_state.value_type_ < PVType::k8TypeMax) {
-      return getEntryExpiredDate<Simple8TypeHeader>(offset, expired_date);
-    }
-    else if (pv_state.value_type_ < PVType::kComplexMax) {
-      return getEntryExpiredDate<ComplexTypeHeader>(offset, expired_date);
-    }
-
-    throw (exception::YASException("Corrupted storage header type: unsupported entry type",
-        StorageError::kCorruptedHeaderError));
+    const PVType pv_type = getRecordType(offset);
+    const StorageType storage_type = EntriesTypeConverter::ConvertToStorageType(pv_type);
+    return std::visit([this, offset, &expired_date](auto &&value) {
+      return getEntryExpiredDate<std::decay_t<decltype(value)>::HeaderType>(offset, expired_date);
+    }, storage_type);
   }
 
   void SetEntryExpiredDate(OffsetType offset, utils::Time &expired_date) {
     const PVType pv_type = getRecordType(offset);
-    if (pv_type < PVType::k4TypeMax) {
-      return setEntryExpiredDate<Simple4TypeHeader>(offset, expired_date);
-    }
-    else if (pv_type < PVType::k8TypeMax) {
-      return setEntryExpiredDate<Simple8TypeHeader>(offset, expired_date);
-    }
-    else if (pv_type < PVType::kComplexMax) {
-      return setEntryExpiredDate<ComplexTypeHeader>(offset, expired_date);
-    }
-    throw (exception::YASException("Corrupted storage header type: unsupported entry type",
-        StorageError::kCorruptedHeaderError));
+    const StorageType storage_type = EntriesTypeConverter::ConvertToStorageType(pv_type);
+    std::visit([this, offset, &expired_date](auto &&value) {
+      return setEntryExpiredDate<std::decay_t<decltype(value)>::HeaderType>(offset, expired_date);
+    }, storage_type);
   }
 
   uint32_t priority() const { return priority_; }

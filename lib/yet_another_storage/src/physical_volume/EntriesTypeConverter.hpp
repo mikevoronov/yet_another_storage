@@ -4,11 +4,49 @@
 #include <unordered_map>
 #include <typeindex>
 #include <any>
+#include <variant>
 
 using namespace yas::pv_layout_headers;
 
 namespace yas {
 namespace pv {
+
+template<typename T, typename U>
+struct StorageTypeHolder {
+  using HeaderType = U;
+  using ValueType = T;
+  ValueType value;
+};
+
+using Int8_StorageType = StorageTypeHolder<int8_t, Simple4TypeHeader>;
+using UInt8_StorageType = StorageTypeHolder<uint8_t, Simple4TypeHeader>;
+using Int16_StorageType = StorageTypeHolder<int16_t, Simple4TypeHeader>;
+using UInt16_StorageType = StorageTypeHolder<uint16_t, Simple4TypeHeader>;
+using Int32_StorageType = StorageTypeHolder<int32_t, Simple4TypeHeader>;
+using UInt32_StorageType = StorageTypeHolder<uint32_t, Simple4TypeHeader>;
+using Float_StorageType = StorageTypeHolder<float, Simple4TypeHeader>;
+using Int64_StorageType = StorageTypeHolder<int64_t, Simple8TypeHeader>;
+using UInt64_StorageType = StorageTypeHolder<uint64_t, Simple8TypeHeader>;
+using Double_StorageType = StorageTypeHolder<double, Simple8TypeHeader>;
+using String_StorageType = StorageTypeHolder<std::string, ComplexTypeHeader>;
+using Blob_StorageType = StorageTypeHolder<ByteVector, ComplexTypeHeader>;
+
+using StorageType = std::variant<Int8_StorageType,
+                                 UInt8_StorageType,
+                                 Int16_StorageType,
+                                 UInt16_StorageType,
+                                 Int32_StorageType,
+                                 UInt32_StorageType,
+                                 Float_StorageType,
+                                 Int64_StorageType,
+                                 UInt64_StorageType,
+                                 Double_StorageType,
+                                 String_StorageType,
+                                 Blob_StorageType>;
+
+
+// don't count PVType::kEmpty4Simple and PVType::kEmpty8Simple types
+static_assert(std::variant_size_v<StorageType> + 1 == PVType::kBlob, "To add new storage types please change PVType and StorageType simultaneously");
 
 class EntriesTypeConverter {
  public:
@@ -16,11 +54,42 @@ class EntriesTypeConverter {
      init();
   }
 
-  PVType ConvertToPVType(const std::any &value) {
+  static StorageType ConvertToStorageType(PVType pv_type) {
+    switch (pv_type) {
+    case PVType::kInt8:
+      return Int8_StorageType();
+    case PVType::kUint8:
+      return UInt8_StorageType();
+    case PVType::kInt16:
+      return Int16_StorageType();
+    case PVType::kUint16:
+      return UInt16_StorageType();
+    case PVType::kInt32:
+      return Int32_StorageType();
+    case PVType::kUint32:
+      return UInt32_StorageType();
+    case PVType::kFloat:
+      return Float_StorageType();
+    case PVType::kInt64:
+      return Int64_StorageType();
+    case PVType::kUint64:
+      return UInt64_StorageType();
+    case PVType::kDouble:
+      return Double_StorageType();
+    case PVType::kString:
+      return String_StorageType();
+    case PVType::kBlob:
+      return Blob_StorageType();
+    }
+    throw (exception::YASException("Corrupted storage header type: unsupported entry type",
+        StorageError::kCorruptedHeaderError));
+  }
+
+  PVType ConvertToPVType(storage_value_type value) {
     return user_to_pv_type_mapping_[std::type_index(value.type())];
   }
 
-  std::any ConvertToUserType(PVType pv_type, uint64_t value) const noexcept {
+  storage_value_type ConvertToUserType(PVType pv_type, uint64_t value) const noexcept {
     switch (pv_type) {
     case PVType::kInt8:
       return static_cast<int8_t>(value);
@@ -50,7 +119,7 @@ class EntriesTypeConverter {
   }
 
   template<typename Iterator>
-  std::any ConvertToUserType(PVType pv_type, const Iterator begin, const Iterator end) const {
+  storage_value_type ConvertToUserType(PVType pv_type, const Iterator begin, const Iterator end) const {
     switch (pv_type) {
     case PVType::kString:
       return std::string{ begin, end };
