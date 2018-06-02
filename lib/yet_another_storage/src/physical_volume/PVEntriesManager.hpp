@@ -26,7 +26,7 @@ class PVEntriesManager {
         version_(version),
         priority_(priority),
         cluster_size_(cluster_size),
-        entries_allocator_(cluster_size_) {
+        entries_allocator_(cluster_size) {
   }
 
   ~PVEntriesManager() = default;
@@ -64,6 +64,8 @@ class PVEntriesManager {
     pv_header.inverted_index_offset_ = index_offset;
     data_reader_writer_.Write<PVHeader>(0, pv_header);
     data_reader_writer_.Write<FreelistHeaderType>(sizeof(PVHeader), freelist_helper_.GetBins());
+
+    entries_allocator_.device_end(sizeof(PVHeader) + sizeof(FreelistHeaderType));
   }
 
   OffsetType CreateNewEntryValue(const std::any &value) {

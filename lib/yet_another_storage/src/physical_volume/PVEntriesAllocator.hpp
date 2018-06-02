@@ -9,7 +9,7 @@ class PVEntriesAllocator {
  public:
   explicit PVEntriesAllocator(int32_t cluster_size)
       : cluster_size_(cluster_size) {
-    simultaneously_allocated_clusters_ = std::max<int32_t>(maximum_simultaneously_extend_pv_size_/ cluster_size, 1);
+    simultaneously_allocated_clusters_ = std::max<int32_t>(maximum_simultaneously_extend_pv_size_/ cluster_size_, 1);
     last_allocated_clusters_count_ = simultaneously_allocated_clusters_;
   }
 
@@ -27,7 +27,8 @@ class PVEntriesAllocator {
     header.chunk_size_ = cluster_size_ - offsetof(ComplexTypeHeader, data_);
     header.value_type_ = PVType::kEmptyComplex;
 
-    OffsetType next_free_entry_offset = free_entry_offset;
+    OffsetType next_free_entry_offset = offset_traits<OffsetType>::IsExistValue(free_entry_offset) ? free_entry_offset :
+        device_end_;
     for (int64_t written_clusters = 0; written_clusters < allocate_clusters_count; 
         written_clusters += simultaneously_allocated_clusters_) {
       auto current_cursor = std::begin(new_clusters);
@@ -41,7 +42,7 @@ class PVEntriesAllocator {
       device_end_ += data_reader_writer_.RawWrite(device_end_, std::cbegin(new_clusters), std::cend(new_clusters));
     }
 
-    return next_free_entry_offset;
+    return next_free_entry_offset - cluster_size_;
   }
 
   void device_end(OffsetType device_end) { device_end_ = device_end;}
