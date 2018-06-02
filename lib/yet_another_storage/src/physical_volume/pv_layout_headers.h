@@ -44,20 +44,18 @@ enum PVType : uint8_t {
   kInt32  = 4,
   kUint32 = 5,
   kFloat  = 6,
-  kEmpty4Simple = 7,
-  k4TypeMax = 8,
 
-  kDouble = 9,
-  kInt64  = 10,
-  kUint64 = 11,
-  kEmpty8Simple = 12,
-  k8TypeMax = 13,
+  kDouble = 7,
+  kInt64  = 8,
+  kUint64 = 9,
 
-  kString = 14,
-  kBlob   = 15,
-  kInvertedIndex = 16,
-  kEmptyComplex = 17,
-  kComplexMax = 18
+  kString = 10,
+  kBlob   = 11,
+  kInvertedIndex = 12,
+
+  kEmpty4Simple = 13,
+  kEmpty8Simple = 14,
+  kEmptyComplex = 15
 };
 
 enum PVTypeState : uint8_t {

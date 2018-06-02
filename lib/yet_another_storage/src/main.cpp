@@ -14,7 +14,9 @@ int main() {
   }
 
   auto pv_manager = manager.value();
-  pv_manager->Put("/root/asd", std::make_any<int8_t>(5));
+  
+  int8_t value = 5;
+  pv_manager->Put("/root/asd", value);
   std::string test_value("aaaaaaaaaaaaaaaaaaaaaaaaaa");
   pv_manager->Delete("/root/asd/asd");
   pv_manager->Put("/root/asd/asd", test_value);

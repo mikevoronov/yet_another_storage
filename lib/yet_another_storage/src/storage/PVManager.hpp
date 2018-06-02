@@ -76,7 +76,7 @@ class PVManager : public IStorage<CharType> {
     return pv_volume_manager;
   }
 
-  virtual StorageErrorDescriptor Put(key_type key, std::any value) override {
+  virtual StorageErrorDescriptor Put(key_type key, storage_value_type value) override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       if (!value.has_value()) {
@@ -96,7 +96,7 @@ class PVManager : public IStorage<CharType> {
     }
   }
 
-  virtual nonstd::expected<std::any, StorageErrorDescriptor> Get(key_type key) override {
+  virtual nonstd::expected<storage_value_type, StorageErrorDescriptor> Get(key_type key) override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
@@ -237,7 +237,7 @@ class PVManager : public IStorage<CharType> {
     try {
       if (inverted_index_->is_changed()) {
         const auto serialized_index = inverted_index_->Serialize<OffsetType>(version_);
-        if (leaf_traits<OffsetType>::IsExistValue(inverted_index_offset_)) {
+        if (offset_traits<OffsetType>::IsExistValue(inverted_index_offset_)) {
           entries_manager_.DeleteEntry(inverted_index_offset_);
         }
         inverted_index_offset_ = entries_manager_.CreateNewEntryValue(serialized_index);
@@ -245,7 +245,7 @@ class PVManager : public IStorage<CharType> {
       entries_manager_.CreateStartSections(inverted_index_offset_);
     }
     catch (...) {
-      // in future relize there should be some some code to save trie in trouble situation (generally OOM)
+      // in future relize there should be some code to save trie while OOM (it could throwed by Serialize method)
     }
   }
 

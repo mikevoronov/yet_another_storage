@@ -42,6 +42,7 @@
     <ClInclude Include="src\physical_volume\EntriesTypeConverter.hpp" />
     <ClInclude Include="src\physical_volume\FreelistHelper.hpp" />
     <ClInclude Include="src\physical_volume\PVDeviceDataReaderWriter.hpp" />
+    <ClInclude Include="src\physical_volume\PVEntriesAllocator.hpp" />
     <ClInclude Include="src\physical_volume\PVEntriesManager.hpp" />
     <ClInclude Include="src\physical_volume\pv_layout_headers.h" />
     <ClInclude Include="src\storage\IStorage.hpp" />

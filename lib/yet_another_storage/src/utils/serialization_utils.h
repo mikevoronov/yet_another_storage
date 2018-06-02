@@ -13,8 +13,8 @@ struct range_t {
   Iterator end_;
   Iterator begin() noexcept { return begin_; }
   Iterator end() noexcept { return end_; }
-  constexpr Iterator cbegin() const noexcept { return begin_; }
-  constexpr Iterator cend() const noexcept { return end_; }
+  const Iterator cbegin() const noexcept { return begin_; }
+  const Iterator cend() const noexcept { return end_; }
   decltype(auto) size() const  { return std::distance(begin_, end_); }
 };
 

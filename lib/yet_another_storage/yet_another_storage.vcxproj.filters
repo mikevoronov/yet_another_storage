@@ -34,6 +34,9 @@
     <Filter Include="src\devices">
       <UniqueIdentifier>{054b3ffd-c69c-40e0-ac19-a92655e7ef1b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\physical_volume\entries">
+      <UniqueIdentifier>{f969bfb3-992c-4fee-b9cb-964272b9abc5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\storage\Storage.hpp">
@@ -108,16 +111,7 @@
     <ClInclude Include="src\devices\TestDevice.hpp">
       <Filter>src\devices</Filter>
     </ClInclude>
-    <ClInclude Include="src\physical_volume\PVDeviceDataReaderWriter.hpp">
-      <Filter>src\physical_volume</Filter>
-    </ClInclude>
     <ClInclude Include="src\physical_volume\FreelistHelper.hpp">
-      <Filter>src\physical_volume</Filter>
-    </ClInclude>
-    <ClInclude Include="src\physical_volume\PVEntriesManager.hpp">
-      <Filter>src\physical_volume</Filter>
-    </ClInclude>
-    <ClInclude Include="src\physical_volume\EntriesTypeConverter.hpp">
       <Filter>src\physical_volume</Filter>
     </ClInclude>
     <ClInclude Include="src\exceptions\YASException.hpp">
@@ -125,6 +119,18 @@
     </ClInclude>
     <ClInclude Include="src\exceptions\ExceptionHandler.hpp">
       <Filter>src\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physical_volume\EntriesTypeConverter.hpp">
+      <Filter>src\physical_volume\entries</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physical_volume\PVDeviceDataReaderWriter.hpp">
+      <Filter>src\physical_volume</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physical_volume\PVEntriesAllocator.hpp">
+      <Filter>src\physical_volume\entries</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physical_volume\PVEntriesManager.hpp">
+      <Filter>src\physical_volume\entries</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
