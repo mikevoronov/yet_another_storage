@@ -20,7 +20,7 @@ class TestDevice {
   TestDevice(const TestDevice &other) = default;
 
   template <typename Iterator>
-  void Read(uint64_t position, Iterator begin, Iterator end) {
+  void Read(OffsetType position, Iterator begin, Iterator end) {
     const auto read_size = std::distance(begin, end);
 
     // possible int overflow but it is just a test device
@@ -36,7 +36,7 @@ class TestDevice {
   }
 
   template<typename Iterator>
-  uint64_t Write(uint64_t position, const Iterator begin, const Iterator end) {
+  OffsetType Write(OffsetType position, const Iterator begin, const Iterator end) {
     if (position > storage_.size()) {
       throw(exception::YASException("The device hasn't been opened during write", StorageError::kDeviceWriteError));
     }

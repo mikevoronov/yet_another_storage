@@ -48,7 +48,7 @@ class FileDevice {
   }
 
   template <typename Iterator>
-  uint64_t Write(OffsetType position, const Iterator begin, const Iterator end) {
+  OffsetType Write(OffsetType position, const Iterator begin, const Iterator end) {
     if (!IsOpen()) {
       throw(exception::YASException("Raw device write error: The device hasn't been opened during write", 
           StorageError::kDeviceWriteError));

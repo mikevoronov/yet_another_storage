@@ -45,8 +45,7 @@ using StorageType = std::variant<Int8_StorageType,
                                  Blob_StorageType>;
 
 
-// don't count PVType::kEmpty4Simple and PVType::kEmpty8Simple types
-static_assert(std::variant_size_v<StorageType> + 1 == PVType::kBlob, "To add new storage types please change PVType and StorageType simultaneously");
+static_assert(std::variant_size_v<StorageType> == PVType::kBlob+1, "To add new storage types please change PVType and StorageType simultaneously");
 
 class EntriesTypeConverter {
  public:

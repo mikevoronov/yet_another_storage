@@ -111,8 +111,8 @@ class PVDeviceDataReaderWriter {
   }
 
   template <typename Iterator>
-  void RawWrite(OffsetType offset, const Iterator begin, const Iterator end) {
-    device_.Write(offset, begin, end);
+  OffsetType RawWrite(OffsetType offset, const Iterator begin, const Iterator end) {
+    return device_.Write(offset, begin, end);
   }
 
 #ifdef UNIT_TEST

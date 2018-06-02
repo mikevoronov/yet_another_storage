@@ -3,6 +3,7 @@
 #include "PVDeviceDataReaderWriter.hpp"
 #include "FreelistHelper.hpp"
 #include "EntriesTypeConverter.hpp"
+#include "PVEntriesAllocator.hpp"
 #include <string_view>
 #include <type_traits>
 #include <variant>
@@ -24,7 +25,8 @@ class PVEntriesManager {
       : data_reader_writer_(file_path, cluster_size),
         version_(version),
         priority_(priority),
-        cluster_size_(cluster_size) {
+        cluster_size_(cluster_size),
+        entries_allocator_(cluster_size_) {
   }
 
   ~PVEntriesManager() = default;
@@ -47,8 +49,8 @@ class PVEntriesManager {
     current_cursor += sizeof(PVHeader);
     FreelistHeaderType freelist_header = data_reader_writer_.Read<FreelistHeaderType>(current_cursor);
     freelist_helper_.SetBins(freelist_header);
-    device_end_ = pv_header.pv_size_;
     cluster_size_ = pv_header.cluster_size_;
+    entries_allocator_.device_end(pv_header.pv_size_);
 
     return pv_header.inverted_index_offset_;
   }
@@ -57,12 +59,11 @@ class PVEntriesManager {
     PVHeader pv_header;
     pv_header.version_ = version_;
     pv_header.priority_ = priority_;
-    pv_header.pv_size_ = device_end_;
+    pv_header.pv_size_ = entries_allocator_.device_end();
     pv_header.cluster_size_ = cluster_size_;
     pv_header.inverted_index_offset_ = index_offset;
     data_reader_writer_.Write<PVHeader>(0, pv_header);
     data_reader_writer_.Write<FreelistHeaderType>(sizeof(PVHeader), freelist_helper_.GetBins());
-    device_end_ = sizeof(PVHeader) + sizeof(FreelistHeaderType);
   }
 
   OffsetType CreateNewEntryValue(const std::any &value) {
@@ -154,11 +155,11 @@ class PVEntriesManager {
  private:
   PVDeviceDataReaderWriter<OffsetType, Device> data_reader_writer_;
   freelist_helper::FreelistHelper<OffsetType> freelist_helper_;
+  PVEntriesAllocator<OffsetType> entries_allocator_;
   EntriesTypeConverter type_converter_;
-  OffsetType device_end_;
-  uint32_t cluster_size_;
   utils::Version version_;    // there could be some parsing issues depends on version
-  uint32_t priority_;
+  int32_t cluster_size_;
+  int32_t priority_;
 
   template<typename HeaderType, typename ValueType>
   OffsetType createNewEntryValue(PVType pv_type, ValueType content) {
@@ -301,7 +302,9 @@ class PVEntriesManager {
 
     auto offset = freelist_helper_.PopFreeEntryOffset(entry_size);
     if (!offset_traits<OffsetType>::IsExistValue(offset)) {
-      expandPV();
+      OffsetType free_entry_offset = entries_allocator_.ExpandPV(data_reader_writer_,
+          freelist_helper_.GetFreeEntry(cluster_size_));
+      freelist_helper_.PushFreeEntry(free_entry_offset, cluster_size_);
       offset = freelist_helper_.PopFreeEntryOffset(entry_size);
       if (!offset_traits<OffsetType>::IsExistValue(offset)) {
         throw (exception::YASException("Error during physical volume size extended", 
@@ -380,30 +383,6 @@ class PVEntriesManager {
     header = data_reader_writer_.Read<ComplexTypeHeader>(next_free_entry);
     freelist_helper_.PushFreeEntry(next_free_entry, header.overall_size_);
     return true;
-  }
-
-  void expandPV() {
-    // write several new clusters - note that in future it should be good to add some strategy to choose the count of
-    // simultaneously added clusters
-    constexpr int clusters_count = 5;
-    constexpr ByteVector::value_type debug_filler = 0xAA;
-
-    ByteVector new_cluster(cluster_size_, debug_filler);
-
-    ComplexTypeHeader header;
-    header.overall_size_ = cluster_size_ - offsetof(ComplexTypeHeader, data_);
-    header.chunk_size_ = cluster_size_ - offsetof(ComplexTypeHeader, data_);
-    header.value_type_ = PVType::kEmptyComplex;
-
-    for (int new_cluster_id = 0; new_cluster_id < clusters_count; ++new_cluster_id) {
-      const auto next_free_entry_offset = freelist_helper_.GetFreeEntry(cluster_size_);
-      header.next_free_entry_offset_ = next_free_entry_offset;
-      serialization_utils::SaveAsBytes(std::begin(new_cluster), std::end(new_cluster), &header);
-
-      data_reader_writer_.RawWrite(device_end_, std::cbegin(new_cluster), std::cend(new_cluster));
-      freelist_helper_.PushFreeEntry(device_end_, cluster_size_);
-      device_end_ += cluster_size_;
-    }
   }
 };
 
