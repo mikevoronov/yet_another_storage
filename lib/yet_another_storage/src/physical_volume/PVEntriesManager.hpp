@@ -20,8 +20,8 @@ class PVEntriesManager {
   using PVPathType = typename Device::path_type;
  
  public:
-  explicit PVEntriesManager(const PVPathType &file_path, utils::Version version, uint32_t priority = 0,
-      uint32_t cluster_size = kDefaultClusterSize)
+  PVEntriesManager(const PVPathType &file_path, utils::Version version, int32_t priority = 0,
+      int32_t cluster_size = kDefaultClusterSize)
       : data_reader_writer_(file_path, cluster_size),
         version_(version),
         priority_(priority),
@@ -163,7 +163,7 @@ class PVEntriesManager {
 
   template<typename HeaderType, typename ValueType>
   OffsetType createNewEntryValue(PVType pv_type, ValueType content) {
-    auto new_entry_offset = getFreeOffset(sizeof(HeaderType));
+    auto new_entry_offset = getFreeEntryOffset(sizeof(HeaderType));
 
     HeaderType header;
     header.value_type_ = pv_type;
@@ -274,7 +274,7 @@ class PVEntriesManager {
   template<typename Iterator>
   OffsetType writeComplexType(PVType value_type, const Iterator begin, const Iterator end) {
     const OffsetType data_size = std::distance(begin, end);
-    auto free_offset = getFreeOffset(data_size + sizeof(ComplexTypeHeader));
+    auto free_offset = getFreeEntryOffset(data_size + sizeof(ComplexTypeHeader));
     auto first_free_offset = free_offset;
 
     bool is_first = true;
@@ -283,7 +283,7 @@ class PVEntriesManager {
     while (overall_written < data_size) {
       auto new_begin = begin;
       std::advance(new_begin, overall_written);
-      auto next_free_offset = getFreeOffset(data_size - written + sizeof(ComplexTypeHeader));
+      auto next_free_offset = getFreeEntryOffset(data_size - written + sizeof(ComplexTypeHeader));
       written = data_reader_writer_.WriteComplexType(free_offset, value_type, is_first, next_free_offset,
           new_begin, end);
       is_first = false;
@@ -295,11 +295,31 @@ class PVEntriesManager {
     return first_free_offset;
   }
 
-  OffsetType getFreeOffset(OffsetType entry_size) {
-    if (0 == entry_size) {
-      return offset_traits<OffsetType>::NonExistValue();
+  OffsetType getFreeEntryOffset(OffsetType entry_size) {
+    const auto offset = getFreeOffset(entry_size);
+
+    OffsetType split_size = 0;
+    switch (getRecordType(offset)) {
+    case PVType::kEmpty4Simple:
+      recoverAndPushNextEntry<Simple4TypeHeader>(offset);
+      return offset;
+    case PVType::kEmpty8Simple:
+      recoverAndPushNextEntry<Simple8TypeHeader>(offset);
+      return offset;
+    case PVType::kEmptyComplex:
+      const ComplexTypeHeader header = data_reader_writer_.Read<ComplexTypeHeader>(offset);
+      recoverAndPushNextEntry<ComplexTypeHeader>(offset);
+      if (entry_size > header.overall_size_) {
+        return offset;
+      }
+      split_size = header.overall_size_ - entry_size;
     }
 
+    splitEntries(offset + entry_size, split_size);
+    return offset;
+  }
+
+  OffsetType getFreeOffset(OffsetType entry_size) {
     auto offset = freelist_helper_.PopFreeEntryOffset(entry_size);
     if (!offset_traits<OffsetType>::IsExistValue(offset)) {
       OffsetType free_entry_offset = entries_allocator_.ExpandPV(data_reader_writer_,
@@ -307,32 +327,15 @@ class PVEntriesManager {
       freelist_helper_.PushFreeEntry(free_entry_offset, cluster_size_);
       offset = freelist_helper_.PopFreeEntryOffset(entry_size);
       if (!offset_traits<OffsetType>::IsExistValue(offset)) {
-        throw (exception::YASException("Error during physical volume size extended", 
+        throw (exception::YASException("Error during physical volume size extended",
             StorageError::kDeviceExpandError));
       }
     }
 
-    const auto value_type = getRecordType(offset);
-    if (PVType::kEmptyComplex != value_type) {
-      if (PVType::kEmpty4Simple == value_type) {
-        recoverAndPushNextEntry<Simple4TypeHeader>(offset);
-      }
-      else if (PVType::kEmpty8Simple == value_type) {
-        recoverAndPushNextEntry<Simple8TypeHeader>(offset);
-      }
-      // difference between sizeof Simple header isn't too much to split
-      return offset;
-    }
+    return offset;
+  }
 
-    // split headers
-    const auto header = data_reader_writer_.Read<ComplexTypeHeader>(offset);
-    recoverAndPushNextEntry<ComplexTypeHeader>(offset);
-    if (entry_size > header.overall_size_) {
-      return offset;
-    }
-
-    const auto split_size = header.overall_size_ - entry_size;
-    const auto split_offset = offset + entry_size;
+  void splitEntries(OffsetType split_offset, OffsetType split_size) {
     if (split_size > sizeof(ComplexTypeHeader)) {
       ComplexTypeHeader header;
       header.value_type_ = PVType::kEmptyComplex;
@@ -356,10 +359,9 @@ class PVEntriesManager {
       data_reader_writer_.Write<Simple8TypeHeader>(split_offset, header);
       freelist_helper_.PushFreeEntry(split_offset, split_size);
     }
-
-    return offset;
   }
 
+  // recover next_free_offset from Header and push it to the freelist
   template<typename HeaderType>
   bool recoverAndPushNextEntry(OffsetType offset) {
     HeaderType header = data_reader_writer_.Read<HeaderType>(offset);
