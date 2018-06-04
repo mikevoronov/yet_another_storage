@@ -167,7 +167,6 @@ class AhoCorasickSerializationHelper {
         sizeof(NodeSerializationDescriptorStorage::value_type)*serialized_nodes.size() + 
         sizeof(LeafSerializationDescriptorStorage::value_type)*serialized_leafs.size());
 
-    // TODO : to make SerializedDataHeader ctor explicit it is need to add a list-initialization
     SerializationDataHeader header {
         version_,
         static_cast<IdType>(serialized_leafs.size()),
@@ -175,7 +174,6 @@ class AhoCorasickSerializationHelper {
         aho_corasick_serialization_headers::ConvertIdType(sizeof(IdType))
     };
 
-    // in VS checked iterator should be disabled to prevent unnecessary checks
     auto result_end = std::end(result);
     auto current_cursor = serialization_utils::SaveAsBytes(std::begin(result), result_end, &header);
     for (const auto &leaf : serialized_leafs) {

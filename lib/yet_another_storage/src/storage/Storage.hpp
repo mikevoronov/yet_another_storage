@@ -19,6 +19,7 @@ namespace storage {
 template<typename CharType>
 class Storage : public IStorage<CharType> {
   using StringType = std::basic_string<CharType>;
+
  public:
   using pv_path_type = PVManagerFactory::pv_path_type;
   using key_type = typename IStorage<CharType>::key_type;

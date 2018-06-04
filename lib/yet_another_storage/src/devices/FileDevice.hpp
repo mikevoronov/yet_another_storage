@@ -29,13 +29,13 @@ class FileDevice {
   template <typename Iterator>
   void Read(OffsetType position, Iterator begin, Iterator end) {
     if (!IsOpen()) {
-      throw(exception::YASException("Raw device read error: the device hasn't been opened during read", 
+      throw(exception::YASException("Raw device read error: the device hasn't been opened during read",
           StorageError::kDeviceReadError));
     }
 
     device_.seekg(position);
     if (device_.eof()) {
-      throw(exception::YASException("Raw device read error: the device's get cursor position mismath", 
+      throw(exception::YASException("Raw device read error: the device's get cursor position mismath",
           StorageError::kDeviceReadError));
     }
 
@@ -50,20 +50,20 @@ class FileDevice {
   template <typename Iterator>
   OffsetType Write(OffsetType position, const Iterator begin, const Iterator end) {
     if (!IsOpen()) {
-      throw(exception::YASException("Raw device write error: The device hasn't been opened during write", 
+      throw(exception::YASException("Raw device write error: the device hasn't been opened during write",
           StorageError::kDeviceWriteError));
     }
 
     device_.seekp(position);
     if (device_.eof()) {
-      throw(exception::YASException("Raw device write error: the device's put cursor position mismath", 
+      throw(exception::YASException("Raw device write error: the device's put cursor position mismath",
           StorageError::kDeviceWriteError));
     }
 
     const auto write_size = std::distance(begin, end);
     device_.write(reinterpret_cast<const char*>(&(*begin)), write_size);
     if (!device_.good()) {
-      throw(exception::YASException("Raw device write error: something bad happened during device write", 
+      throw(exception::YASException("Raw device write error: something bad happened during device write",
           StorageError::kDeviceWriteError));
     }
 

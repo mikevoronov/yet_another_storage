@@ -20,7 +20,7 @@ using DefaultDevice = devices::FileDevice<OffsetType>;
  *
  *    Objects of this class could be created by Load/Create static methods. Note that for each physically
  *    seprated PV should be created only one instance of this class. If you want to simultaneously work
- *    with several PV please create instances through PVManagerFactory
+ *    with several PV please create instances through PVManagerFactory.
  */
 template <typename CharType=CharType, typename OffsetType=OffsetType, typename Device=DefaultDevice<OffsetType>>
 class PVManager : public IStorage<CharType> {
@@ -37,7 +37,7 @@ class PVManager : public IStorage<CharType> {
   }
 
   ///  \brief loads the already created PV from specifed path. Can throw YASExceptions if PV has invalid structure
-  ///         or device fails
+  ///         or device fails.
   ///  \param pv_path - path to exist PV
   ///  \param version - maximum supported version (PVEntriesManager could use it for parsing)
   ///  \return - new PVManager instance
@@ -61,7 +61,7 @@ class PVManager : public IStorage<CharType> {
   ///  \param version - maximum supported version (PVEntriesManager could use it for parsing)
   ///  \return - new PVManager instance
   static std::unique_ptr<pv_manager_type> Create(const pv_path_type &pv_path, utils::Version version,
-      uint32_t priority, uint32_t cluster_size = kDefaultClusterSize) {
+      int32_t priority, int32_t cluster_size = kDefaultClusterSize) {
     if (Device::Exist(pv_path)) {
       return Load(pv_path, version);
     }
@@ -206,14 +206,14 @@ class PVManager : public IStorage<CharType> {
     }
   }
 
-  uint32_t priority() const { return entries_manager_.priority(); }
+  int32_t priority() const { return entries_manager_.priority(); }
 
 #ifdef UNIT_TEST
-  Device& GetDevice() const { return device_; }
+  PVEntriesManagerType& entries_manager() const { return entries_manager_; }
 #endif
 
   PVManager(const PVManager&) = delete;
-  PVManager(PVManager&&) = default;
+  PVManager(PVManager&&) = delete;
   PVManager& operator=(const PVManager&) = delete;
   PVManager& operator=(PVManager&&) = delete;
 
@@ -250,7 +250,7 @@ class PVManager : public IStorage<CharType> {
   }
 
   bool isEntryExpired(OffsetType offset) {
-    utils::Time expired_date(0, 0);
+    utils::Time expired_date;
     if (!entries_manager_.GetEntryExpiredDate(offset, expired_date)) {
       return false;
     }

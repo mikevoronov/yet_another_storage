@@ -31,7 +31,7 @@ class PVDeviceDataReaderWriter {
 
   template <typename ValueType>
   ValueType Read(OffsetType offset) {
-    static_assert(std::is_trivially_copyable_v<ValueType>, "PVDeviceDataReaderWriter::Read<Type>: type should be POD");
+    static_assert(std::is_trivially_copyable_v<ValueType>, "PVDeviceDataReaderWriter::Read<Type>: Type should be POD");
 
     ByteVector raw_bytes(sizeof(ValueType));
     device_.Read(offset, std::begin(raw_bytes), std::end(raw_bytes));
@@ -43,7 +43,7 @@ class PVDeviceDataReaderWriter {
 
   template <typename ValueType>
   void Write(OffsetType position, const ValueType &type) {
-    static_assert(std::is_trivially_copyable_v<ValueType>, "PVDeviceDataReaderWriter::Write<Type>: type should be POD");
+    static_assert(std::is_trivially_copyable_v<ValueType>, "PVDeviceDataReaderWriter::Write<Type>: Type should be POD");
 
     ByteVector data(sizeof(ValueType));
     serialization_utils::SaveAsBytes(std::begin(data), std::end(data), &type);

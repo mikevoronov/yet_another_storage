@@ -4,7 +4,7 @@
 
 namespace yas {
 
-// pointer type to navigate through PV (compeltely determines the maximum size of volume)
+// pointer type to navigate through PV (completely determines the maximum size of volume)
 using OffsetType = uintptr_t;
 
 // type of key chars in storage

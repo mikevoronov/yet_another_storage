@@ -13,7 +13,7 @@ namespace utils {
 STRUCT_PACK(
 class Time {
  public:
-  constexpr explicit Time(uint32_t expired_time_low, uint16_t expired_time_high = 0)
+  constexpr explicit Time(uint32_t expired_time_low = 0, uint16_t expired_time_high = 0)
       : expired_time_high_(expired_time_high), expired_time_low_(expired_time_low)
   {}
 

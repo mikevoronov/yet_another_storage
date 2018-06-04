@@ -35,9 +35,9 @@ class PVEntriesAllocator {
         header.next_free_entry_offset_ = free_entry_offset;
         serialization_utils::SaveAsBytes(current_cursor, std::end(new_clusters), &header);
         std::advance(current_cursor, cluster_size_);
-    free_entry_offset = offset_traits<OffsetType>::IsExistValue(free_entry_offset) ? free_entry_offset + cluster_size_ :
-      device_end_;
-    }
+        free_entry_offset = offset_traits<OffsetType>::IsExistValue(free_entry_offset) ? 
+            free_entry_offset + cluster_size_ : device_end_;
+      }
       device_end_ += data_reader_writer.RawWrite(device_end_, std::cbegin(new_clusters), std::cend(new_clusters));
     }
 
@@ -59,5 +59,6 @@ class PVEntriesAllocator {
   const ByteVector::value_type debug_filler = 0xAA;
   const double extend_factor_ = 1.1;
 };
+
 } // namespace pv
 } // namespace yas

@@ -11,7 +11,7 @@ using namespace yas::macros;
 namespace yas {
 namespace pv_layout_headers {
 
-constexpr uint32_t kBinCount = 11;
+constexpr int32_t kBinCount = 11;
 
 // PV layout contains:
 // PVHeader
@@ -24,10 +24,10 @@ struct PVHeader {
   uint8_t signature_[6] = { 'Y', 'A', 'S', '_', 'P', 'V' };                        //  + 6 bytes
   utils::Version version_;                                                         //  + 2 bytes
   OffsetType pv_size_;                                                             //  + 8 bytes
-  uint32_t cluster_size_ = kDefaultClusterSize;                                    //  + 4 bytes
-  uint32_t priority_;                                                              //  + 4 bytes
+  int32_t cluster_size_ = kDefaultClusterSize;                                     //  + 4 bytes
+  int32_t priority_;                                                               //  + 4 bytes
   OffsetType inverted_index_offset_;                                               //  + sizeof(OffsetType) : 4 or 8 bytes
-  uint32_t freelist_bins_count_ = kBinCount;                                       //  + 4 bytes
+  int32_t freelist_bins_count_ = kBinCount;                                        //  + 4 bytes
 });
 
 STRUCT_PACK(
@@ -66,31 +66,30 @@ enum PVTypeState : uint8_t {
 };
 
 constexpr PVTypeState operator|(PVTypeState lhs, PVTypeState rhs) {
-  using T = std::underlying_type_t<PVTypeState>;
-  return (PVTypeState)(static_cast<T>(lhs) | static_cast<T>(rhs));
+  using UnderlyingType = std::underlying_type_t<PVTypeState>;
+  return (PVTypeState)(static_cast<UnderlyingType>(lhs) | static_cast<UnderlyingType>(rhs));
 }
 
 constexpr PVTypeState operator&(PVTypeState lhs, PVTypeState rhs) {
-  using T = std::underlying_type_t<PVTypeState>;
-  return (PVTypeState)(static_cast<T>(lhs) & static_cast<T>(rhs));
+  using UnderlyingType = std::underlying_type_t<PVTypeState>;
+  return (PVTypeState)(static_cast<UnderlyingType>(lhs) & static_cast<UnderlyingType>(rhs));
 }
 
-constexpr PVTypeState& operator|=(PVTypeState &lhs, PVTypeState rhs)
-{
-  using T = std::underlying_type_t<PVTypeState>;
-  lhs = (PVTypeState)(static_cast<T>(lhs) | static_cast<T>(rhs));
+constexpr PVTypeState& operator|=(PVTypeState &lhs, PVTypeState rhs) {
+  using UnderlyingType = std::underlying_type_t<PVTypeState>;
+  lhs = (PVTypeState)(static_cast<UnderlyingType>(lhs) | static_cast<UnderlyingType>(rhs));
   return lhs;
 }
 
 // I assume that the most common types would be types with 4 and 8 bytes size. So there are specially
 // size-optimized header for them. Each header could be in 2 states: allocated and freed. Allocated 
 // headers contain expired_time and data. Freed headers contain the link instead of data. This link 
-// points to the next freed header with size in the same bucktes' range. This freelists then would 
-// used for allocating new Entries in file. It will lead to to decrease fragmentation and expensive 
+// points to the next freed header with size in the same bucket's range. This freelists then would 
+// used for allocating new entries in file. It will lead to to decrease fragmentation and expensive 
 // extension process of the physical volume on hdd. The idea stolen from (dl)ptmalloc fastbin realization.
 // Also note that expired_time can also placed at inverted index and there is also a thradeoff between
 // size/speed. I chose the file location to reduce possible RAM costs (following the reqs in proposal).
-// 
+//
 // P.S. I will also note that most device type have some kind of read/write cache. F.e. read/write cache
 // in most of std::fstream realization, aligment and rounding in boost::interprocess::mapping_file. 
 // Given this fact it can be say that it would be faster to implement the same logic as in jemalloc or

@@ -14,10 +14,10 @@ namespace aho_corasick_serialization_headers {
 STRUCT_PACK(
 template<typename IdType, typename CharType>
 struct NodeSerializationDescriptorT {
-  constexpr NodeSerializationDescriptorT(IdType node_id = 0,
-      IdType parent_node_id = 0,
-      IdType depth_level = 0,
-      IdType leaf_id = 0,
+  constexpr NodeSerializationDescriptorT(IdType node_id,
+      IdType parent_node_id,
+      IdType depth_level,
+      IdType leaf_id,
       CharType parent_node_ch = std::char_traits<CharType>::to_char_type('/'))
       : node_id_(node_id),
         parent_node_id_(parent_node_id),
@@ -25,6 +25,8 @@ struct NodeSerializationDescriptorT {
         leaf_id_(leaf_id),
         parent_node_ch_(parent_node_ch)
   {}
+
+  NodeSerializationDescriptorT() = default;
 
   IdType node_id_;
   IdType parent_node_id_;
@@ -36,11 +38,13 @@ struct NodeSerializationDescriptorT {
 STRUCT_PACK(
 template<typename IdType, typename LeafType>
 struct LeafSerializationDescriptorT {
-  constexpr LeafSerializationDescriptorT(IdType node_id = 0,
-      LeafType leaf = leaf_traits<LeafType>::NonExistValue())
+  constexpr LeafSerializationDescriptorT(IdType node_id,
+      LeafType leaf)
       : node_id_(node_id),
         leaf_(leaf)
   {}
+
+  LeafSerializationDescriptorT() = default;
 
   IdType node_id_;
   LeafType leaf_;
@@ -58,6 +62,8 @@ struct NodeDescriptorT {
         parent_node_id_(parent_node_id),
         parent_node_ch_(parent_node_ch)
   {}
+
+  NodeDescriptorT() = default;
 
   IdType node_id_;
   CharNode *node_;
@@ -82,15 +88,17 @@ constexpr auto ConvertIdType(uint32_t size) {
 STRUCT_PACK(
 template <typename IdType>
 struct SerializationDataHeaderT {
-  SerializationDataHeaderT(utils::Version version = {1,1},
-      IdType leafs_count = 0,
-      IdType nodes_count = 0,
+  SerializationDataHeaderT(utils::Version version,
+      IdType leafs_count,
+      IdType nodes_count,
       IdTypeSize id_type_size = IdTypeSize::k4Byte)
       : version_(version),
         leafs_count_(leafs_count),
         nodes_count_(nodes_count),
         id_type_size_(id_type_size)
   {}
+
+  SerializationDataHeaderT() = default;
 
   utils::Version version_;
   IdType leafs_count_;

@@ -12,8 +12,8 @@ namespace storage {
 *    \brief The class is used for creating PVManager on specified path.
 *
 *    The general rule of YAS is one PVManager for one PV file because of thread-safety. So this class creates new
-*    or loads an existing PV from device and keep shared_ptr on them in internal unordered_map. If user specifies 
-*    path for already created PVManager - class returns him already created one.
+*    or loads an existing PV from device and keep shared_ptr on them in the internal unordered_map. If user specifies
+*    path for already created PVManager - class returns the already created one.
 */
 class PVManagerFactory {
  public:
@@ -33,7 +33,7 @@ class PVManagerFactory {
   ///  \param cluster_size - a cluster size for newly created PVManager
   ///  \return - a PVManager for specified path or error
   nonstd::expected<std::shared_ptr<manager_type>, StorageErrorDescriptor> Create(const pv_path_type path,
-      utils::Version requested_version, uint32_t priority = 0, uint32_t cluster_size = kDefaultClusterSize) {
+      utils::Version requested_version, int32_t priority = 0, int32_t cluster_size = kDefaultClusterSize) {
 
     if (max_supported_version_ < requested_version) {
       return nonstd::make_unexpected(StorageErrorDescriptor("requested PV version is unsupported", 

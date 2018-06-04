@@ -75,7 +75,6 @@ class FreelistHelper {
   }
 
   OffsetType PushFreeEntry(OffsetType new_offset, OffsetType entry_size) {
-    //assert(entry_size > kDefaultClusterSize);
     const auto bin_id = getBinIdForSize(entry_size);
     const auto offset = bin_descriptors_[bin_id].offset_;
     bin_descriptors_[bin_id].offset_ = new_offset;
@@ -104,8 +103,6 @@ class FreelistHelper {
   std::array<BinDescriptor, kBinCount> bin_descriptors_;
 
   uint32_t getBinIdForSize(OffsetType entry_size) const {
-    //assert(entry_size > kDefaultClusterSize);
-
     auto found_value_it = std::lower_bound(std::cbegin(bin_descriptors_), std::cend(bin_descriptors_), entry_size, [](
         const BinDescriptor &bin_descriptor,
         const OffsetType entry_size) {

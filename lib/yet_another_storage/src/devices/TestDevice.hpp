@@ -9,7 +9,7 @@
 namespace yas {
 namespace devices {
 
-// this simple device based on std::vector
+// this simple device based on std::vector<uint8_t> and used for some unit tests
 template <typename OffsetType>
 class TestDevice {
  public:
@@ -44,7 +44,7 @@ class TestDevice {
     const auto data_size = std::distance(begin, end);
     storage_.reserve(position + data_size);
     if (position == storage_.size()) {
-      // case one: add new content strictly to the end of file
+      // add new content strictly to the end of file
       for (auto it = begin; it != end; ++it) {
         storage_.push_back(*it);
       }
@@ -96,7 +96,7 @@ class TestDevice {
   TestDevice operator=(const TestDevice&) = delete;
   TestDevice operator=(TestDevice&&) = delete;
   TestDevice(TestDevice&&) = delete;
- 
+
  private:
   ByteVector storage_;
 };
