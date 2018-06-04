@@ -7,6 +7,7 @@ For more info please see project wiki.
 
 ```shell
 git clone https://github.com/michailvoronov/yet_another_storage
+cd yet_another_storage
 
 # build test binaries
 make
