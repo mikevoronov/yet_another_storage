@@ -50,7 +50,7 @@ class Storage : public IStorage<CharType> {
 
     const auto vg_range = getVolumeGroupRange(key);
     if (!vg_range.has_value()) {
-      return nonstd::make_unexpected(vg_range);
+      return nonstd::make_unexpected(std::move(vg_range.error()));
     }
 
     StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
@@ -145,7 +145,7 @@ class Storage : public IStorage<CharType> {
     
     const auto vg_range = getVolumeGroupRange(key);
     if (!vg_range.has_value()) {
-      return nonstd::make_unexpected(vg_range.error());
+      return nonstd::make_unexpected(std::move(vg_range.error()));
     }
 
     StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));

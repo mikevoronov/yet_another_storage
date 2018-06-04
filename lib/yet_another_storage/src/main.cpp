@@ -1,6 +1,7 @@
 #include "storage/PVManagerFactory.hpp"
 #include "common/filesystem.h"
 #include <iostream>
+#include <variant>
 
 using namespace yas;
 
@@ -26,7 +27,7 @@ int main() {
   }
 
   auto tt = result.value();
-  auto tt2 = std::any_cast<std::string>(tt);
+  auto tt2 = std::get<std::string>(tt);
   
   pv_manager->SetExpiredDate("/root/asd/asd", 0);
   auto result_2 = pv_manager->Get("/root/asd/asd");

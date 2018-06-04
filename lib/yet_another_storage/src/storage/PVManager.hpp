@@ -36,7 +36,7 @@ class PVManager : public IStorage<CharType> {
     close();
   }
 
-  ///  \brief loads an already created PV from specifed path. Can throw YASExceptions if PV has invalid structure
+  ///  \brief loads the already created PV from specifed path. Can throw YASExceptions if PV has invalid structure
   ///         or device fails
   ///  \param pv_path - path to exist PV
   ///  \param version - maximum supported version (PVEntriesManager could use it for parsing)
@@ -44,10 +44,10 @@ class PVManager : public IStorage<CharType> {
   static std::unique_ptr<pv_manager_type> Load(const pv_path_type &pv_path, utils::Version version) {
     auto pv_volume_manager = std::unique_ptr<pv_manager_type>(new pv_manager_type(pv_path, version));
 
-    pv_volume_manager->inverted_index_offset_ = pv_volume_manager->entries_manager_.LoadStartSections();
+    pv_volume_manager->inverted_index_offset_ = pv_volume_manager->entries_manager_.LoadStartEntries();
     const auto serialized_index = pv_volume_manager->entries_manager_.GetEntryContent(
         pv_volume_manager->inverted_index_offset_);
-    const auto &vector_serialized_index = std::any_cast<const ByteVector &>(serialized_index);
+    const auto &vector_serialized_index = std::get<ByteVector>(serialized_index);
     auto indexer = InvertedIndexType::Deserialize<InvertedIndexType::leaf_type>(std::cbegin(vector_serialized_index),
         std::cend(vector_serialized_index), version);
 
@@ -55,8 +55,8 @@ class PVManager : public IStorage<CharType> {
     return pv_volume_manager;
   }
 
-  ///  \brief create new PV in the specified path. Note that if PV already exist (it means that Device::Exist returns
-  ///         success) then it try to Load existing by Load method. Can throw YASExceptions if device fails. 
+  ///  \brief creates new PV in the specified path. Note that if the PV already exist (it means that Device::Exist
+  ///         returns success) then it tries to load existing by Load method. Can throw YASExceptions if device fails.
   ///  \param pv_path - path to newly created PV
   ///  \param version - maximum supported version (PVEntriesManager could use it for parsing)
   ///  \return - new PVManager instance
@@ -71,7 +71,7 @@ class PVManager : public IStorage<CharType> {
     // std::make_unique needs access to the class ctor
     auto pv_volume_manager = std::unique_ptr<pv_manager_type>(new pv_manager_type(pv_path, version, priority, 
         cluster_size));
-    pv_volume_manager->entries_manager_.CreateStartSections(offset_traits<OffsetType>::NonExistValue());
+    pv_volume_manager->entries_manager_.SaveStartEntries(offset_traits<OffsetType>::NonExistValue());
     pv_volume_manager->inverted_index_.reset(new InvertedIndexType());
     return pv_volume_manager;
   }
@@ -79,8 +79,8 @@ class PVManager : public IStorage<CharType> {
   virtual StorageErrorDescriptor Put(key_type key, storage_value_type value) override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
-      if (!value.has_value()) {
-        return { "Put key: std::any doesn't contain any value", StorageError::kValueNotFound };
+      if (value.valueless_by_exception()) {
+        return { "Put key: value is valueless", StorageError::kIncorrectStorageValue };
       }
       if (inverted_index_->HasKey(key)) {
         return { "Put key: the storage already has current key, please remove it first", 
@@ -159,7 +159,7 @@ class PVManager : public IStorage<CharType> {
     try {
       const auto entry_offset = inverted_index_->Get(key);
       if (!leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
-        return { "Delete key: key hasn't been found", StorageError::kKeyNotFound };
+        return { "Delete key: the key hasn't been found", StorageError::kKeyNotFound };
       }
       entries_manager_.DeleteEntry(entry_offset);
       inverted_index_->Delete(key);
@@ -242,10 +242,10 @@ class PVManager : public IStorage<CharType> {
         }
         inverted_index_offset_ = entries_manager_.CreateNewEntryValue(serialized_index);
       }
-      entries_manager_.CreateStartSections(inverted_index_offset_);
+      entries_manager_.SaveStartEntries(inverted_index_offset_);
     }
     catch (...) {
-      // in future relize there should be some code to save trie while OOM (it could throwed by Serialize method)
+      // in future relize there should be some code to save trie while OOM (it could be throwed by Serialize method)
     }
   }
 

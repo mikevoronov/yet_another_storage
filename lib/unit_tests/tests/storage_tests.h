@@ -17,13 +17,13 @@ TEST(Storage, MountTest_1) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put("/home/user1/dir1", std::make_any<TestType>(test_value));
+  pv_manager->Put("/home/user1/dir1", test_value);
 
   storage.Mount(pv_path, "/home/user2/dir2", "/home/user1");
   storage.Put("/home/user2/dir2/dir3", test_value);
   const auto result = storage.Get("/home/user2/dir2/dir3");
   EXPECT_TRUE(result);
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result.value()));
+  EXPECT_EQ(test_value, std::get<TestType>(result.value()));
 }
 
 TEST(Storage, MountTest_2) {
@@ -42,15 +42,15 @@ TEST(Storage, MountTest_2) {
 
   auto pv_manager_1 = manager_1.value();
   auto pv_manager_2 = manager_2.value();
-  pv_manager_1->Put("/home/user1/dir1", std::make_any<TestType>(test_value_1));
-  pv_manager_2->Put("/root/user1/dir1", std::make_any<TestType>(test_value_2));
+  pv_manager_1->Put("/home/user1/dir1", test_value_1);
+  pv_manager_2->Put("/root/user1/dir1", test_value_2);
 
   storage.Mount(pv_path_1, "/home/user2/dir2", "/home/user1");
   storage.Mount(pv_path_2, "/home/user2/dir2", "/root/user1");
   const auto result = storage.Get("/home/user2/dir2/dir1");
   EXPECT_TRUE(result);
   // test_value_2 is in storage with a higher priority
-  EXPECT_EQ(test_value_2, std::any_cast<TestType>(result.value()));
+  EXPECT_EQ(test_value_2, std::get<TestType>(result.value()));
 }
 
 }

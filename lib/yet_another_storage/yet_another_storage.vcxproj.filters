@@ -28,14 +28,14 @@
     <Filter Include="include">
       <UniqueIdentifier>{aa19e795-db19-4e3a-b3fc-31cff3637bc2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\inverted_index_helper">
-      <UniqueIdentifier>{9ca1e68b-01a7-4f8e-b3cf-6dd4981c3e81}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\devices">
       <UniqueIdentifier>{054b3ffd-c69c-40e0-ac19-a92655e7ef1b}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\physical_volume\entries">
       <UniqueIdentifier>{f969bfb3-992c-4fee-b9cb-964272b9abc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\inverted_index">
+      <UniqueIdentifier>{9ca1e68b-01a7-4f8e-b3cf-6dd4981c3e81}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -88,22 +88,22 @@
       <Filter>src\storage</Filter>
     </ClInclude>
     <ClInclude Include="src\inverted_index_helper\AhoCorasickEngine.hpp">
-      <Filter>src\inverted_index_helper</Filter>
+      <Filter>src\inverted_index</Filter>
     </ClInclude>
     <ClInclude Include="src\inverted_index_helper\AhoCorasickSerializationHelper.hpp">
-      <Filter>src\inverted_index_helper</Filter>
+      <Filter>src\inverted_index</Filter>
     </ClInclude>
     <ClInclude Include="src\inverted_index_helper\id_type_type_traits.hpp">
-      <Filter>src\inverted_index_helper</Filter>
+      <Filter>src\inverted_index</Filter>
     </ClInclude>
     <ClInclude Include="src\inverted_index_helper\InvertedIndexHelper.hpp">
-      <Filter>src\inverted_index_helper</Filter>
+      <Filter>src\inverted_index</Filter>
     </ClInclude>
     <ClInclude Include="src\inverted_index_helper\leaf_type_traits.hpp">
-      <Filter>src\inverted_index_helper</Filter>
+      <Filter>src\inverted_index</Filter>
     </ClInclude>
     <ClInclude Include="src\inverted_index_helper\aho_corasick_serialization_headers.hpp">
-      <Filter>src\inverted_index_helper</Filter>
+      <Filter>src\inverted_index</Filter>
     </ClInclude>
     <ClInclude Include="src\devices\FileDevice.hpp">
       <Filter>src\devices</Filter>

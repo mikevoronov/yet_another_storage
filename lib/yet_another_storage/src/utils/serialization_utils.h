@@ -5,7 +5,7 @@
 namespace yas {
 namespace serialization_utils {
 
-// idea from https://stackoverflow.com/questions/47917576/append-structs-to-a-vectoruint8-t
+// the idea from https://stackoverflow.com/questions/47917576/append-structs-to-a-vectoruint8-t
 
 template<typename Iterator>
 struct range_t {
@@ -35,7 +35,6 @@ range_t<const uint8_t*> AsBytes(const Type *type) {
   return range(ptr, ptr + sizeof(Type));
 }
 
-// universal link isn't sutable in this case
 template<typename InsertIterator, typename Type>
 InsertIterator SaveAsBytes(const InsertIterator begin, const InsertIterator end, const Type *data) {
   auto bytes = AsBytes(data);

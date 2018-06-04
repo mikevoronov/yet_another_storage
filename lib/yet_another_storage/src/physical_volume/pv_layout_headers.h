@@ -86,7 +86,7 @@ constexpr PVTypeState& operator|=(PVTypeState &lhs, PVTypeState rhs)
 // size-optimized header for them. Each header could be in 2 states: allocated and freed. Allocated 
 // headers contain expired_time and data. Freed headers contain the link instead of data. This link 
 // points to the next freed header with size in the same bucktes' range. This freelists then would 
-// used for allocating new entries in file. It will lead to to decrease fragmentation and expensive 
+// used for allocating new Entries in file. It will lead to to decrease fragmentation and expensive 
 // extension process of the physical volume on hdd. The idea stolen from (dl)ptmalloc fastbin realization.
 // Also note that expired_time can also placed at inverted index and there is also a thradeoff between
 // size/speed. I chose the file location to reduce possible RAM costs (following the reqs in proposal).

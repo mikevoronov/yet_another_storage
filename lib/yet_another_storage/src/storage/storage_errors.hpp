@@ -21,7 +21,7 @@ enum StorageError : uint32_t {
   kKeyExpired = 11,
   kKeyDoesntExpired = 12,
   kPVMountPointManagerAdapterNotReady = 13,
-  kValueNotFound = 14,                                         // used for std::any
+  kIncorrectStorageValue = 14,                                // used for std::variant
   kKeyAlreadyCreated = 15,
   kPVVersionUnsupported = 16,
   kUnknownError = 17,

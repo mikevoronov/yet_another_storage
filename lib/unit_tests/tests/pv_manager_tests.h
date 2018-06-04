@@ -21,14 +21,12 @@ TEST(PVManager, PutGetInt8) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetUInt8) {
@@ -42,14 +40,12 @@ TEST(PVManager, PutGetUInt8) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetInt16) {
@@ -63,14 +59,12 @@ TEST(PVManager, PutGetInt16) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetUInt16) {
@@ -84,14 +78,12 @@ TEST(PVManager, PutGetUInt16) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetInt32) {
@@ -105,14 +97,12 @@ TEST(PVManager, PutGetInt32) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetUInt32) {
@@ -126,14 +116,12 @@ TEST(PVManager, PutGetUInt32) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetFloat1) {
@@ -147,14 +135,12 @@ TEST(PVManager, PutGetFloat1) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetFloat2) {
@@ -168,14 +154,12 @@ TEST(PVManager, PutGetFloat2) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetDouble1) {
@@ -189,14 +173,12 @@ TEST(PVManager, PutGetDouble1) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetDouble2) {
@@ -210,14 +192,12 @@ TEST(PVManager, PutGetDouble2) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetInt64) {
@@ -231,14 +211,12 @@ TEST(PVManager, PutGetInt64) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetUInt64) {
@@ -252,14 +230,12 @@ TEST(PVManager, PutGetUInt64) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetString) {
@@ -273,14 +249,12 @@ TEST(PVManager, PutGetString) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutGetBlob) {
@@ -294,14 +268,12 @@ TEST(PVManager, PutGetBlob) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, PutDeleteGetBlob) {
@@ -315,7 +287,7 @@ TEST(PVManager, PutDeleteGetBlob) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   pv_manager->Delete(key);
   auto result = pv_manager->Get(key);
   EXPECT_FALSE(result);
@@ -332,7 +304,7 @@ TEST(PVManager, PutDeleteGetBigBlob) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   pv_manager->Delete(key);
   auto result = pv_manager->Get(key);
   EXPECT_FALSE(result);
@@ -349,14 +321,12 @@ TEST(PVManager, PutGetBigBlob) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get(key);
   EXPECT_TRUE(result);
 
   auto result_value = result.value();
-  EXPECT_TRUE(result_value.has_value());
-  EXPECT_EQ(std::type_index(result_value.type()), std::type_index(typeid(TestType)));
-  EXPECT_EQ(test_value, std::any_cast<TestType>(result_value));
+  EXPECT_EQ(test_value, std::get<TestType>(result_value));
 }
 
 TEST(PVManager, HasKeyTest) {
@@ -370,7 +340,7 @@ TEST(PVManager, HasKeyTest) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   EXPECT_EQ(StorageError::kSuccess, pv_manager->HasKey(key).error_code_);
 }
 
@@ -388,7 +358,7 @@ TEST(PVManager, ExpiredTest) {
   utils::Time expired_time(saved_time);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   pv_manager->SetExpiredDate(key, saved_time);
   const auto retreived_time = pv_manager->GetExpiredDate(key);
   EXPECT_EQ(0, std::difftime(saved_time, retreived_time.value()));
@@ -408,7 +378,7 @@ TEST(PVManager, ExpiredDeleteTest) {
   utils::Time expired_time(saved_time);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   pv_manager->SetExpiredDate(key, saved_time);
   const auto result = pv_manager->Get(key);
   EXPECT_FALSE(result.has_value()); // value already expired
@@ -425,7 +395,7 @@ TEST(PVManager, GetNonExistKey) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->Get("/////");
   EXPECT_FALSE(result.has_value());
 }
@@ -441,7 +411,7 @@ TEST(PVManager, HasCatalogTest) {
   EXPECT_TRUE(manager);
 
   auto pv_manager = manager.value();
-  pv_manager->Put(key, std::make_any<TestType>(test_value));
+  pv_manager->Put(key, test_value);
   auto result = pv_manager->HasCatalog("/");
   EXPECT_EQ(StorageError::kSuccess, result.error_code_);
 }
@@ -449,7 +419,7 @@ TEST(PVManager, HasCatalogTest) {
 TEST(PVManager, ReqsFuzzyTest_1) {
   using TestType = uint32_t;
 
-  const uint32_t keys_count = 100000;
+  const int32_t keys_count = 1000000;
   const TestType test_value = 5;
   const std::basic_string<CharType> key = "/root/asd22";
   const auto pv_path = fs::temp_directory_path() / "yas_pv_fd60f6e1ae21d37aa1e10007636431ab_23";
@@ -459,7 +429,7 @@ TEST(PVManager, ReqsFuzzyTest_1) {
   auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
-  for (uint32_t key_id = 0; key_id < keys_count; ++key_id) {
+  for (int32_t key_id = 0; key_id < keys_count; ++key_id) {
     manager.value()->Put("/root/" + std::to_string(key_id), test_value);
   }
 }
