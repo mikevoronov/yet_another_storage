@@ -1,41 +1,41 @@
 # yet_another_storage
 
-## Basic defenitions
-**Physical volume (PV)** - is a single physical storage unit located anywhere which is could be accessed by special device class.
+## Basic definitions
+**Physical volume (PV)** - a single physical storage unit that could be accessed by special device class.
 
-**Catalog** - is any prefix substring from prefix trie of keys from PV. F.e. assume that we have 3 keys: "/home/user1/file1", "/home/user1/file2", "/home/user2/file". So catalog is any prefix from prefix trie build on these keys. Since if we have choosen "/home/us" (or any prefix substring of "/home/user") catalog that we have an access to all of these keys.
+**Catalog** - any prefix substring from prefix trie built on all PV keys of PV. F.e. assume that we have 3 keys: "/home/user1/file1", "/home/user1/file2", "/home/user2/file". Since if we have choosen "/home/us" (or any other prefix substring of "/home/user") catalog that we have an access to all of these keys.
 
 ## PV layout
 
-Each PV has following layout:
+Each PV has the following layout:
 
 ### PVHeader
-  The header contains information about version, cluster size, bin counts, priority, and offsets of all other structures.
+  The PVHeader contains information about version, cluster size, bin counts, priority, and offsets of all other structures.
 
 ### Freelists
-  Freelists exploits the same concept as fastbin in (dl)ptmalloc. In version 1.1 of library cluster size could be choosen arbitrarily but by default equals 3840 bytes (to guaranteed fit at page size on x86/amd64). Because of this there are following freelist buckets | 12 | 16 | <64 | <100 | <128 | <256 | <512 | <1024 | <1520 | <2048 | <3840 | have been chosen.
+  Freelists exploits the same concept as fastbin in (dl)ptmalloc. In the current version cluster size could be choosen arbitrarily but by default equals 3840 bytes (to guaranteed fit in page size on x86/amd64). Because of this there are following freelist buckets | 12 | 16 | <64 | <100 | <128 | <256 | <512 | <1024 | <1520 | <2048 | <3840 | have been chosen.
  
 ### Inverted index
-  The main purpose of inverted index in PV is to keep information (mainly offsets) for all keys. In version 1.1 inverted index is based on Aho-Corasick algorithm. In PV it is saved in serialized view.
+  The main purpose of inverted index in PV is keeping information (mainly offsets) for all keys. In the current version inverted index is based on Aho-Corasick algorithm. In PV it is saved in serialized view.
 
 ### Data
-  Similar to common filesystems: PV is divided on clusters with choosen size and has several types of data entry. For version 1.1 there are 3 types:
+  Similar to common filesystems: PV is divided on clusters with choosen size and has several types of data entry. For the current version there are 3 types:
   1. "simple" 4 bytes type,
   2. "simple" 8 bytes type,
   3. "complex" type with non-fixed size.
 
   The first two have a simple header with minimum size (12 bytes and 16 bytes respectively). It is assummed that these types of headers can't occupy several clusters. 
-  The third types can occupy several clusters and so has a special structure with link to next chunk (single linked list). Each headers could be in 2 states: allocated and freed. In the first state it simply contains user's data but in the second state in place of data it has a link to the next freed chunk of corresponded size (see section about Freelists). The begining of this list always located at freelist bins.
+  The third types can occupy several clusters and so has a special structure with link to next chunk (single linked list). Each headers could be in 2 states: allocated and freed. In the first state it simply contains user's data but in the second state instead of data it has a link to the next freed chunk of corresponded size (see section about Freelists). The begining of this list always located at freelist bins.
 
 ## Storage
-Storage is a some kind of virtual PV. It is also based on the same inverted index as PV. Storage support mounting of any catalog of PV to any virtual Storage catalog. Also it is possible to mounting any several catalogs of one PV to several catalogs of Storage. In case of path ambiguity operations are performed on the PV with the hightest priority (priority specifies by user while creating PV).
+Storage is a some kind of virtual PV. It is also based on the same inverted index as PV. Storage support mounting of any catalog of PV to any virtual Storage catalog. Also it is possible to mounting any several catalogs of one PV to several catalogs of Storage. In case of path ambiguity operations are performed according to PV priority (priority specifies by user while PV creating).
  
 ## General idea
-Since it's assumed that a PV could have a too big size to keep it all in RAM each PV represents in memory only by inverted index and freelists bins. To minimize memory overhead inverted index save only offset of data entry in PV. All other information (type and expired date) about key is located in the entry header. So all common operation on PV suggest prefix index traversal to find a offset of value PV, then determine entry types (simple4, simple8 or complex) and expired status and then execution the operation itself. For write new entry to PV it is used freelist bins. In version 1.1 of library all freed entries is located in several single linked lists and freelist helper provides with capability to provide a most sutable chunk. If there aren't any freed chunk in list PV is physically expanded to several cluster size (in current version by 5 cluster size at once). So in general case it isn't need to long traversal through PV strucutre with a lot of i/o operation.
+Since it's assumed that a PV could have a too big size to keep it all in RAM each PV represents in memory only by inverted index and freelists bins. To minimize memory overhead the inverted index contains only offset of data entry in PV. All other information (type and expired date) about keys is located in the entry header. So all common operation on PV suggest prefix index traversal to find a offset of value PV, then determine entry types (simple4, simple8 or complex) and expired status and then execution the operation itself. For write new entry to PV it is used freelist bins. In the current version of library all freed entries is located in several single linked lists and freelist helper provides with capability to give a most sutable chunk. If there aren't any freed chunk of corresponded size in the freelist PV is physically expanded to several cluster size. So in general case it isn't need to long traversal through PV strucutre with a lot of i/o operation.
 
-Library is highly template and now supports unicode, working in 32/64 bit (in 32 bit size of PV is limited by 2**32 bytes but it implies less overhead) and heterogeneous device with the assumption about possbility only to open/read/write/close data.
+Library is highly template and in the current version supports unicode, 32/64 bit operation mode(in 32 bit size of PV is limited by 2**32 bytes but it implies less overhead) and heterogeneous device with the assumption about possbility only to open/read/write/close data.
 
-At the moment YAS support following types:
+At the moment YAS supports the following types:
 - int8_t
 - uint8_t
 - int16_t
@@ -47,8 +47,7 @@ At the moment YAS support following types:
 - uint64_t
 - double
 - std::string
-- std::vector
-
+- std::vector<uint8_t>
 
 ## Dependences 
 
