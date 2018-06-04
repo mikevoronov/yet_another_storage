@@ -1,11 +1,13 @@
 # Yet Another Storage
-YAS is a header-only highly template library. At the moment the library supports unicode, 32/64 bit operation mode(in 32 bit size of PV is limited by 2**32 bytes but it implies less overhead) and heterogeneous devices. 
+YAS is a header-only library that provides common key-value operations. At the moment the library supports unicode, 32/64 bit operation mode(in 32 bit size of PV is limited by 2**32 bytes but it implies less overhead) and heterogeneous devices. 
 
 For more info please see project wiki.
 
 ## Test
 
 ```shell
+git clone https://github.com/michailvoronov/yet_another_storage
+
 # build test binaries
 make
 
@@ -23,7 +25,7 @@ make tests
 
 ## Project templates
 
-You can find project templates for VS 2017 and gcc 7 in exmaples. To change unicode support, bitness and device please change the corresponding declarations in include/storage/settings.h.
+You can find project templates for VS 2017 and gcc 7 in examples. To change unicode support, bitness and devices please change the corresponding declarations in include/storage/settings.h.
 
 ## Dependences 
 

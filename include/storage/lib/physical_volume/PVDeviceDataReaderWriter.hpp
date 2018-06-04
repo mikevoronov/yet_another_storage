@@ -52,7 +52,7 @@ class PVDeviceDataReaderWriter {
 
   ByteVector ReadComplexType(OffsetType offset) {
     ComplexTypeHeader type_header = Read<ComplexTypeHeader>(offset);
-    CheckComplexTypeHeader(type_header, true);
+    checkComplexTypeHeader(type_header, true);
 
     ByteVector complex_data(type_header.overall_size_);
     OffsetType readed_size = 0;
@@ -68,7 +68,7 @@ class PVDeviceDataReaderWriter {
     while (readed_size < overall_size) {
       offset = type_header.sequel_offset_;
       type_header = Read<ComplexTypeHeader>(type_header.sequel_offset_);
-      CheckComplexTypeHeader(type_header, false);
+      checkComplexTypeHeader(type_header, false);
       offset += serialization_utils::offset_of(&ComplexTypeHeader::data_);
 
       read_cursor_begin = read_cursor_end;
@@ -128,7 +128,7 @@ class PVDeviceDataReaderWriter {
   Device device_;
   uint32_t cluster_size_;
 
-  void CheckComplexTypeHeader(const ComplexTypeHeader &complex_header, bool is_first_header) const {
+  void checkComplexTypeHeader(const ComplexTypeHeader &complex_header, bool is_first_header) const {
     if (is_first_header && !(complex_header.value_state_ & PVTypeState::kComplexBegin)) {
       // read complex types is only possible from the beggining of sequence
       throw exception::YASException("Read complex type error: kComplexBegin type expected",

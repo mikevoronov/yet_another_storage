@@ -13,6 +13,7 @@ namespace freelist_helper {
 template <typename OffsetType>
 class FreelistHelper {
   using FreelistHeaderType = FreelistHeader<OffsetType>;
+
  public:
   // the last one must be equals to default cluster size 
   static constexpr std::array<OffsetType, kBinCount> kFreelistLimits = { sizeof(Simple4TypeHeader), sizeof(Simple8TypeHeader), 64, 100, 128, 256, 512, 1024, 1520, 2048, kDefaultClusterSize };

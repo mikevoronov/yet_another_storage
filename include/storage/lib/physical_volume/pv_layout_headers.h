@@ -81,21 +81,21 @@ constexpr PVTypeState& operator|=(PVTypeState &lhs, PVTypeState rhs) {
   return lhs;
 }
 
-// I assume that the most common types would be types with 4 and 8 bytes size. So there are specially
-// size-optimized header for them. Each header could be in 2 states: allocated and freed. Allocated 
+// I assume that the most common types would be types with 4 and 8 bytes size, so there are specially
+// size-optimized headers for them. Each header could be in 2 states: allocated and freed. Allocated 
 // headers contain expired_time and data. Freed headers contain the link instead of data. This link 
-// points to the next freed header with size in the same bucket's range. This freelists then would 
-// used for allocating new entries in file. It will lead to to decrease fragmentation and expensive 
-// extension process of the physical volume on hdd. The idea stolen from (dl)ptmalloc fastbin realization.
-// Also note that expired_time can also placed at inverted index and there is also a thradeoff between
-// size/speed. I chose the file location to reduce possible RAM costs (following the reqs in proposal).
+// points to the next freed header with size in the same bucket's range. These freelists then would be
+// used for allocating new entries in file. It will lead to decrease fragmentation and expensive 
+// extension process of the physical volume on hdd. Also note that expired_time can also be placed at 
+// inverted index and there is also a tradeoff between size/speed. I chose the file location to reduce
+// possible RAM costs (following the reqs in proposal).
 //
-// P.S. I will also note that most device type have some kind of read/write cache. F.e. read/write cache
-// in most of std::fstream realization, aligment and rounding in boost::interprocess::mapping_file. 
-// Given this fact it can be say that it would be faster to implement the same logic as in jemalloc or
+// P.S. I will also note that most device types have some kind of read/write cache. F.e. read/write cache
+// in most of std::fstream realizations, aligment and rounding in boost::interprocess::mapping_file. 
+// Given this fact it can be said that it would be faster to implement the same logic as in jemalloc or
 // low fragmentation heap in Windows >= 8. The first is designed to place objects of the same size next to 
 // each other to reach cache-friendly using and the second has buckets with preallocated headers and 
-// exploit the similar conception. But i think that for test task it is too complex :).
+// exploit similar conception. But i think that for test task it is too complex :).
 
 STRUCT_PACK(
   struct PVState {
