@@ -41,7 +41,9 @@ x64/
 [Bb]in/
 [Oo]bj/
 *.vc.db
-*/.vs/
+.vs/
+*.lib
 
-
-gtest/
+# cmake build dirs
+build/
+cmake-build/
