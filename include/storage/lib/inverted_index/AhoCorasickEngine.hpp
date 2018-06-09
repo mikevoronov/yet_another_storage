@@ -41,12 +41,12 @@ class AhoCorasickEngine {
 
   LeafType Get(key_type key) noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? leaf_traits<LeafType>::NonExistValue() : node->leaf_;
+    return (nullptr == node) ? leaf_type_traits<LeafType>::NonExistValue() : node->leaf_;
   }
 
   const LeafType Get(key_type key) const noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? leaf_traits<LeafType>::NonExistValue() : node->leaf_;
+    return (nullptr == node) ? leaf_type_traits<LeafType>::NonExistValue() : node->leaf_;
   }
 
   bool Delete(key_type key) {
@@ -56,13 +56,13 @@ class AhoCorasickEngine {
       return false;
     }
 
-    node->leaf_ = leaf_traits<LeafType>::NonExistValue();
+    node->leaf_ = leaf_type_traits<LeafType>::NonExistValue();
     return true;
   }
 
   bool HasKey(key_type key) const noexcept {
     const auto node = getPathNode(key);
-    return (nullptr == node) ? false : leaf_traits<LeafType>::NonExistValue() != node->leaf_;
+    return (nullptr == node) ? false : leaf_type_traits<LeafType>::NonExistValue() != node->leaf_;
   }
 
   int64_t FindMaxSubKey(key_type key) const noexcept {
@@ -91,7 +91,7 @@ private:
   // TODO : for better perfomance and cache-friendly nodes should placed next to each other
   // in this case traversal would almost free (could used the same allocator as in std::deque)
   struct Node {
-    Node() : leaf_(leaf_traits<LeafType>::NonExistValue()) {}
+    Node() : leaf_(leaf_type_traits<LeafType>::NonExistValue()) {}
     std::unordered_map<CharType, std::unique_ptr<Node>> routes_;
     LeafType leaf_;
   };

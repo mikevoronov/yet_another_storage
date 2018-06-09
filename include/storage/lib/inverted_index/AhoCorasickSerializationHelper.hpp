@@ -4,7 +4,7 @@
 #include "../exceptions/YASException.hpp"
 #include "../utils/serialization_utils.h"
 #include "../common/common.h"
-#include "id_type_type_traits.hpp"
+#include "id_type_traits.hpp"
 #include <cstdint>
 #include <vector>
 #include <algorithm>
@@ -47,7 +47,7 @@ class AhoCorasickSerializationHelper {
     while (!current_level_nodes.empty()) {
       for (const auto &node_descriptor : current_level_nodes) {
         auto leaf_id = id_type_traits<IdType>::NonExistValue();
-        if (leaf_traits<LeafType>::IsExistValue(node_descriptor.node_->leaf_)) {
+        if (leaf_type_traits<LeafType>::IsExistValue(node_descriptor.node_->leaf_)) {
           leaf_id = current_leaf_id;
           serialized_leafs.push_back(serialize(node_descriptor.node_->leaf_, node_descriptor.node_id_));
           ++current_leaf_id;

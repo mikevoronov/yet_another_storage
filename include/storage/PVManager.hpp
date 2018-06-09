@@ -98,7 +98,7 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
-      if (!index_helper::leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
+      if (!index_helper::leaf_type_traits<OffsetType>::IsExistValue(entry_offset)) {
         return nonstd::make_unexpected(StorageErrorDescriptor{ "Get key: key hasn't been found",
             StorageError::kKeyNotFound });
       }
@@ -122,7 +122,7 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
-      if (!index_helper::leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
+      if (!index_helper::leaf_type_traits<OffsetType>::IsExistValue(entry_offset)) {
         return { std::string(), StorageError::kKeyNotFound };
       }
 
@@ -156,7 +156,7 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
-      if (!index_helper::leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
+      if (!index_helper::leaf_type_traits<OffsetType>::IsExistValue(entry_offset)) {
         return { "Delete key: the key hasn't been found", StorageError::kKeyNotFound };
       }
       entries_manager_.DeleteEntry(entry_offset);
@@ -172,7 +172,7 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
-      if (!index_helper::leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
+      if (!index_helper::leaf_type_traits<OffsetType>::IsExistValue(entry_offset)) {
         return { "SetExpiredDate key: key hasn't been found", StorageError::kKeyNotFound };
       }
       utils::Time expired_time(expired);
@@ -188,7 +188,7 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
-      if (!index_helper::leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
+      if (!index_helper::leaf_type_traits<OffsetType>::IsExistValue(entry_offset)) {
         return nonstd::make_unexpected(StorageErrorDescriptor{ "GetExpiredDate key: key hasn't been found",
             StorageError::kKeyNotFound });
       }

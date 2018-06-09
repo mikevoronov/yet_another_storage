@@ -122,7 +122,7 @@ TEST(AhoCorasickEngine, BasicDeleteTest) {
   engine.Delete(key_3);
   engine.Delete(key_5);
 
-  Engine::leaf_type non_exist_value = yas::index_helper::leaf_traits<Engine::leaf_type>::NonExistValue();
+  Engine::leaf_type non_exist_value = yas::index_helper::leaf_type_traits<Engine::leaf_type>::NonExistValue();
   EXPECT_EQ(non_exist_value, engine.Get(key_1));
   EXPECT_EQ(value_2, engine.Get(key_2));
   EXPECT_EQ(non_exist_value, engine.Get(key_3));
@@ -140,7 +140,7 @@ TEST(AhoCorasickEngine, DeleteRootTest) {
   engine.Insert(key_1, value_1);
   engine.Delete(key_1);
 
-  EXPECT_EQ(yas::index_helper::leaf_traits<Engine::leaf_type>::NonExistValue(), engine.Get(key_1));
+  EXPECT_EQ(yas::index_helper::leaf_type_traits<Engine::leaf_type>::NonExistValue(), engine.Get(key_1));
   EXPECT_EQ(false, engine.HasKey(key_1));
   EXPECT_EQ(false, engine.HasKey("/home/user1/"));
   EXPECT_EQ(false, engine.HasKey("/home/"));

@@ -5,7 +5,7 @@ namespace yas {
 namespace index_helper {
 
 template<typename LeafType>
-struct leaf_traits {
+struct leaf_type_traits {
   static constexpr LeafType NonExistValue() {
     return static_cast<LeafType>(std::numeric_limits<LeafType>::max());
   }

@@ -33,14 +33,14 @@ public:
 
   LeafType Get(key_type key) noexcept {
     if (key.empty()) {
-      return leaf_traits<LeafType>::NonExistValue();
+      return leaf_type_traits<LeafType>::NonExistValue();
     }
     return engine_.Get(key);
   }
 
   const LeafType Get(key_type key) const noexcept {
     if (key.empty()) {
-      return leaf_traits<LeafType>::NonExistValue();
+      return leaf_type_traits<LeafType>::NonExistValue();
     }
     return engine_.Get(key);
   }
