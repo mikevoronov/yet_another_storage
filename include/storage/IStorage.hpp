@@ -18,7 +18,7 @@ class IStorage {
  public:
   using key_type = std::basic_string_view<CharType>;
 
-  virtual StorageErrorDescriptor Put(key_type key, storage_value_type value) noexcept = 0;
+  virtual StorageErrorDescriptor Put(key_type key, const storage_value_type &value) noexcept = 0;
   virtual nonstd::expected<storage_value_type, StorageErrorDescriptor> Get(key_type key) noexcept = 0;
   virtual StorageErrorDescriptor HasKey(key_type key) noexcept = 0;
   virtual StorageErrorDescriptor HasCatalog(key_type key) noexcept = 0;

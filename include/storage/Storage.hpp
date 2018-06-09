@@ -25,7 +25,7 @@ class Storage : public IStorage<DCharType> {
   Storage() = default;
   virtual ~Storage() = default;
 
-  StorageErrorDescriptor Put(key_type key, storage_value_type value) noexcept override {
+  StorageErrorDescriptor Put(key_type key, const storage_value_type &value) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
     const auto vg_range = getVolumeGroupRange(key);
@@ -36,7 +36,7 @@ class Storage : public IStorage<DCharType> {
     StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
     for (auto &&it : vg_range.value()) {
       const auto adjusted_key = it.mount_catalog_ + catalog_key;
-      if (StorageError::kSuccess == it.pv_manager_->Put(adjusted_key, std::move(value)).error_code_) {
+      if (StorageError::kSuccess == it.pv_manager_->Put(adjusted_key, value).error_code_) {
         return { std::string(), StorageError::kSuccess };
       }
     }

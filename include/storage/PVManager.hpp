@@ -74,7 +74,7 @@ class PVManager : public IStorage<CharType> {
     return pv_volume_manager;
   }
 
-  StorageErrorDescriptor Put(key_type key, storage_value_type value) noexcept override {
+  StorageErrorDescriptor Put(key_type key, const storage_value_type &value) noexcept override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       if (value.valueless_by_exception()) {
