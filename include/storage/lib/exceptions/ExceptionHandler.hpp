@@ -24,7 +24,7 @@ class ExceptionHandler {
       return { exception.what(), storage::StorageError::kUnknownExceptionType };
     }
     catch (...) {
-      return { "unknown exception", storage::StorageError::kUnknownExceptionType };
+      return { std::string(), storage::StorageError::kUnknownExceptionType };
     }
   }
 };

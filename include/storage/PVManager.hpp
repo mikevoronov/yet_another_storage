@@ -89,7 +89,7 @@ class PVManager : public IStorage<CharType> {
 
       const auto offset = entries_manager_.CreateNewEntryValue(value);
       inverted_index_->Insert(key, offset);
-      return { "", StorageError::kSuccess };
+      return { std::string(), StorageError::kSuccess };
     }
     catch (...) {
       return exception::ExceptionHandler::Handle(std::current_exception());
@@ -125,17 +125,17 @@ class PVManager : public IStorage<CharType> {
     try {
       const auto entry_offset = inverted_index_->Get(key);
       if (!leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
-        return { "", StorageError::kKeyNotFound };
+        return { std::string(), StorageError::kKeyNotFound };
       }
 
       if (!isEntryExpired(entry_offset)) {
-        return { "", StorageError::kSuccess };
+        return { std::string(), StorageError::kSuccess };
       }
 
       // delete expired values during access
       entries_manager_.DeleteEntry(entry_offset);
       inverted_index_->Delete(key);
-      return { "", StorageError::kKeyNotFound};
+      return { std::string(), StorageError::kKeyNotFound};
     }
     catch (...) {
       return exception::ExceptionHandler::Handle(std::current_exception());
@@ -146,8 +146,8 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       return 0 == inverted_index_->FindMaxSubKey(key) ?
-          StorageErrorDescriptor( "", StorageError::kKeyNotFound ) :
-          StorageErrorDescriptor( "", StorageError::kSuccess);
+          StorageErrorDescriptor( std::string(), StorageError::kKeyNotFound ) :
+          StorageErrorDescriptor( std::string(), StorageError::kSuccess);
     }
     catch (...) {
       return exception::ExceptionHandler::Handle(std::current_exception());
@@ -163,7 +163,7 @@ class PVManager : public IStorage<CharType> {
       }
       entries_manager_.DeleteEntry(entry_offset);
       inverted_index_->Delete(key);
-      return { "", StorageError::kSuccess };
+      return { std::string(), StorageError::kSuccess };
     }
     catch (...) {
       return exception::ExceptionHandler::Handle(std::current_exception());
@@ -179,7 +179,7 @@ class PVManager : public IStorage<CharType> {
       }
       utils::Time expired_time(expired);
       entries_manager_.SetEntryExpiredDate(entry_offset, expired_time);
-      return {"", StorageError::kSuccess};
+      return { std::string(), StorageError::kSuccess};
     }
     catch (...) {
       return exception::ExceptionHandler::Handle(std::current_exception());

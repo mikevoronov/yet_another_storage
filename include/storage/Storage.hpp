@@ -39,11 +39,11 @@ class Storage : public IStorage<CharType> {
     for (auto &&it : vg_range.value()) {
       const auto adjusted_key = it.mount_catalog_ + catalog_key;
       if (StorageError::kSuccess == it.pv_manager_->Put(adjusted_key, std::move(value)).error_code_) {
-        return { "", StorageError::kSuccess };
+        return { std::string(), StorageError::kSuccess };
       }
     }
 
-    return { "", StorageError::kKeyNotFound };
+    return { std::string(), StorageError::kKeyNotFound };
   }
 
   nonstd::expected<storage_value_type, StorageErrorDescriptor> Get(key_type key) noexcept override {
@@ -62,7 +62,7 @@ class Storage : public IStorage<CharType> {
         return result.value();
       }
     }
-    return nonstd::make_unexpected(StorageErrorDescriptor("", StorageError::kKeyNotFound));
+    return nonstd::make_unexpected(StorageErrorDescriptor(std::string(), StorageError::kKeyNotFound));
  }
 
   StorageErrorDescriptor HasKey(key_type key) noexcept override {
@@ -77,11 +77,11 @@ class Storage : public IStorage<CharType> {
     for (auto &&it : vg_range.value()) {
       const auto adjusted_key = it.mount_catalog_ + catalog_key;
       if (StorageError::kSuccess == it.pv_manager_->HasKey(adjusted_key).error_code_) {
-        return { "", StorageError::kSuccess };
+        return { std::string(), StorageError::kSuccess };
       }
     }
 
-    return { "", StorageError::kKeyNotFound };
+    return { std::string(), StorageError::kKeyNotFound };
   }
 
   StorageErrorDescriptor HasCatalog(key_type key) noexcept override {
@@ -96,11 +96,11 @@ class Storage : public IStorage<CharType> {
     for (auto &&it : vg_range.value()) {
       const auto adjusted_key = it.mount_catalog_ + catalog_key;
       if (StorageError::kSuccess == it.pv_manager_->HasCatalog(adjusted_key).error_code_) {
-        return { "", StorageError::kSuccess };
+        return { std::string(), StorageError::kSuccess };
       }
     }
 
-    return { "", StorageError::kKeyNotFound };
+    return { std::string(), StorageError::kKeyNotFound };
   }
 
   StorageErrorDescriptor Delete(key_type key) noexcept override {
@@ -115,11 +115,11 @@ class Storage : public IStorage<CharType> {
     for (auto &&it : vg_range.value()) {
       const auto adjusted_key = it.mount_catalog_ + catalog_key;
       if (StorageError::kSuccess == it.pv_manager_->Delete(adjusted_key).error_code_) {
-        return { "", StorageError::kSuccess };
+        return { std::string(), StorageError::kSuccess };
       }
     }
 
-    return { "", StorageError::kKeyNotFound };
+    return { std::string(), StorageError::kKeyNotFound };
   }
 
   StorageErrorDescriptor SetExpiredDate(key_type key, time_t expired) noexcept override {
@@ -134,11 +134,11 @@ class Storage : public IStorage<CharType> {
     for (auto &&it : vg_range.value()) {
       const auto adjusted_key = it.mount_catalog_ + catalog_key;
       if (StorageError::kSuccess == it.pv_manager_->SetExpiredDate(adjusted_key, expired).error_code_) {
-        return { "", StorageError::kSuccess };
+        return { std::string(), StorageError::kSuccess };
       }
     }
 
-    return { "", StorageError::kKeyNotFound };
+    return { std::string(), StorageError::kKeyNotFound };
   }
 
   nonstd::expected<time_t, StorageErrorDescriptor> GetExpiredDate(key_type key) noexcept override {
@@ -157,7 +157,7 @@ class Storage : public IStorage<CharType> {
         return result.value();
       }
     }
-    return nonstd::make_unexpected(StorageErrorDescriptor("", StorageError::kKeyNotFound));
+    return nonstd::make_unexpected(StorageErrorDescriptor(std::string(), StorageError::kKeyNotFound));
   }
 
   ///  \brief mounts the specified catalog of PVManager to specified location in virtual volume
@@ -242,7 +242,7 @@ class Storage : public IStorage<CharType> {
     if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
       virtual_storage_index_.Insert(storage_mount_catalog, static_cast<uint32_t>(virtual_storage_.size()));
       virtual_storage_.push_back({ mount_point });
-      return { "", StorageError::kSuccess };
+      return { std::string(), StorageError::kSuccess };
     }
 
     if (volume_group_id > virtual_storage_.size()) {
@@ -257,11 +257,11 @@ class Storage : public IStorage<CharType> {
     });
     if (std::cend(volume_group) == insert_place) {
       volume_group.push_back(mount_point);
-      return {"", StorageError::kSuccess};
+      return { std::string(), StorageError::kSuccess};
     }
     volume_group.insert(insert_place, mount_point);
 
-    return { "", StorageError::kSuccess };
+    return { std::string(), StorageError::kSuccess };
   }
 };
 
