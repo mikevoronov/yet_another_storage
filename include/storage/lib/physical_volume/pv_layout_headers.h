@@ -6,8 +6,6 @@
 #include <cstdint>
 #include <type_traits>        // for underlying_type_t
 
-using namespace yas::macros;
-
 namespace yas {
 namespace pv_layout_headers {
 

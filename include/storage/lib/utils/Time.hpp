@@ -5,8 +5,6 @@
 #include <ctime>
 #include <limits>
 
-using namespace yas::macros;
-
 namespace yas {
 namespace utils {
 

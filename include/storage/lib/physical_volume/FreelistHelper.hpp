@@ -5,35 +5,44 @@
 #include <array>
 #include <algorithm>
 
-using namespace yas::pv_layout_headers;
-
 namespace yas {
 namespace freelist_helper {
 
 template <typename OffsetType>
 class FreelistHelper {
-  using FreelistHeaderType = FreelistHeader<OffsetType>;
+  using FreelistHeaderType = pv_layout_headers::FreelistHeader<OffsetType>;
 
  public:
   // the last one must be equals to default cluster size 
-  static constexpr std::array<OffsetType, kBinCount> kFreelistLimits = { sizeof(Simple4TypeHeader), sizeof(Simple8TypeHeader), 64, 100, 128, 256, 512, 1024, 1520, 2048, kDefaultClusterSize };
+  static constexpr std::array<OffsetType, pv_layout_headers::kBinCount> kFreelistLimits = {
+      sizeof(pv_layout_headers::Simple4TypeHeader), 
+      sizeof(pv_layout_headers::Simple8TypeHeader), 
+      64,
+      100,
+      128,
+      256,
+      512,
+      1024,
+      1520,
+      2048,
+      kDefaultClusterSize };
    
   FreelistHelper() {
-    for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
+    for (int32_t bin_id = 0; bin_id < pv_layout_headers::kBinCount; ++bin_id) {
       bin_descriptors_[bin_id].offset_ = offset_traits<OffsetType>::NonExistValue();
       bin_descriptors_[bin_id].limit_ = kFreelistLimits[bin_id];
     }
   }
 
   explicit FreelistHelper(const FreelistHeaderType &header) {
-    for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
+    for (int32_t bin_id = 0; bin_id < pv_layout_headers::kBinCount; ++bin_id) {
       bin_descriptors_[bin_id].offset_ = header.free_bins_[bin_id];
       bin_descriptors_[bin_id].limit_ = kFreelistLimits[bin_id];
     }
   }
 
   void SetBins(const FreelistHeaderType &header) noexcept {
-    for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
+    for (int32_t bin_id = 0; bin_id < pv_layout_headers::kBinCount; ++bin_id) {
       bin_descriptors_[bin_id].offset_ = header.free_bins_[bin_id];
       bin_descriptors_[bin_id].limit_ = kFreelistLimits[bin_id];
     }
@@ -41,7 +50,7 @@ class FreelistHelper {
 
   FreelistHeaderType GetBins() const {
     FreelistHeaderType header;
-    for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
+    for (int32_t bin_id = 0; bin_id < pv_layout_headers::kBinCount; ++bin_id) {
       header.free_bins_[bin_id] = bin_descriptors_[bin_id].offset_;
     }
 
@@ -55,7 +64,7 @@ class FreelistHelper {
     bool is_less_cluster_size = entry_size < kDefaultClusterSize;
 
     int32_t last_viewed_freed_bin_id = -1;
-    for (int32_t bin_id = 0; bin_id < kBinCount; ++bin_id) {
+    for (int32_t bin_id = 0; bin_id < pv_layout_headers::kBinCount; ++bin_id) {
       if (entry_size <= bin_descriptors_[bin_id].limit_ 
           && offset_traits<OffsetType>::IsExistValue(bin_descriptors_[bin_id].offset_)) {
         const auto offset = bin_descriptors_[bin_id].offset_;
@@ -102,7 +111,7 @@ class FreelistHelper {
     OffsetType offset_;
     OffsetType limit_;
   };
-  std::array<BinDescriptor, kBinCount> bin_descriptors_;
+  std::array<BinDescriptor, pv_layout_headers::kBinCount> bin_descriptors_;
 
   uint32_t getBinIdForSize(OffsetType entry_size) const {
     auto found_value_it = std::lower_bound(std::cbegin(bin_descriptors_), std::cend(bin_descriptors_), entry_size, [](
@@ -111,7 +120,7 @@ class FreelistHelper {
       return entry_size > bin_descriptor.limit_;
     });
     if (std::cend(bin_descriptors_) == found_value_it) {
-      return kBinCount-1;
+      return pv_layout_headers::kBinCount - 1;
     }
 
     return static_cast<uint32_t>(std::distance(std::cbegin(bin_descriptors_), found_value_it));

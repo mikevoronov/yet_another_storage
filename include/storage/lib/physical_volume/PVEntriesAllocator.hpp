@@ -4,6 +4,8 @@
 namespace yas {
 namespace pv {
 
+using namespace pv_layout_headers;
+
 template <typename OffsetType>
 class PVEntriesAllocator {
  public:

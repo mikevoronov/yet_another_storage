@@ -4,11 +4,11 @@
 #include <unordered_map>
 #include <variant>
 
-using namespace yas::pv_layout_headers;
-
 namespace yas {
 namespace pv {
 namespace entries_types {
+
+using namespace yas::pv_layout_headers;
 
 // the idea from http://en.cppreference.com/w/cpp/utility/variant/visit
 
@@ -97,7 +97,7 @@ class EntriesTypeConverter {
     }
 
     throw (exception::YASException("Corrupted storage header type: the unsupported entry type",
-        StorageError::kCorruptedHeaderError));
+        storage::StorageError::kCorruptedHeaderError));
   }
 
   template<typename Type>
@@ -128,7 +128,7 @@ class EntriesTypeConverter {
     }
 
     throw (exception::YASException("Corrupted storage header type: the unsupported entry type",
-        StorageError::kCorruptedHeaderError));
+        storage::StorageError::kCorruptedHeaderError));
   }
 
   static storage_value_type ConvertToUserType(EntryType &&storage_value) {
@@ -150,7 +150,7 @@ EntryType EntriesTypeConverter::ConvertToEntryType<ByteVector>(PVType pv_type, B
   }
 
   throw (exception::YASException("Corrupted storage header type: the unsupported entry type",
-    StorageError::kCorruptedHeaderError));
+      storage::StorageError::kCorruptedHeaderError));
 }
 
 } // namespace storage_types

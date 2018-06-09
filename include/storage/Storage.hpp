@@ -4,8 +4,6 @@
 #include "lib/inverted_index/InvertedIndexHelper.hpp"
 #include <shared_mutex>
 
-using namespace yas::index_helper;
-
 namespace yas {
 namespace storage {
 
@@ -229,7 +227,7 @@ class Storage : public IStorage<DCharType> {
     StringType storage_key(key.substr(0, max_subkey_length));
     const auto volume_group_id = virtual_storage_index_.Get(storage_key);
 
-    if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
+    if (!index_helper::leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
       return nonstd::make_unexpected(StorageErrorDescriptor("Storage: there aren't any physical volume corresponds to\
           specified path", StorageError::kCatalogNotFoundError));
     }
@@ -239,7 +237,7 @@ class Storage : public IStorage<DCharType> {
 
   StorageErrorDescriptor addNewMountPoint(const PVMountPoint &mount_point, StringType &storage_mount_catalog) {
     const auto volume_group_id = virtual_storage_index_.Get(storage_mount_catalog);
-    if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
+    if (!index_helper::leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
       virtual_storage_index_.Insert(storage_mount_catalog, static_cast<uint32_t>(virtual_storage_.size()));
       virtual_storage_.push_back({ mount_point });
       return { std::string(), StorageError::kSuccess };

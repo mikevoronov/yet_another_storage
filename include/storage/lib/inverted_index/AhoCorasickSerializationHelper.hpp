@@ -9,8 +9,6 @@
 #include <vector>
 #include <algorithm>
 
-using namespace yas::storage;
-
 namespace yas {
 namespace index_helper {
 
@@ -86,7 +84,7 @@ class AhoCorasickSerializationHelper {
     current_cursor = deserializeNodeDescriptor(current_cursor, end, node_descriptor);
     if (node_descriptor.node_id_ != node_descriptor.parent_node_id_) {
       throw (exception::YASException("Corrupt data: root must be the first node in the serialized descriptors list",
-          StorageError::kInvertedIndexDeserializationError));
+          storage::StorageError::kInvertedIndexDeserializationError));
     }
 
     // at first completely construct the trie on function level
@@ -112,7 +110,7 @@ class AhoCorasickSerializationHelper {
       const auto parent_element = previous_level_nodes.find(node_descriptor.parent_node_id_);
       if (std::cend(previous_level_nodes) == parent_element) {
         throw (exception::YASException("Corrupt data: parent node can't be found",
-            StorageError::kInvertedIndexDeserializationError));
+            storage::StorageError::kInvertedIndexDeserializationError));
       }
 
       const auto parent = parent_element->second;
@@ -125,7 +123,7 @@ class AhoCorasickSerializationHelper {
         const auto leaf_element = leaf_descriptors.find(node_descriptor.node_id_);
         if (std::cend(leaf_descriptors) == leaf_element) {
           throw (exception::YASException("Corrupt data: node's leaf can't be found",
-              StorageError::kInvertedIndexDeserializationError));
+              storage::StorageError::kInvertedIndexDeserializationError));
         }
         route->leaf_ = leaf_element->second;
       }
@@ -194,17 +192,17 @@ class AhoCorasickSerializationHelper {
     auto current_cursor = serialization_utils::LoadFromBytes(begin, end, &header);
     if (begin == current_cursor) {
       throw (exception::YASException("Invalid data size: data size less than size of SerializedDataHeader",
-          StorageError::kInvertedIndexDeserializationError));
+          storage::StorageError::kInvertedIndexDeserializationError));
     }
 
     if (version_ < header.version_) {
       throw (exception::YASException("Corrupted header: header version unsupported",
-          StorageError::kInvertedIndexDeserializationVersionUnsupportedError));
+          storage::StorageError::kInvertedIndexDeserializationVersionUnsupportedError));
     }
 
     if (sizeof(IdType) != header.id_type_size_) {
       throw (exception::YASException("Corrupted header: size of IdType mismath",
-          StorageError::kInvertedIndexDeserializationError));
+          storage::StorageError::kInvertedIndexDeserializationError));
     }
 
     return current_cursor;
@@ -220,7 +218,7 @@ class AhoCorasickSerializationHelper {
       current_cursor = serialization_utils::LoadFromBytes(current_cursor, end, &leaf_descriptor);
       if (begin == current_cursor) {
         throw (exception::YASException("leafs count don't corresponds to header",
-            StorageError::kInvertedIndexDeserializationError));
+            storage::StorageError::kInvertedIndexDeserializationError));
       }
       const auto aligned_node_id = leaf_descriptor.node_id_;
       const auto aligned_leaf = leaf_descriptor.leaf_;
@@ -236,7 +234,7 @@ class AhoCorasickSerializationHelper {
     auto current_cursor = serialization_utils::LoadFromBytes(begin, end, &node_descriptor);
     if (begin == current_cursor) {
       throw (exception::YASException("Invalid data size: there is a mismatch with size of data and descriptors count",
-          StorageError::kInvertedIndexDeserializationError));
+          storage::StorageError::kInvertedIndexDeserializationError));
     }
 
     return current_cursor;

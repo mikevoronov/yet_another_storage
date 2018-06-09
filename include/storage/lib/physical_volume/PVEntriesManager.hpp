@@ -8,16 +8,16 @@
 #include <variant>
 #include <cstring>
 
-using namespace yas::pv_layout_headers;
-using namespace yas::freelist_helper;
-using namespace yas::pv::entries_types;
-
 namespace yas {
 namespace pv {
 
+using namespace yas::pv_layout_headers;
+using namespace yas::pv::entries_types;
+using namespace yas::storage;
+
 template <typename OffsetType, typename Device>
 class PVEntriesManager {
-  using FreelistHeaderType = FreelistHeader<OffsetType>;
+  using FreelistHeaderType = pv_layout_headers::FreelistHeader<OffsetType>;
   using PVPathType = typename Device::path_type;
  
  public:

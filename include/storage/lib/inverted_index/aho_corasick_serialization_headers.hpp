@@ -5,8 +5,6 @@
 #include <cstdint>
 #include <type_traits>    // for underlying_type_t
 
-using namespace yas::macros;
-
 namespace yas {
 namespace index_helper {
 namespace aho_corasick_serialization_headers {

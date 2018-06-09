@@ -6,8 +6,6 @@
 #include "IStorage.hpp"
 #include <mutex>
 
-using namespace yas::pv_layout_headers;
-using namespace yas::index_helper;
 
 namespace yas {
 namespace storage {
@@ -21,7 +19,7 @@ namespace storage {
  */
 template <typename CharType=DCharType, typename OffsetType=DOffsetType, typename Device=DDevice>
 class PVManager : public IStorage<CharType> {
-  using InvertedIndexType = InvertedIndexHelper<CharType, OffsetType>;
+  using InvertedIndexType = index_helper::InvertedIndexHelper<CharType, OffsetType>;
   using PVEntriesManagerType = pv::PVEntriesManager<OffsetType, Device>;
 
  public:
@@ -100,7 +98,7 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
-      if (!leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
+      if (!index_helper::leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
         return nonstd::make_unexpected(StorageErrorDescriptor{ "Get key: key hasn't been found",
             StorageError::kKeyNotFound });
       }
@@ -124,7 +122,7 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
-      if (!leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
+      if (!index_helper::leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
         return { std::string(), StorageError::kKeyNotFound };
       }
 
@@ -158,7 +156,7 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
-      if (!leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
+      if (!index_helper::leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
         return { "Delete key: the key hasn't been found", StorageError::kKeyNotFound };
       }
       entries_manager_.DeleteEntry(entry_offset);
@@ -174,7 +172,7 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
-      if (!leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
+      if (!index_helper::leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
         return { "SetExpiredDate key: key hasn't been found", StorageError::kKeyNotFound };
       }
       utils::Time expired_time(expired);
@@ -190,11 +188,11 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
-      if (!leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
+      if (!index_helper::leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
         return nonstd::make_unexpected(StorageErrorDescriptor{ "GetExpiredDate key: key hasn't been found",
             StorageError::kKeyNotFound });
       }
-      utils::Time expired_date(0,1);
+      utils::Time expired_date(0, 0);
       if (!entries_manager_.GetEntryExpiredDate(entry_offset, expired_date)) {
         return nonstd::make_unexpected(StorageErrorDescriptor{ "GetExpiredDate key: the key doesn't has expired date",
             StorageError::kKeyDoesntExpired });

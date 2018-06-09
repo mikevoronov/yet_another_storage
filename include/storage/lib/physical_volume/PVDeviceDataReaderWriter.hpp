@@ -4,9 +4,6 @@
 #include "../devices/FileDevice.hpp"
 #include <string_view>
 
-using namespace yas::pv_layout_headers;
-using namespace yas::storage;
-
 namespace yas {
 namespace pv {
 
@@ -21,7 +18,7 @@ class PVDeviceDataReaderWriter {
         cluster_size_(cluster_size) {
     if (!device_.IsOpen()) {
       throw(exception::YASException("Device worker error: the device hasn't been opened correctly",
-          StorageError::kDeviceGeneralError));
+          storage::StorageError::kDeviceGeneralError));
     }
   }
 
@@ -51,14 +48,14 @@ class PVDeviceDataReaderWriter {
   }
 
   ByteVector ReadComplexType(OffsetType offset) {
-    ComplexTypeHeader type_header = Read<ComplexTypeHeader>(offset);
+    pv_layout_headers::ComplexTypeHeader type_header = Read<pv_layout_headers::ComplexTypeHeader>(offset);
     checkComplexTypeHeader(type_header, true);
 
     ByteVector complex_data(type_header.overall_size_);
     OffsetType readed_size = 0;
     const OffsetType overall_size = type_header.overall_size_;
 
-    offset += serialization_utils::offset_of(&ComplexTypeHeader::data_);
+    offset += serialization_utils::offset_of(&pv_layout_headers::ComplexTypeHeader::data_);
     auto read_cursor_begin = std::begin(complex_data);
     auto read_cursor_end = std::begin(complex_data);
     std::advance(read_cursor_end, type_header.chunk_size_);
@@ -67,9 +64,9 @@ class PVDeviceDataReaderWriter {
 
     while (readed_size < overall_size) {
       offset = type_header.sequel_offset_;
-      type_header = Read<ComplexTypeHeader>(type_header.sequel_offset_);
+      type_header = Read<pv_layout_headers::ComplexTypeHeader>(type_header.sequel_offset_);
       checkComplexTypeHeader(type_header, false);
-      offset += serialization_utils::offset_of(&ComplexTypeHeader::data_);
+      offset += serialization_utils::offset_of(&pv_layout_headers::ComplexTypeHeader::data_);
 
       read_cursor_begin = read_cursor_end;
       std::advance(read_cursor_end, type_header.chunk_size_);
@@ -81,23 +78,25 @@ class PVDeviceDataReaderWriter {
   }
 
   template <typename Iterator>
-  OffsetType WriteComplexType(OffsetType offset, PVType pv_type, bool is_first, OffsetType next_free_offset,
-        Iterator begin, Iterator end) {
-    ComplexTypeHeader header = Read<ComplexTypeHeader>(offset);
+  OffsetType WriteComplexType(OffsetType offset, pv_layout_headers::PVType pv_type, bool is_first, 
+      OffsetType next_free_offset,Iterator begin, Iterator end) {
+    pv_layout_headers::ComplexTypeHeader header = Read<pv_layout_headers::ComplexTypeHeader>(offset);
     const auto data_size = std::distance(begin, end);
     const auto written = std::min<OffsetType>(header.chunk_size_, data_size);
 
     header.overall_size_ = data_size;
     header.value_type_ = pv_type;
-    header.value_state_ = (is_first ? PVTypeState::kComplexBegin : PVTypeState::kComplexSequel);
+    header.value_state_ = (is_first ? pv_layout_headers::PVTypeState::kComplexBegin : 
+        pv_layout_headers::PVTypeState::kComplexSequel);
     header.chunk_size_ = written;
     header.sequel_offset_ = next_free_offset;
 
     auto new_end = begin;
     std::advance(new_end, written);
     // at first try to write data 
-    Write<ComplexTypeHeader>(offset, header);
-    device_.Write(offset + serialization_utils::offset_of(&ComplexTypeHeader::data_), begin, new_end);
+    Write<pv_layout_headers::ComplexTypeHeader>(offset, header);
+    device_.Write(offset + 
+        serialization_utils::offset_of(&pv_layout_headers::ComplexTypeHeader::data_), begin, new_end);
     // and only then header to don't loose original header if data writing will fails with exception
 
     return written;
@@ -128,23 +127,23 @@ class PVDeviceDataReaderWriter {
   Device device_;
   uint32_t cluster_size_;
 
-  void checkComplexTypeHeader(const ComplexTypeHeader &complex_header, bool is_first_header) const {
-    if (is_first_header && !(complex_header.value_state_ & PVTypeState::kComplexBegin)) {
+  void checkComplexTypeHeader(const pv_layout_headers::ComplexTypeHeader &complex_header, bool is_first_header) const {
+    if (is_first_header && !(complex_header.value_state_ & pv_layout_headers::PVTypeState::kComplexBegin)) {
       // read complex types is only possible from the beggining of sequence
       throw exception::YASException("Read complex type error: kComplexBegin type expected",
-          StorageError::kCorruptedHeaderError);
+          storage::StorageError::kCorruptedHeaderError);
     }
-    else if (!is_first_header && !(complex_header.value_state_ & PVTypeState::kComplexSequel)) {
+    else if (!is_first_header && !(complex_header.value_state_ & pv_layout_headers::PVTypeState::kComplexSequel)) {
       throw exception::YASException("Read complex type error: kComplexSequel type expected",
-          StorageError::kCorruptedHeaderError);
+          storage::StorageError::kCorruptedHeaderError);
     }
     else if (complex_header.chunk_size_ > cluster_size_) {
       throw exception::YASException("Read complex type error: chunk size is bigger than device cluster size",
-          StorageError::kCorruptedHeaderError);
+          storage::StorageError::kCorruptedHeaderError);
     }
     else if (complex_header.overall_size_ > kMaximumTypeSize) {
       throw exception::YASException("Read complex type error: chunk size is bigger than device cluster size",
-          StorageError::kCorruptedHeaderError);
+          storage::StorageError::kCorruptedHeaderError);
     }
   }
 };

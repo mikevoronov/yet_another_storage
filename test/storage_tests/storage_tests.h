@@ -13,7 +13,7 @@ TEST(Storage, MountTest_1) {
   const TestType test_value = 5;
   const auto pv_path = fs::temp_directory_path() / "yas_pv_fd60f6e1ae21d37aa1e10007636431aas_1";
 
-  auto &factory = PVManagerFactory::Instance();
+  auto &factory = storage::PVManagerFactory::Instance();
   auto manager = factory.Create(pv_path, kMaximumSupportedVersion);
   EXPECT_TRUE(manager);
 
@@ -35,7 +35,7 @@ TEST(Storage, MountTest_2) {
   const auto pv_path_1 = fs::temp_directory_path() / "yas_pv_fd60f6e1ae21d37aa1e10007636431aas_2";
   const auto pv_path_2 = fs::temp_directory_path() / "yas_pv_fd60f6e1ae21d37aa1e10007636431aas_3";
 
-  auto &factory = PVManagerFactory::Instance();
+  auto &factory = storage::PVManagerFactory::Instance();
   auto manager_1 = factory.Create(pv_path_1, kMaximumSupportedVersion, 10);
   auto manager_2 = factory.Create(pv_path_2, kMaximumSupportedVersion, 20);
   EXPECT_TRUE(manager_1);

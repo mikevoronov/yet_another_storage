@@ -2,8 +2,6 @@
 #include "../common/macros.h"
 #include <cstdint>
 
-using namespace yas::macros;
-
 namespace yas {
 namespace utils {
 
