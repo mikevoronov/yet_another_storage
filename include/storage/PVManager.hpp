@@ -101,8 +101,8 @@ class PVManager : public IStorage<CharType> {
     try {
       const auto entry_offset = inverted_index_->Get(key);
       if (!leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor("Get key: key hasn't been found", 
-            StorageError::kKeyNotFound));
+        return nonstd::make_unexpected(StorageErrorDescriptor{ "Get key: key hasn't been found",
+            StorageError::kKeyNotFound });
       }
 
       if (!isEntryExpired(entry_offset)) {
@@ -112,8 +112,8 @@ class PVManager : public IStorage<CharType> {
       // delete expired values during access
       entries_manager_.DeleteEntry(entry_offset);
       inverted_index_->Delete(key);
-      return nonstd::make_unexpected(StorageErrorDescriptor("Get key: key hasn't been found", 
-          StorageError::kKeyNotFound));
+      return nonstd::make_unexpected(StorageErrorDescriptor{ "Get key: key hasn't been found",
+          StorageError::kKeyNotFound });
     }
     catch (...) {
       return nonstd::make_unexpected(exception::ExceptionHandler::Handle(std::current_exception()));
@@ -146,8 +146,8 @@ class PVManager : public IStorage<CharType> {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       return 0 == inverted_index_->FindMaxSubKey(key) ?
-          StorageErrorDescriptor( std::string(), StorageError::kKeyNotFound ) :
-          StorageErrorDescriptor( std::string(), StorageError::kSuccess);
+          StorageErrorDescriptor{ std::string(), StorageError::kKeyNotFound } :
+          StorageErrorDescriptor{ std::string(), StorageError::kSuccess };
     }
     catch (...) {
       return exception::ExceptionHandler::Handle(std::current_exception());
@@ -191,13 +191,13 @@ class PVManager : public IStorage<CharType> {
     try {
       const auto entry_offset = inverted_index_->Get(key);
       if (!leaf_traits<OffsetType>::IsExistValue(entry_offset)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor("GetExpiredDate key: key hasn't been found", 
-            StorageError::kKeyNotFound));
+        return nonstd::make_unexpected(StorageErrorDescriptor{ "GetExpiredDate key: key hasn't been found",
+            StorageError::kKeyNotFound });
       }
       utils::Time expired_date(0,1);
       if (!entries_manager_.GetEntryExpiredDate(entry_offset, expired_date)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor("GetExpiredDate key: the key doesn't has expired date",
-            StorageError::kKeyDoesntExpired));
+        return nonstd::make_unexpected(StorageErrorDescriptor{ "GetExpiredDate key: the key doesn't has expired date",
+            StorageError::kKeyDoesntExpired });
       }
       return expired_date.GetTime();
     }

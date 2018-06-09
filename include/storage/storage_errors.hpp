@@ -36,6 +36,7 @@ struct StorageErrorDescriptor {
       : message_(std::move(message)),
         error_code_(error_code)
   {}
+
   StorageError error_code_;
   std::string message_;           // can be empty
 

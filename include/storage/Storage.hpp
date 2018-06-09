@@ -16,8 +16,8 @@ namespace storage {
 *    interface, "write" is only mount operation which modifies this class inner structures. Take into account
 *    that this based on assumptions that PVManager is also thead-safe.
 */
-template<typename CharType>
-class Storage : public IStorage<CharType> {
+class Storage : public IStorage<DCharType> {
+  using CharType = DCharType;
   using StringType = std::basic_string<CharType>;
 
  public:

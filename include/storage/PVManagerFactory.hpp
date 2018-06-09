@@ -36,8 +36,8 @@ class PVManagerFactory {
       utils::Version requested_version, int32_t priority = 0, int32_t cluster_size = kDefaultClusterSize) {
 
     if (max_supported_version_ < requested_version) {
-      return nonstd::make_unexpected(StorageErrorDescriptor("requested PV version is unsupported", 
-          StorageError::kPVVersionUnsupported));
+      return nonstd::make_unexpected(StorageErrorDescriptor{ "requested PV version is unsupported",
+          StorageError::kPVVersionUnsupported });
     }
 
     std::lock_guard<std::mutex> lock(factory_mutex_);

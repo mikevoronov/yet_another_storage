@@ -8,7 +8,7 @@ using namespace yas;
 namespace {
 
 TEST(Storage, MountTest_1) {
-  yas::storage::Storage<char> storage;
+  yas::storage::Storage storage;
   using TestType = uint32_t;
   const TestType test_value = 5;
   const auto pv_path = fs::temp_directory_path() / "yas_pv_fd60f6e1ae21d37aa1e10007636431aas_1";
@@ -28,7 +28,7 @@ TEST(Storage, MountTest_1) {
 }
 
 TEST(Storage, MountTest_2) {
-  yas::storage::Storage<char> storage;
+  yas::storage::Storage storage;
   using TestType = uint32_t;
   const TestType test_value_1 = 5;
   const TestType test_value_2 = 7;
