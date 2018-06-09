@@ -4,7 +4,7 @@
 namespace yas {
 namespace storage {
 
-enum StorageError : uint32_t {
+enum class StorageError : uint32_t {
   kSuccess = 0,
   kDeviceGeneralError = 1,
   kDeviceReadError = 2,
@@ -26,6 +26,7 @@ enum StorageError : uint32_t {
   kPVVersionUnsupported = 16,
   kUnknownError = 17,
   kCatalogNotFoundError = 18,
+  kMemoryNotEnough = 19,
 
   kUnknownExceptionType
 };

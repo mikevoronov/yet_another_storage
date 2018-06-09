@@ -27,7 +27,7 @@ class Storage : public IStorage<CharType> {
   Storage() = default;
   virtual ~Storage() = default;
 
-  virtual StorageErrorDescriptor Put(key_type key, storage_value_type value) override {
+  StorageErrorDescriptor Put(key_type key, storage_value_type value) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
     const auto vg_range = getVolumeGroupRange(key);
@@ -46,7 +46,7 @@ class Storage : public IStorage<CharType> {
     return { "", StorageError::kKeyNotFound };
   }
 
-  virtual nonstd::expected<storage_value_type, StorageErrorDescriptor> Get(key_type key) override {
+  nonstd::expected<storage_value_type, StorageErrorDescriptor> Get(key_type key) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
     const auto vg_range = getVolumeGroupRange(key);
@@ -65,7 +65,7 @@ class Storage : public IStorage<CharType> {
     return nonstd::make_unexpected(StorageErrorDescriptor("", StorageError::kKeyNotFound));
  }
 
-  virtual StorageErrorDescriptor HasKey(key_type key) override {
+  StorageErrorDescriptor HasKey(key_type key) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
     const auto vg_range = getVolumeGroupRange(key);
@@ -84,7 +84,7 @@ class Storage : public IStorage<CharType> {
     return { "", StorageError::kKeyNotFound };
   }
 
-  virtual StorageErrorDescriptor HasCatalog(key_type key) override {
+  StorageErrorDescriptor HasCatalog(key_type key) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
     const auto vg_range = getVolumeGroupRange(key);
@@ -103,7 +103,7 @@ class Storage : public IStorage<CharType> {
     return { "", StorageError::kKeyNotFound };
   }
 
-  virtual StorageErrorDescriptor Delete(key_type key) override {
+  StorageErrorDescriptor Delete(key_type key) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
     const auto vg_range = getVolumeGroupRange(key);
@@ -122,7 +122,7 @@ class Storage : public IStorage<CharType> {
     return { "", StorageError::kKeyNotFound };
   }
 
-  virtual StorageErrorDescriptor SetExpiredDate(key_type key, time_t expired) override {
+  StorageErrorDescriptor SetExpiredDate(key_type key, time_t expired) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
     const auto vg_range = getVolumeGroupRange(key);
@@ -141,7 +141,7 @@ class Storage : public IStorage<CharType> {
     return { "", StorageError::kKeyNotFound };
   }
 
-  virtual nonstd::expected<time_t, StorageErrorDescriptor> GetExpiredDate(key_type key) override {
+  nonstd::expected<time_t, StorageErrorDescriptor> GetExpiredDate(key_type key) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     
     const auto vg_range = getVolumeGroupRange(key);
@@ -231,7 +231,7 @@ class Storage : public IStorage<CharType> {
 
     if (!leaf_traits<uint32_t>::IsExistValue(volume_group_id)) {
       return nonstd::make_unexpected(StorageErrorDescriptor("Storage: there aren't any physical volume corresponds to\
-        specified path", StorageError::kCatalogNotFoundError));
+          specified path", StorageError::kCatalogNotFoundError));
     }
 
     return VGReversedRange(virtual_storage_[volume_group_id]);

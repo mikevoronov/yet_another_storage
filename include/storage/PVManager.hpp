@@ -76,7 +76,7 @@ class PVManager : public IStorage<CharType> {
     return pv_volume_manager;
   }
 
-  virtual StorageErrorDescriptor Put(key_type key, storage_value_type value) override {
+  StorageErrorDescriptor Put(key_type key, storage_value_type value) noexcept override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       if (value.valueless_by_exception()) {
@@ -96,7 +96,7 @@ class PVManager : public IStorage<CharType> {
     }
   }
 
-  virtual nonstd::expected<storage_value_type, StorageErrorDescriptor> Get(key_type key) override {
+  nonstd::expected<storage_value_type, StorageErrorDescriptor> Get(key_type key) noexcept override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
@@ -120,7 +120,7 @@ class PVManager : public IStorage<CharType> {
     }
   }
 
-  virtual StorageErrorDescriptor HasKey(key_type key) override {
+  StorageErrorDescriptor HasKey(key_type key) noexcept override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
@@ -142,7 +142,7 @@ class PVManager : public IStorage<CharType> {
     }
   }
 
-  StorageErrorDescriptor HasCatalog(key_type key) override {
+  StorageErrorDescriptor HasCatalog(key_type key) noexcept override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       return 0 == inverted_index_->FindMaxSubKey(key) ?
@@ -154,7 +154,7 @@ class PVManager : public IStorage<CharType> {
     }
   }
 
-  virtual StorageErrorDescriptor Delete(key_type key) override {
+   StorageErrorDescriptor Delete(key_type key) noexcept override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
@@ -170,7 +170,7 @@ class PVManager : public IStorage<CharType> {
     }
   }
 
-  virtual StorageErrorDescriptor SetExpiredDate(key_type key, time_t expired) override {
+  StorageErrorDescriptor SetExpiredDate(key_type key, time_t expired) noexcept override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
@@ -186,7 +186,7 @@ class PVManager : public IStorage<CharType> {
     }
   }
 
-  virtual nonstd::expected<time_t, StorageErrorDescriptor> GetExpiredDate(key_type key) override {
+  nonstd::expected<time_t, StorageErrorDescriptor> GetExpiredDate(key_type key) noexcept override {
     std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
       const auto entry_offset = inverted_index_->Get(key);
