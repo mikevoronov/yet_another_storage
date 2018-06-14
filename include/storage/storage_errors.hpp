@@ -32,6 +32,7 @@ enum class StorageError : uint32_t {
 };
 
 struct StorageErrorDescriptor {
+  // message should be optimized by compiler through copy elision
   StorageErrorDescriptor(std::string message, StorageError error_code)
       : message_(std::move(message)),
         error_code_(error_code)
@@ -51,7 +52,6 @@ struct StorageErrorDescriptor {
       message_.clear();
     }
   }
-
 
   StorageError error_code_;
   std::string message_;           // can be empty

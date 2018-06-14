@@ -12,8 +12,9 @@ class FileDevice {
  public:
   using path_type = fs::path;
 
-  explicit FileDevice(const path_type &path)
-      : path_(path) {
+  // path should be optimized by compiler through copy elision
+  explicit FileDevice(path_type path)
+      : path_(std::move(path)) {
     Open();
   }
 

@@ -28,7 +28,7 @@ class Storage : public IStorage<DCharType> {
   StorageErrorDescriptor Put(key_type key, const storage_value_type &value) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto vg_range = getVolumeGroupRange(key);
+    auto &&vg_range = getVolumeGroupRange(key);
     if (!vg_range.has_value()) {
       return vg_range.error();
     }
@@ -47,7 +47,7 @@ class Storage : public IStorage<DCharType> {
   nonstd::expected<storage_value_type, StorageErrorDescriptor> Get(key_type key) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto vg_range = getVolumeGroupRange(key);
+    auto &&vg_range = getVolumeGroupRange(key);
     if (!vg_range.has_value()) {
       return nonstd::make_unexpected(std::move(vg_range.error()));
     }
@@ -66,7 +66,7 @@ class Storage : public IStorage<DCharType> {
   StorageErrorDescriptor HasKey(key_type key) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto vg_range = getVolumeGroupRange(key);
+    auto &&vg_range = getVolumeGroupRange(key);
     if (!vg_range.has_value()) {
       return vg_range.error();
     }
@@ -85,7 +85,7 @@ class Storage : public IStorage<DCharType> {
   StorageErrorDescriptor HasCatalog(key_type key) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto vg_range = getVolumeGroupRange(key);
+    auto &&vg_range = getVolumeGroupRange(key);
     if (!vg_range.has_value()) {
       return vg_range.error();
     }
@@ -104,7 +104,7 @@ class Storage : public IStorage<DCharType> {
   StorageErrorDescriptor Delete(key_type key) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto vg_range = getVolumeGroupRange(key);
+    auto &&vg_range = getVolumeGroupRange(key);
     if (!vg_range.has_value()) {
       return vg_range.error();
     }
@@ -123,7 +123,7 @@ class Storage : public IStorage<DCharType> {
   StorageErrorDescriptor SetExpiredDate(key_type key, time_t expired) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    const auto vg_range = getVolumeGroupRange(key);
+    auto &&vg_range = getVolumeGroupRange(key);
     if (!vg_range.has_value()) {
       return vg_range.error();
     }
@@ -142,7 +142,7 @@ class Storage : public IStorage<DCharType> {
   nonstd::expected<time_t, StorageErrorDescriptor> GetExpiredDate(key_type key) noexcept override {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     
-    const auto vg_range = getVolumeGroupRange(key);
+    auto &&vg_range = getVolumeGroupRange(key);
     if (!vg_range.has_value()) {
       return nonstd::make_unexpected(std::move(vg_range.error()));
     }
@@ -164,7 +164,8 @@ class Storage : public IStorage<DCharType> {
   ///  \param storage_mount_catalog - the catalog of virtual storage that would be used for PV mounting.
   ///  \param pv_mount_catalog - the catalog of mounted PV that would be mounted to the virtual storage
   ///  \return - descriptor of error
-  StorageErrorDescriptor Mount(pv_path_type pv_path, StringType storage_mount_catalog, StringType pv_mount_catalog) {
+  StorageErrorDescriptor Mount(pv_path_type pv_path, const StringType &storage_mount_catalog,
+      const StringType &pv_mount_catalog) {
     std::unique_lock<std::shared_mutex> lock(mutex_);
 
     auto &factory = storage::PVManagerFactory::Instance();
@@ -179,7 +180,7 @@ class Storage : public IStorage<DCharType> {
 
     const auto priority = pv_manager->priority();
     PVMountPoint mount_point(std::move(pv_manager), std::move(pv_mount_catalog), priority);
-    return addNewMountPoint(mount_point, storage_mount_catalog);
+    return addNewMountPoint(std::move(mount_point), storage_mount_catalog);
   }
 
   Storage(const Storage&) = delete;
@@ -189,16 +190,16 @@ class Storage : public IStorage<DCharType> {
 
  private:
   struct PVMountPoint {
-    PVMountPoint(std::shared_ptr<PVManagerFactory::manager_type> pv_manager, std::basic_string<CharType> 
-        mount_catalog, uint32_t priority)
-        : pv_manager_(std::move(pv_manager)),
+    PVMountPoint(const std::shared_ptr<PVManagerFactory::manager_type> &pv_manager, const StringType &mount_catalog,
+        int32_t priority)
+        : pv_manager_(pv_manager),
           mount_catalog_(mount_catalog),
           priority_(priority)
     {}
 
     std::shared_ptr<PVManagerFactory::manager_type> pv_manager_;
     StringType mount_catalog_;
-    uint32_t priority_;
+    int32_t priority_;
   };
   using VolumeGroup = std::vector<PVMountPoint>;
 
@@ -235,7 +236,7 @@ class Storage : public IStorage<DCharType> {
     return VGReversedRange(virtual_storage_[volume_group_id]);
   }
 
-  StorageErrorDescriptor addNewMountPoint(const PVMountPoint &mount_point, StringType &storage_mount_catalog) {
+  StorageErrorDescriptor addNewMountPoint(const PVMountPoint &mount_point, const StringType &storage_mount_catalog) {
     const auto volume_group_id = virtual_storage_index_.Get(storage_mount_catalog);
     if (!index_helper::leaf_type_traits<uint32_t>::IsExistValue(volume_group_id)) {
       virtual_storage_index_.Insert(storage_mount_catalog, static_cast<uint32_t>(virtual_storage_.size()));
