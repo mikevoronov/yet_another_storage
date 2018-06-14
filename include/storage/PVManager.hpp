@@ -75,8 +75,9 @@ class PVManager : public IStorage<CharType> {
   }
 
   StorageErrorDescriptor Put(key_type key, const storage_value_type &value) noexcept override {
-    std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
+      std::lock_guard<std::mutex> lock(manager_guard_mutex_);
+
       if (value.valueless_by_exception()) {
         return { "Put key: value is valueless", StorageError::kIncorrectStorageValue };
       }
@@ -95,8 +96,9 @@ class PVManager : public IStorage<CharType> {
   }
 
   nonstd::expected<storage_value_type, StorageErrorDescriptor> Get(key_type key) noexcept override {
-    std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
+      std::lock_guard<std::mutex> lock(manager_guard_mutex_);
+
       const auto entry_offset = inverted_index_->Get(key);
       if (!index_helper::leaf_type_traits<OffsetType>::IsExistValue(entry_offset)) {
         return nonstd::make_unexpected(StorageErrorDescriptor{ "Get key: key hasn't been found",
@@ -119,8 +121,9 @@ class PVManager : public IStorage<CharType> {
   }
 
   StorageErrorDescriptor HasKey(key_type key) noexcept override {
-    std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
+      std::lock_guard<std::mutex> lock(manager_guard_mutex_);
+
       const auto entry_offset = inverted_index_->Get(key);
       if (!index_helper::leaf_type_traits<OffsetType>::IsExistValue(entry_offset)) {
         return { std::string(), StorageError::kKeyNotFound };
@@ -141,8 +144,9 @@ class PVManager : public IStorage<CharType> {
   }
 
   StorageErrorDescriptor HasCatalog(key_type key) noexcept override {
-    std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
+      std::lock_guard<std::mutex> lock(manager_guard_mutex_);
+
       return 0 == inverted_index_->FindMaxSubKey(key) ?
           StorageErrorDescriptor{ std::string(), StorageError::kKeyNotFound } :
           StorageErrorDescriptor{ std::string(), StorageError::kSuccess };
@@ -153,8 +157,9 @@ class PVManager : public IStorage<CharType> {
   }
 
    StorageErrorDescriptor Delete(key_type key) noexcept override {
-    std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
+      std::lock_guard<std::mutex> lock(manager_guard_mutex_);
+
       const auto entry_offset = inverted_index_->Get(key);
       if (!index_helper::leaf_type_traits<OffsetType>::IsExistValue(entry_offset)) {
         return { "Delete key: the key hasn't been found", StorageError::kKeyNotFound };
@@ -169,8 +174,9 @@ class PVManager : public IStorage<CharType> {
   }
 
   StorageErrorDescriptor SetExpiredDate(key_type key, time_t expired) noexcept override {
-    std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
+      std::lock_guard<std::mutex> lock(manager_guard_mutex_);
+
       const auto entry_offset = inverted_index_->Get(key);
       if (!index_helper::leaf_type_traits<OffsetType>::IsExistValue(entry_offset)) {
         return { "SetExpiredDate key: key hasn't been found", StorageError::kKeyNotFound };
@@ -185,8 +191,9 @@ class PVManager : public IStorage<CharType> {
   }
 
   nonstd::expected<time_t, StorageErrorDescriptor> GetExpiredDate(key_type key) noexcept override {
-    std::lock_guard<std::mutex> lock(manager_guard_mutex_);
     try {
+      std::lock_guard<std::mutex> lock(manager_guard_mutex_);
+
       const auto entry_offset = inverted_index_->Get(key);
       if (!index_helper::leaf_type_traits<OffsetType>::IsExistValue(entry_offset)) {
         return nonstd::make_unexpected(StorageErrorDescriptor{ "GetExpiredDate key: key hasn't been found",

@@ -26,136 +26,173 @@ class Storage : public IStorage<DCharType> {
   virtual ~Storage() = default;
 
   StorageErrorDescriptor Put(key_type key, const storage_value_type &value) noexcept override {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    try {
+      std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    auto &&vg_range = getVolumeGroupRange(key);
-    if (!vg_range.has_value()) {
-      return vg_range.error();
-    }
-
-    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
-    for (auto &&it : vg_range.value()) {
-      const auto adjusted_key = it.mount_catalog_ + catalog_key;
-      if (StorageError::kSuccess == it.pv_manager_->Put(adjusted_key, value).error_code_) {
-        return { std::string(), StorageError::kSuccess };
+      auto &&vg_range = getVolumeGroupRange(key);
+      if (!vg_range.has_value()) {
+        return vg_range.error();
       }
-    }
 
-    return { std::string(), StorageError::kKeyNotFound };
+      StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+      for (auto &&it : vg_range.value()) {
+        const auto adjusted_key = it.mount_catalog_ + catalog_key;
+        if (StorageError::kSuccess == it.pv_manager_->Put(adjusted_key, value).error_code_) {
+          return { std::string(), StorageError::kSuccess };
+        }
+      }
+
+      return { std::string(), StorageError::kKeyNotFound };
+    }
+    catch (...) {
+      return exception::ExceptionHandler::Handle(std::current_exception());
+    }
   }
 
   nonstd::expected<storage_value_type, StorageErrorDescriptor> Get(key_type key) noexcept override {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    try {
+      std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    auto &&vg_range = getVolumeGroupRange(key);
-    if (!vg_range.has_value()) {
-      return nonstd::make_unexpected(std::move(vg_range.error()));
-    }
-
-    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
-    for (auto &&it : vg_range.value()) {
-      const auto adjusted_key = it.mount_catalog_ + catalog_key;
-      const auto result = it.pv_manager_->Get(adjusted_key);
-      if (result.has_value()) {
-        return result.value();
+      auto &&vg_range = getVolumeGroupRange(key);
+      if (!vg_range.has_value()) {
+        return nonstd::make_unexpected(std::move(vg_range.error()));
       }
+
+      StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+      for (auto &&it : vg_range.value()) {
+        const auto adjusted_key = it.mount_catalog_ + catalog_key;
+        const auto result = it.pv_manager_->Get(adjusted_key);
+        if (result.has_value()) {
+          return result.value();
+        }
+      }
+
+      return nonstd::make_unexpected(StorageErrorDescriptor(std::string(), StorageError::kKeyNotFound));
     }
-    return nonstd::make_unexpected(StorageErrorDescriptor(std::string(), StorageError::kKeyNotFound));
- }
+    catch (...) {
+      return exception::ExceptionHandler::Handle(std::current_exception());
+    }
+  }
 
   StorageErrorDescriptor HasKey(key_type key) noexcept override {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    try {
+      std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    auto &&vg_range = getVolumeGroupRange(key);
-    if (!vg_range.has_value()) {
-      return vg_range.error();
-    }
-
-    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
-    for (auto &&it : vg_range.value()) {
-      const auto adjusted_key = it.mount_catalog_ + catalog_key;
-      if (StorageError::kSuccess == it.pv_manager_->HasKey(adjusted_key).error_code_) {
-        return { std::string(), StorageError::kSuccess };
+      auto &&vg_range = getVolumeGroupRange(key);
+      if (!vg_range.has_value()) {
+        return vg_range.error();
       }
-    }
 
-    return { std::string(), StorageError::kKeyNotFound };
+      StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+      for (auto &&it : vg_range.value()) {
+        const auto adjusted_key = it.mount_catalog_ + catalog_key;
+        if (StorageError::kSuccess == it.pv_manager_->HasKey(adjusted_key).error_code_) {
+          return { std::string(), StorageError::kSuccess };
+        }
+      }
+
+      return { std::string(), StorageError::kKeyNotFound };
+    }
+    catch (...) {
+      return exception::ExceptionHandler::Handle(std::current_exception());
+    }
   }
 
   StorageErrorDescriptor HasCatalog(key_type key) noexcept override {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    try {
+      std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    auto &&vg_range = getVolumeGroupRange(key);
-    if (!vg_range.has_value()) {
-      return vg_range.error();
-    }
-
-    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
-    for (auto &&it : vg_range.value()) {
-      const auto adjusted_key = it.mount_catalog_ + catalog_key;
-      if (StorageError::kSuccess == it.pv_manager_->HasCatalog(adjusted_key).error_code_) {
-        return { std::string(), StorageError::kSuccess };
+      auto &&vg_range = getVolumeGroupRange(key);
+      if (!vg_range.has_value()) {
+        return vg_range.error();
       }
-    }
 
-    return { std::string(), StorageError::kKeyNotFound };
+      StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+      for (auto &&it : vg_range.value()) {
+        const auto adjusted_key = it.mount_catalog_ + catalog_key;
+        if (StorageError::kSuccess == it.pv_manager_->HasCatalog(adjusted_key).error_code_) {
+          return { std::string(), StorageError::kSuccess };
+        }
+      }
+
+      return { std::string(), StorageError::kKeyNotFound };
+    }
+    catch (...) {
+      return exception::ExceptionHandler::Handle(std::current_exception());
+    }
   }
 
   StorageErrorDescriptor Delete(key_type key) noexcept override {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    try {
+      std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    auto &&vg_range = getVolumeGroupRange(key);
-    if (!vg_range.has_value()) {
-      return vg_range.error();
-    }
-
-    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
-    for (auto &&it : vg_range.value()) {
-      const auto adjusted_key = it.mount_catalog_ + catalog_key;
-      if (StorageError::kSuccess == it.pv_manager_->Delete(adjusted_key).error_code_) {
-        return { std::string(), StorageError::kSuccess };
+      auto &&vg_range = getVolumeGroupRange(key);
+      if (!vg_range.has_value()) {
+        return vg_range.error();
       }
-    }
 
-    return { std::string(), StorageError::kKeyNotFound };
+      StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+      for (auto &&it : vg_range.value()) {
+        const auto adjusted_key = it.mount_catalog_ + catalog_key;
+        if (StorageError::kSuccess == it.pv_manager_->Delete(adjusted_key).error_code_) {
+          return { std::string(), StorageError::kSuccess };
+        }
+      }
+
+      return { std::string(), StorageError::kKeyNotFound };
+    }
+    catch (...) {
+      return exception::ExceptionHandler::Handle(std::current_exception());
+    }
   }
 
   StorageErrorDescriptor SetExpiredDate(key_type key, time_t expired) noexcept override {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    try {
+      std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    auto &&vg_range = getVolumeGroupRange(key);
-    if (!vg_range.has_value()) {
-      return vg_range.error();
-    }
-
-    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
-    for (auto &&it : vg_range.value()) {
-      const auto adjusted_key = it.mount_catalog_ + catalog_key;
-      if (StorageError::kSuccess == it.pv_manager_->SetExpiredDate(adjusted_key, expired).error_code_) {
-        return { std::string(), StorageError::kSuccess };
+      auto &&vg_range = getVolumeGroupRange(key);
+      if (!vg_range.has_value()) {
+        return vg_range.error();
       }
-    }
 
-    return { std::string(), StorageError::kKeyNotFound };
+      StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+      for (auto &&it : vg_range.value()) {
+        const auto adjusted_key = it.mount_catalog_ + catalog_key;
+        if (StorageError::kSuccess == it.pv_manager_->SetExpiredDate(adjusted_key, expired).error_code_) {
+          return { std::string(), StorageError::kSuccess };
+        }
+      }
+
+      return { std::string(), StorageError::kKeyNotFound };
+    }
+    catch (...) {
+      return exception::ExceptionHandler::Handle(std::current_exception());
+    }
   }
 
   nonstd::expected<time_t, StorageErrorDescriptor> GetExpiredDate(key_type key) noexcept override {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
-    
-    auto &&vg_range = getVolumeGroupRange(key);
-    if (!vg_range.has_value()) {
-      return nonstd::make_unexpected(std::move(vg_range.error()));
-    }
+    try {
+      std::shared_lock<std::shared_mutex> lock(mutex_);
 
-    StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
-    for (auto &&it : vg_range.value()) {
-      const auto adjusted_key = it.mount_catalog_ + catalog_key;
-      const auto result = it.pv_manager_->GetExpiredDate(adjusted_key);
-      if (result.has_value()) {
-        return result.value();
+      auto &&vg_range = getVolumeGroupRange(key);
+      if (!vg_range.has_value()) {
+        return nonstd::make_unexpected(std::move(vg_range.error()));
       }
+
+      StringType catalog_key(key.substr(virtual_storage_index_.FindMaxSubKey(key)));
+      for (auto &&it : vg_range.value()) {
+        const auto adjusted_key = it.mount_catalog_ + catalog_key;
+        const auto result = it.pv_manager_->GetExpiredDate(adjusted_key);
+        if (result.has_value()) {
+          return result.value();
+        }
+      }
+
+      return nonstd::make_unexpected(StorageErrorDescriptor(std::string(), StorageError::kKeyNotFound));
     }
-    return nonstd::make_unexpected(StorageErrorDescriptor(std::string(), StorageError::kKeyNotFound));
+    catch (...) {
+      return exception::ExceptionHandler::Handle(std::current_exception());
+    }
   }
 
   ///  \brief mounts the specified catalog of PVManager to specified location in virtual volume
@@ -179,7 +216,7 @@ class Storage : public IStorage<DCharType> {
     }
 
     const auto priority = pv_manager->priority();
-    PVMountPoint mount_point(std::move(pv_manager), std::move(pv_mount_catalog), priority);
+    PVMountPoint mount_point(std::move(pv_manager), pv_mount_catalog, priority);
     return addNewMountPoint(std::move(mount_point), storage_mount_catalog);
   }
 
@@ -190,10 +227,10 @@ class Storage : public IStorage<DCharType> {
 
  private:
   struct PVMountPoint {
-    PVMountPoint(const std::shared_ptr<PVManagerFactory::manager_type> &pv_manager, const StringType &mount_catalog,
+    PVMountPoint(std::shared_ptr<PVManagerFactory::manager_type> pv_manager, StringType mount_catalog,
         int32_t priority)
-        : pv_manager_(pv_manager),
-          mount_catalog_(mount_catalog),
+        : pv_manager_(std::move(pv_manager)),
+          mount_catalog_(std::move(mount_catalog)),
           priority_(priority)
     {}
 
