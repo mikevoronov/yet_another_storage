@@ -37,6 +37,22 @@ struct StorageErrorDescriptor {
         error_code_(error_code)
   {}
 
+  StorageErrorDescriptor(const StorageErrorDescriptor &other) noexcept {
+    try {
+      error_code_ = other.error_code_;
+      message_.assign(other.message_);
+    }
+    catch (const std::bad_alloc &) {
+      error_code_ = StorageError::kMemoryNotEnough;
+      message_.clear();
+    }
+    catch (...) {
+      error_code_ = StorageError::kUnknownError;
+      message_.clear();
+    }
+  }
+
+
   StorageError error_code_;
   std::string message_;           // can be empty
 
