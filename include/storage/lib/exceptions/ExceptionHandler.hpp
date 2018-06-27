@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 #include "YASException.hpp"
 #include <exception>
 #include <string>
@@ -10,7 +10,7 @@ class ExceptionHandler {
  public:
    /// \brief convert the exception to StorageErrorDescriptor
    /// \param exception - the pointer to exception to convert
-   static storage::StorageErrorDescriptor Handle (std::exception_ptr exception) {
+   static storage::StorageErrorDescriptor Handle(std::exception_ptr exception) {
     try {
       std::rethrow_exception(exception);
     }
@@ -19,6 +19,9 @@ class ExceptionHandler {
     }
     catch (const std::runtime_error &runtime_exception) {
       return { runtime_exception.what(), storage::StorageError::kUnknownExceptionType };
+    }
+    catch (const std::bad_alloc &exception) {
+      return { exception.what(), storage::StorageError::kMemoryNotEnough };
     }
     catch (const std::exception &exception) {
       return { exception.what(), storage::StorageError::kUnknownExceptionType };

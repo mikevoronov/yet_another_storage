@@ -7,6 +7,7 @@
 #include <type_traits>
 #include <variant>
 #include <cstring>
+#include <optional>
 
 namespace yas {
 namespace pv {
@@ -86,8 +87,8 @@ class PVEntriesManager {
         [this](double value) { 
               static_assert(std::numeric_limits<double>::is_iec559, "The YAS requires using of IEEE 754 floating point format for binary serialization of doubles");
               return createNewEntryValue(Double_EntryType(value)); },
-        [this](const std::string &value) { return createNewEntryValue(String_EntryType(std::move(value))); },
-        [this](const ByteVector &value) { return createNewEntryValue(Blob_EntryType(std::move(value))); });
+        [this](const std::string &value) { return createNewEntryValue(String_EntryType(value)); },
+        [this](const ByteVector &value) { return createNewEntryValue(Blob_EntryType(value)); });
   }
 
   storage_value_type GetEntryContent(OffsetType offset) {
@@ -107,15 +108,15 @@ class PVEntriesManager {
     }, storage_type);
   }
 
-  bool GetEntryExpiredDate(OffsetType offset, utils::Time &expired_date) {
+  std::optional<utils::Time> GetEntryExpiredDate(OffsetType offset) {
     const PVType pv_type = getRecordType(offset);
     const EntryType storage_type = EntriesTypeConverter::ConvertToEntryType(pv_type);
-    return std::visit([this, offset, &expired_date](auto &&value) {
-      return getEntryExpiredDate<typename std::decay_t<decltype(value)>::HeaderType>(offset, expired_date);
+    return std::visit([this, offset](auto &&value) {
+      return getEntryExpiredDate<typename std::decay_t<decltype(value)>::HeaderType>(offset);
     }, storage_type);
   }
 
-  void SetEntryExpiredDate(OffsetType offset, utils::Time &expired_date) {
+  void SetEntryExpiredDate(OffsetType offset, const utils::Time &expired_date) {
     const PVType pv_type = getRecordType(offset);
     const EntryType storage_type = EntriesTypeConverter::ConvertToEntryType(pv_type);
     std::visit([this, offset, &expired_date](auto &&value) {
@@ -164,13 +165,12 @@ class PVEntriesManager {
   }
 
   template<typename HeaderType>
-  bool getEntryExpiredDate(OffsetType offset, utils::Time &expired_date) {
+  std::optional<utils::Time> getEntryExpiredDate(OffsetType offset) {
     HeaderType header = data_reader_writer_.template Read<HeaderType>(offset);
     if (!(header.value_state_ & PVTypeState::kIsExpired)) {
-      return false;
+      return {};
     }
-    expired_date = utils::Time(header.expired_time_low_, header.expired_time_high_);
-    return true;
+    return utils::Time(header.expired_time_low_, header.expired_time_high_);
   }
 
   template<typename HeaderType>
@@ -215,7 +215,7 @@ class PVEntriesManager {
   }
 
   template<typename HeaderType>
-  void setEntryExpiredDate(OffsetType offset, utils::Time &expired_date) {
+  void setEntryExpiredDate(OffsetType offset, const utils::Time &expired_date) {
     HeaderType header = data_reader_writer_.template Read<HeaderType>(offset);
     header.value_type_ = header.value_type_;
     header.value_state_ = PVTypeState::kIsExpired;

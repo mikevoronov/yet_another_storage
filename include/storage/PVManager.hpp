@@ -199,12 +199,12 @@ class PVManager : public IStorage<CharType> {
         return nonstd::make_unexpected(StorageErrorDescriptor{ "GetExpiredDate key: key hasn't been found",
             StorageError::kKeyNotFound });
       }
-      utils::Time expired_date(0, 0);
-      if (!entries_manager_.GetEntryExpiredDate(entry_offset, expired_date)) {
-        return nonstd::make_unexpected(StorageErrorDescriptor{ "GetExpiredDate key: the key doesn't has expired date",
-            StorageError::kKeyDoesntExpired });
+      if (auto expired_date = entries_manager_.GetEntryExpiredDate(entry_offset); expired_date.has_value()) {
+        return expired_date.value().GetTime();
       }
-      return expired_date.GetTime();
+
+      return nonstd::make_unexpected(StorageErrorDescriptor{ "GetExpiredDate key: the key doesn't has expired date",
+          StorageError::kKeyDoesntExpired });
     }
     catch (...) {
       return nonstd::make_unexpected(exception::ExceptionHandler::Handle(std::current_exception()));
@@ -255,12 +255,8 @@ class PVManager : public IStorage<CharType> {
   }
 
   bool isEntryExpired(OffsetType offset) {
-    utils::Time expired_date;
-    if (!entries_manager_.GetEntryExpiredDate(offset, expired_date)) {
-      return false;
-    }
-
-    return expired_date.IsExpired();
+    auto expired_date = entries_manager_.GetEntryExpiredDate(offset);
+    return expired_date.has_value() ? expired_date.value().IsExpired() : false;
   }
 };
 
