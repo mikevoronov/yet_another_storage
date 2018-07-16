@@ -3,7 +3,6 @@
 #include "AhoCorasickSerializationHelper.hpp"
 #include <memory>
 #include <string_view>
-#include <type_traits>
 
 namespace yas {
 namespace index_helper {
@@ -17,10 +16,8 @@ public:
 
   InvertedIndexHelper() = default;
   ~InvertedIndexHelper() = default;
-
-  InvertedIndexHelper(InvertedIndexHelper &&other) noexcept
-      : engine_(std::move(other.engine_))
-  {}
+  InvertedIndexHelper(InvertedIndexHelper &&other) noexcept = default;
+  InvertedIndexHelper& operator=(InvertedIndexHelper&&) noexcept = default;
 
   bool Insert(key_type key, LeafType leaf) {
     if (key.empty()) {
@@ -45,7 +42,7 @@ public:
     return engine_.Get(key);
   }
 
-  bool Delete(key_type key) {
+  bool Delete(key_type key) noexcept {
     if (key.empty()) {
       return false;
     }
@@ -88,7 +85,6 @@ public:
 
   InvertedIndexHelper(const InvertedIndexHelper&) = delete;
   InvertedIndexHelper& operator=(const InvertedIndexHelper&) = delete;
-  InvertedIndexHelper& operator=(InvertedIndexHelper&&) = delete;
 
  private:
   AhoCorasickEngine<CharType, LeafType> engine_;

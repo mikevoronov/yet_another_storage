@@ -6,12 +6,11 @@
 #include "IStorage.hpp"
 #include <mutex>
 
-
 namespace yas {
 namespace storage {
 
 /**
- *    \brief The class encapsulates all high-level storage-like operations on one Physical Volume (PV)
+ *    \brief This class encapsulates all high-level storage-like operations on one Physical Volume (PV)
  *
  *    Objects of this class could be created by Load/Create static methods. Note that for each physically
  *    seprated PV should be created only one instance of this class. If you want to simultaneously work
@@ -229,7 +228,7 @@ class PVManager : public IStorage<CharType> {
   std::mutex manager_guard_mutex_;
   utils::Version version_;
 
-  explicit PVManager(const fs::path &file_path, utils::Version version, uint32_t priority = 0, 
+  PVManager(const fs::path &file_path, utils::Version version, uint32_t priority = 0,
       uint32_t cluster_size = kDefaultClusterSize)
       : entries_manager_(file_path, version, priority, cluster_size),
         version_(version) {

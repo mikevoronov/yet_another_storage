@@ -40,8 +40,9 @@ class PVManagerFactory {
           StorageError::kPVVersionUnsupported });
     }
 
-    std::lock_guard<std::mutex> lock(factory_mutex_);
     try {
+      std::lock_guard<std::mutex> lock(factory_mutex_);
+
       if(DDevice::Exists(pv_path)) {
         const auto canonical_path = DDevice::Canonical(pv_path);
         const auto canonical_path_str = canonical_path.wstring();

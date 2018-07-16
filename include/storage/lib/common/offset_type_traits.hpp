@@ -4,7 +4,7 @@ namespace yas {
 
 template<typename OffsetType>
 struct offset_traits {
-  static constexpr OffsetType NonExistValue() {
+  static constexpr [[nodiscard]] OffsetType NonExistValue() noexcept {
     return static_cast<OffsetType>(0);
   }
 

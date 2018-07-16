@@ -92,8 +92,8 @@ class PVEntriesManager {
   }
 
   storage_value_type GetEntryContent(OffsetType offset) {
-    const PVType pv_type = getRecordType(offset);
-    const EntryType storage_type = EntriesTypeConverter::ConvertToEntryType(pv_type);
+    const PVType entry_type = getEntryType(offset);
+    const EntryType storage_type = EntriesTypeConverter::ConvertToEntryType(entry_type);
     return std::visit([this, offset](auto &&value) {
         auto &&storage_result = getEntryContent<typename std::decay_t<decltype(value)>::HeaderType>(offset);
         return EntriesTypeConverter::ConvertToUserType(std::move(storage_result));
@@ -101,7 +101,7 @@ class PVEntriesManager {
   }
 
   void DeleteEntry(OffsetType offset) {
-    const PVType pv_type = getRecordType(offset);
+    const PVType pv_type = getEntryType(offset);
     const EntryType storage_type = EntriesTypeConverter::ConvertToEntryType(pv_type);
     std::visit([this, offset](auto &&value) {
       return deleteEntry<typename std::decay_t<decltype(value)>::HeaderType>(offset);
@@ -109,7 +109,7 @@ class PVEntriesManager {
   }
 
   std::optional<utils::Time> GetEntryExpiredDate(OffsetType offset) {
-    const PVType pv_type = getRecordType(offset);
+    const PVType pv_type = getEntryType(offset);
     const EntryType storage_type = EntriesTypeConverter::ConvertToEntryType(pv_type);
     return std::visit([this, offset](auto &&value) {
       return getEntryExpiredDate<typename std::decay_t<decltype(value)>::HeaderType>(offset);
@@ -117,7 +117,7 @@ class PVEntriesManager {
   }
 
   void SetEntryExpiredDate(OffsetType offset, const utils::Time &expired_date) {
-    const PVType pv_type = getRecordType(offset);
+    const PVType pv_type = getEntryType(offset);
     const EntryType storage_type = EntriesTypeConverter::ConvertToEntryType(pv_type);
     std::visit([this, offset, &expired_date](auto &&value) {
       return setEntryExpiredDate<typename std::decay_t<decltype(value)>::HeaderType>(offset, expired_date);
@@ -127,6 +127,14 @@ class PVEntriesManager {
   int32_t priority() const { return priority_; }
 
  private:
+  using EntryHeaderStorage = std::aligned_union<0, PVState, Simple4TypeHeader, Simple8TypeHeader, ComplexTypeHeader>;
+  STRUCT_PACK(union alignas(EntryHeaderStorage) EntryHeader {
+    PVState pv_state_;
+    Simple4TypeHeader simple4_type_header_;
+    Simple8TypeHeader simple8_type_header_;
+    ComplexTypeHeader complex_type_header_;
+  });
+   
   PVDeviceDataReaderWriter<OffsetType, Device> data_reader_writer_;
   freelist_helper::FreelistHelper<OffsetType> freelist_helper_;
   PVEntriesAllocator<OffsetType> entries_allocator_;
@@ -193,10 +201,11 @@ class PVEntriesManager {
       header.overall_size_ = header.chunk_size_;
       header.next_free_entry_offset_ = freelist_helper_.GetFreeEntry(header.chunk_size_);
       data_reader_writer_.template Write<ComplexTypeHeader>(offset, header);
-      freelist_helper_.PushFreeEntry(offset, header.chunk_size_ + serialization_utils::offset_of(&ComplexTypeHeader::data_));
+      freelist_helper_.PushFreeEntry(offset, header.chunk_size_ + 
+          serialization_utils::offset_of(&ComplexTypeHeader::data_));
 
-      auto deleted = header.chunk_size_;
-      while (deleted < overall_size && offset_traits<OffsetType>::IsExistValue(next_entry_offset)) {
+      auto already_deleted = header.chunk_size_;
+      while (already_deleted < overall_size && offset_traits<OffsetType>::IsExistValue(next_entry_offset)) {
         const auto saved_next_entry_offset = next_entry_offset;
         header = data_reader_writer_.template Read<ComplexTypeHeader>(next_entry_offset);
 
@@ -208,7 +217,7 @@ class PVEntriesManager {
         data_reader_writer_.template Write<ComplexTypeHeader>(saved_next_entry_offset, header);
         freelist_helper_.PushFreeEntry(saved_next_entry_offset, header.chunk_size_
             + serialization_utils::offset_of(&ComplexTypeHeader::data_));
-        deleted += header.chunk_size_;
+        already_deleted += header.chunk_size_;
         return;
       }
     }
@@ -224,13 +233,17 @@ class PVEntriesManager {
     data_reader_writer_.template Write<HeaderType>(offset, header);
   }
 
-  PVType getRecordType(OffsetType offset) {
+  PVType getEntryType(OffsetType offset) {
     // In version 1.3 it is good to optimize read operations count by add std::aligned_union<headers...>
     // It gives us with a possibility to read this union in this method and decrease by one read operations.
     // But because of read/write cache in most devices there aren't any important performance issues at the moment.
     // Also it is important to add checks that (readed_offset + sizeof(union)) < device_end
     const auto pv_state = data_reader_writer_.template Read<PVState>(offset);
     return pv_state.value_type_;
+  }
+
+  EntryHeader getEntryHeader(OffsetType offset) {
+    return data_reader_writer_.template Read<EntryHeader>(offset);
   }
 
   template<typename Iterator>
@@ -261,7 +274,7 @@ class PVEntriesManager {
     const auto offset = getFreeOffset(entry_size);
 
     OffsetType split_size = 0;
-    switch (getRecordType(offset)) {
+    switch (getEntryType(offset)) {
     case PVType::kEmpty4Simple:
       recoverAndPushNextEntry<Simple4TypeHeader>(offset);
       return offset;

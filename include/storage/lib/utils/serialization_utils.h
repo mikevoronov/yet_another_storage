@@ -48,7 +48,7 @@ template<typename ReadIterator, typename Type>
 ReadIterator LoadFromBytes(ReadIterator begin, ReadIterator end, Type *data) {
   auto bytes = AsBytes(data);
   if (std::distance(begin, end) < bytes.size()) {
-    // nithing has been readed
+    // nothing has been readed
     return begin;
   }
 

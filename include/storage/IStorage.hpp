@@ -1,9 +1,8 @@
 #pragma once
-#include "lib/ext/expected/expected.h"
 #include "storage_errors.hpp"
+#include "lib/common/common.h"
+#include "lib/ext/expected/expected.h"
 #include <string_view>
-#include <cstdint>
-#include <variant>
 
 namespace yas {
 namespace storage {
@@ -11,7 +10,7 @@ namespace storage {
 /**
  *    \brief Interface for storage-like classes of YAS: Storage and PVManager
  *
- *    Provides basic operations over key-value
+ *    Provides basic operations over key-value storage
  */
 template <typename CharType>
 class IStorage {

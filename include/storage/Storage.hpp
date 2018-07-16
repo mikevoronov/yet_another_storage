@@ -8,7 +8,7 @@ namespace yas {
 namespace storage {
 
 /**
-*    \brief The class represents virtual volume of key-value storage with possbility to mount physical volumes
+*    \brief This class represents virtual volume of key-value storage with possbility to mount physical volumes
 *
 *    This class is thread-safe with read-write blocks on shared_mutex. "Read" operation is all from IStorage
 *    interface, "write" is only mount operation which modifies this class inner structures. Take into account

@@ -6,7 +6,7 @@ namespace index_helper {
 
 template<typename IdType>
 struct id_type_traits {
-  static constexpr IdType NonExistValue() {
+  static constexpr IdType [[nodiscard]] NonExistValue() noexcept {
     return static_cast<IdType>(std::numeric_limits<IdType>::max());
   }
 

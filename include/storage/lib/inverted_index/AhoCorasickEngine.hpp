@@ -1,5 +1,6 @@
 #pragma once
 #include "leaf_type_traits.hpp"
+#include <string_view>
 #include <unordered_map>
 #include <memory>
 
@@ -18,15 +19,15 @@ class AhoCorasickEngine {
   AhoCorasickEngine()
       : trie_(new Node())
   {}
-  ~AhoCorasickEngine() = default;
-  AhoCorasickEngine(AhoCorasickEngine &&other) noexcept 
-      : trie_(std::move(other.trie_))
-  {}
+
+  ~AhoCorasickEngine() noexcept = default;
+  AhoCorasickEngine(AhoCorasickEngine &&other) noexcept = default;
+  AhoCorasickEngine& operator=(AhoCorasickEngine&&) noexcept = default;
 
   bool Insert(key_type key, LeafType &leaf) {
     auto current = trie_.get();
 
-    for (const auto &ch : key) {
+    for (auto &&ch : key) {
       auto next = getNextNode(ch, current);
       if (nullptr == next) {
         current->routes_[ch].reset(new Node());
@@ -49,7 +50,7 @@ class AhoCorasickEngine {
     return (nullptr == node) ? leaf_type_traits<LeafType>::NonExistValue() : node->leaf_;
   }
 
-  bool Delete(key_type key) {
+  bool Delete(key_type key) noexcept {
     // TODO : delete node path
     const auto node = getPathNode(key);
     if (nullptr == node) {
@@ -83,7 +84,6 @@ class AhoCorasickEngine {
 
   AhoCorasickEngine(const AhoCorasickEngine&) = delete;
   AhoCorasickEngine& operator=(const AhoCorasickEngine&) = delete;
-  AhoCorasickEngine& operator=(AhoCorasickEngine&&) = delete;
 
 private:
   template <typename T1, typename T2, typename T3> friend class AhoCorasickSerializationHelper;
@@ -98,11 +98,13 @@ private:
 
   std::unique_ptr<Node> trie_;
 
-  Node *getNextNode(CharType ch, Node *current) const noexcept {
-    if (nullptr == current || !current->routes_.count(ch)) {
+  Node [[nodiscard]] *getNextNode(CharType ch, Node *current) const noexcept {
+    // std::unordered_map::find with standart comparator is exception safe
+    if (nullptr == current || std::cend(current->routes_) == current->routes_.find(ch)) {
       // the next node hasn't been created yet
       return nullptr;
     }
+
     return current->routes_[ch].get();
   } 
 
