@@ -12,12 +12,13 @@ namespace storage {
 *    \brief This class is used for creating PVManager on specified path.
 *
 *    The general rule of YAS is one PVManager for one PV file because of thread-safety. So this class creates new
-*    or loads an existing PV from device and keep shared_ptr on them in the internal unordered_map. If user specifies
-*    path for already created PVManager - class returns the already created one.
+*    or loads an existing PV from the device and keeps shared_ptr on it. If a user specifies the path for already
+*    created PVManager - class returns the already created one.
 */
 class PVManagerFactory {
  public:
   using manager_type = PVManager<DCharType, DOffsetType, DDevice>;
+  using shared_manager_type = std::shared_ptr<manager_type>;
   using pv_path_type = typename manager_type::pv_path_type;
 
   static PVManagerFactory& Instance() {
@@ -27,13 +28,13 @@ class PVManagerFactory {
 
   ///  \brief creates new or returns existing PVManager
   ///
-  ///  \param path - path to PVManager
-  ///  \param requested_version - maximum supported version of PV structure
+  ///  \param path - the path to PVManager
+  ///  \param requested_version - the maximum supported version of PV structure
   ///  \param priority - a priority for newly created PVManager
   ///  \param cluster_size - a cluster size for newly created PVManager
-  ///  \return - a PVManager for specified path or error
-  nonstd::expected<std::shared_ptr<manager_type>, StorageErrorDescriptor> Create(const pv_path_type pv_path,
-      utils::Version requested_version, int32_t priority = 0, int32_t cluster_size = kDefaultClusterSize) {
+  ///  \return - the PVManager for specified path or error
+  nonstd::expected<shared_manager_type, StorageErrorDescriptor> Create(const pv_path_type pv_path,
+      utils::Version requested_version, int32_t priority = 0, int32_t cluster_size = kDefaultClusterSize) noexcept {
 
     if (max_supported_version_ < requested_version) {
       return nonstd::make_unexpected(StorageErrorDescriptor{ "requested PV version is unsupported",
@@ -46,7 +47,7 @@ class PVManagerFactory {
       if(DDevice::Exists(pv_path)) {
         const auto canonical_path = DDevice::Canonical(pv_path);
         const auto canonical_path_str = canonical_path.wstring();
-        if (managers_.count(canonical_path_str)) {
+        if (std::cend(managers_) != managers_.find(canonical_path_str)) {
           return managers_[canonical_path_str];
         }
 
@@ -69,16 +70,27 @@ class PVManagerFactory {
 
   ///  \brief returns existing PVManager
   ///
-  ///  \param path - path to PVManager
-  ///  \return - already created PVManager for specified path or nullptr if it hasn't been created yet
-  std::shared_ptr<manager_type> GetPVManager(const pv_path_type path) {
-    if (!DDevice::Exists(path)){
-      return nullptr;
-    }
+  ///  \param path - the path to PVManager
+  ///  \return - the already created PVManager for specified path
+  nonstd::expected<shared_manager_type, StorageErrorDescriptor> GetPVManager(const pv_path_type path) noexcept {
+    try {
+      if (!DDevice::Exists(path)) {
+        return nonstd::make_unexpected(StorageErrorDescriptor{ "requested PV path isn't found",
+            StorageError::kPathNotFound });
+      }
 
-    auto canonical_path_str = DDevice::Canonical(path).wstring();
-    std::lock_guard<std::mutex> lock(factory_mutex_);
-    return managers_.count(canonical_path_str) ? managers_[canonical_path_str] : nullptr;
+      const auto canonical_path_str = DDevice::Canonical(path).wstring();
+      std::lock_guard<std::mutex> lock(factory_mutex_);
+      if (std::cend(managers_) == managers_.find(canonical_path_str)) {
+        return nonstd::make_unexpected(StorageErrorDescriptor{ "requested PV on the given path isn't found",
+            StorageError::kPathNotFound });
+      }
+
+      return managers_[canonical_path_str];
+    }
+    catch (...) {
+      return nonstd::make_unexpected(exception::ExceptionHandler::Handle(std::current_exception()));
+    }
   }
 
   ~PVManagerFactory() = default;
@@ -89,7 +101,7 @@ class PVManagerFactory {
   PVManagerFactory& operator=(PVManagerFactory&&) = delete;
 
  private:
-  std::unordered_map<std::wstring, std::shared_ptr<manager_type>> managers_;
+  std::unordered_map<std::wstring, shared_manager_type> managers_;
   std::mutex factory_mutex_;
   utils::Version max_supported_version_;
 

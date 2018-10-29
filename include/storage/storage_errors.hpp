@@ -16,17 +16,18 @@ enum class StorageError : uint32_t {
                                                               // version header
   kCorruptedHeaderError = 7,
   kInvalidPVSignatureError = 8,
-  kPVVersionNotSupported = 9,
-  kKeyNotFound = 10,
-  kKeyExpired = 11,
-  kKeyDoesntExpired = 12,
-  kPVMountPointManagerAdapterNotReady = 13,
-  kIncorrectStorageValue = 14,                                // used for valueless std::variant
-  kKeyAlreadyCreated = 15,
-  kPVVersionUnsupported = 16,
-  kUnknownError = 17,
-  kCatalogNotFoundError = 18,
-  kMemoryNotEnough = 19,
+  kKeyNotFound = 9,
+  kKeyExpired = 10,
+  kKeyDoesntExpired = 11,
+  kPVMountPointManagerAdapterNotReady = 12,
+  kIncorrectStorageValue = 13,                                // used for valueless std::variant
+  kKeyAlreadyCreated = 14,
+  kPVVersionUnsupported = 15,
+  kUnknownError = 16,
+  kCatalogNotFoundError = 17,
+  kMemoryNotEnough = 18,
+  kPathNotFound = 19,
+  kPVNotFound = 20,
 
   kUnknownExceptionType
 };

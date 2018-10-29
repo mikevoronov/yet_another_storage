@@ -7,7 +7,7 @@
 namespace yas {
 namespace pv {
 
-// class can read and write control headers of device layout
+// This class can reads and writes control headers of device layout
 template <typename OffsetType, typename Device>
 class PVDeviceDataReaderWriter {
   using PVPathType = typename Device::path_type;

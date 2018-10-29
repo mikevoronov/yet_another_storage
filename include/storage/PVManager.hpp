@@ -13,7 +13,7 @@ namespace storage {
  *    \brief This class encapsulates all high-level storage-like operations on one Physical Volume (PV)
  *
  *    Objects of this class could be created by Load/Create static methods. Note that for each physically
- *    seprated PV should be created only one instance of this class. If you want to simultaneously work
+ *    separated PV should be created only one instance of this class. If you want to simultaneously work
  *    with several PV please create instances through PVManagerFactory.
  */
 template <typename CharType=DCharType, typename OffsetType=DOffsetType, typename Device=DDevice>
@@ -53,9 +53,9 @@ class PVManager : public IStorage<CharType> {
 
   ///  \brief creates new PV in the specified path. Note that if the PV already exist (it means that Device::Exist
   ///         returns success) then it tries to load existing by Load method. Can throw YASExceptions if device fails.
-  ///  \param pv_path - path to newly created PV
-  ///  \param version - maximum supported version (PVEntriesManager could use it for parsing)
-  ///  \return - new PVManager instance
+  ///  \param pv_path - a path to newly created PV
+  ///  \param version - the maximum supported version (PVEntriesManager could use it for parsing)
+  ///  \return - the new PVManager instance
   static std::unique_ptr<pv_manager_type> Create(pv_path_type pv_path, utils::Version version,
       int32_t priority, int32_t cluster_size = kDefaultClusterSize) {
     if (Device::Exists(pv_path)) {

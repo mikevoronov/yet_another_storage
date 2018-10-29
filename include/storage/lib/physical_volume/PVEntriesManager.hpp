@@ -35,8 +35,9 @@ class PVEntriesManager {
 
   OffsetType LoadStartEntries() {
     OffsetType current_cursor = 0;
-    PVHeader pv_header = data_reader_writer_.template Read<PVHeader>(current_cursor);
-    PVHeader default_header;
+    const PVHeader pv_header = data_reader_writer_.template Read<PVHeader>(current_cursor);
+    const PVHeader default_header;
+
     if (0 != std::memcmp(default_header.signature_, pv_header.signature_, sizeof default_header.signature_)) {
       throw exception::YASException("PV header parsing: corrupted signature", StorageError::kInvalidPVSignatureError);
     }
@@ -49,7 +50,7 @@ class PVEntriesManager {
     }
 
     current_cursor += sizeof pv_header;
-    FreelistHeaderType freelist_header = data_reader_writer_.template Read<FreelistHeaderType>(current_cursor);
+    const FreelistHeaderType freelist_header = data_reader_writer_.template Read<FreelistHeaderType>(current_cursor);
     freelist_helper_.SetBins(freelist_header);
     cluster_size_ = pv_header.cluster_size_;
     priority_ = pv_header.priority_;
